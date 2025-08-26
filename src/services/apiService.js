@@ -15,10 +15,15 @@ const apiRequest = async (endpoint, options = {}) => {
       config.body = body;
     }
     
-    
+    console.log('apiRequest: Making request to:', url);
+    console.log('apiRequest: Config:', config);
     
     const response = await fetch(url, config);
+    console.log('apiRequest: Response status:', response.status);
+    console.log('apiRequest: Response headers:', Object.fromEntries(response.headers.entries()));
+    
     const data = await response.json();
+    console.log('apiRequest: Response data:', data);
     
 
     
@@ -132,7 +137,10 @@ export const centerService = {
   getCenters: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString ? `${API_ENDPOINTS.CENTER.GET_ALL}?${queryString}` : API_ENDPOINTS.CENTER.GET_ALL;
+    console.log('centerService.getCenters: Making request to:', endpoint);
+    console.log('centerService.getCenters: Params:', params);
     const result = await apiRequest(endpoint);
+    console.log('centerService.getCenters: Response:', result);
     return result;
   },
 

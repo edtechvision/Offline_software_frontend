@@ -347,34 +347,6 @@ const StudentsPage = () => {
         </Box>
       )}
 
-      {/* Debug Information */}
-      {process.env.NODE_ENV === 'development' && (
-        <Box sx={{ mb: 2, p: 2, backgroundColor: '#f3f4f6', borderRadius: 2, border: '1px solid #e5e7eb' }}>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280' }}>
-            <strong>Debug Info:</strong> Courses: {courses.length} | Batches: {batches.length} | Students: {students.length} | Filtered: {filteredStudents.length}
-          </Typography>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280', mt: 1 }}>
-            <strong>Courses API:</strong> {coursesLoading ? 'Loading...' : coursesError ? `Error: ${coursesError.message}` : coursesData ? `Status: ${coursesData.success ? 'Success' : 'Failed'}` : 'No data'}
-          </Typography>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280', mt: 1 }}>
-            <strong>Batches API:</strong> {batchesLoading ? 'Loading...' : batchesError ? `Error: ${batchesError.message}` : batchesData ? `Status: ${batchesData.success ? 'Success' : 'Failed'}` : 'No data'}
-          </Typography>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280', mt: 1 }}>
-            <strong>Auth Token:</strong> {localStorage.getItem('authToken') ? 'Present' : 'Missing'}
-          </Typography>
-          {coursesData && (
-            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280', mt: 1 }}>
-              <strong>Courses Response:</strong> {JSON.stringify(coursesData, null, 2)}
-            </Typography>
-          )}
-          {batchesData && (
-            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280', mt: 1 }}>
-              <strong>Batches Response:</strong> {JSON.stringify(batchesData, null, 2)}
-            </Typography>
-          )}
-        </Box>
-      )}
-
       {/* Students Table */}
       <Card sx={{ borderRadius: 2, boxShadow: 1, overflow: 'hidden' }}>
         <TableContainer>

@@ -6,10 +6,17 @@ export const useCenters = (params = {}) => {
 
   // Get all centers
   const centersQuery = useQuery({
-    queryKey: ['centers', params],
-    queryFn: () => centerService.getCenters(params),
+    queryKey: ['centers', JSON.stringify(params)],
+    queryFn: async () => {
+      console.log('useCenters hook: Making API call with params:', params);
+      const result = await centerService.getCenters(params);
+      console.log('useCenters hook: API response:', result);
+      return result;
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   // Create center mutation
@@ -37,10 +44,10 @@ export const useCenters = (params = {}) => {
   });
 
   return {
-    // Query data
-    data: centersQuery.data?.data,
-    centers: centersQuery.data?.data?.data || [],
-    pagination: centersQuery.data?.data?.pagination,
+    // Query data - Fixed data structure mapping
+    data: centersQuery.data,
+    centers: centersQuery.data?.data || [],
+    pagination: centersQuery.data?.pagination,
     isLoading: centersQuery.isLoading,
     isError: centersQuery.isError,
     error: centersQuery.error,
