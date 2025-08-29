@@ -80,22 +80,22 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
       color: '#16a34a'
     },
     { id: 10, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
-    { id: 11, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
-    {
-      id: 12,
-      label: 'Manage Job',
-      icon: Work,
-      path: '/job-category',
-      hasSubmenu: true,
-      submenu: [
-        { label: 'Job Category', path: '/job-category' },
-        { label: 'Jobs', path: '/jobs' },
-        { label: 'Job Applications', path: '/job-applications' },
-        { label: 'Offline Job Applications', path: '/offline-job-applications' }
-      ],
-      color: '#10b981'
-    },
-    { id: 13, label: 'Slider', icon: Image, path: '/slider', color: '#f43f5e' },
+    // { id: 11, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
+    // {
+    //   id: 12,
+    //   label: 'Manage Job',
+    //   icon: Work,
+    //   path: '/job-category',
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { label: 'Job Category', path: '/job-category' },
+    //     { label: 'Jobs', path: '/jobs' },
+    //     { label: 'Job Applications', path: '/job-applications' },
+    //     { label: 'Offline Job Applications', path: '/offline-job-applications' }
+    //   ],
+    //   color: '#10b981'
+    // },
+    // { id: 13, label: 'Slider', icon: Image, path: '/slider', color: '#f43f5e' },
     // { id: 14, label: 'Offline Job Applications', icon: ListAlt, path: '/offline-job-applications', color: '#3b82f6' }
   ];
 

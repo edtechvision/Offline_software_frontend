@@ -25,8 +25,9 @@ export const API_ENDPOINTS = {
     CREATE: '/center/create',
     GET_ALL: '/center/get',
     GET_BY_ID: (id) => `/center/${id}`,
-    UPDATE: (id) => `/center/${id}`,
+    UPDATE: (id) => `/centers/${id}`,
     DELETE: (id) => `/center/${id}`,
+    BLOCK: (id) => `/centers/${id}/block`,
   },
   
   // Admission Incharge management
@@ -36,6 +37,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/admissionIncharge/${id}`,
     UPDATE: (id) => `/admissionIncharge/${id}`,
     DELETE: (id) => `/admissionIncharge/${id}`,
+    BLOCK: (id) => `/admissionIncharge/${id}/block`,
   },
   
   // Course management

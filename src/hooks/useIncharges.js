@@ -67,3 +67,16 @@ export const useCheckInchargeByCode = (inchargeCode, enabled = false) => {
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
+
+// Hook for blocking/unblocking admission incharge
+export const useBlockIncharge = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, block }) => inchargeService.blockIncharge(id, block),
+    onSuccess: () => {
+      // Invalidate and refetch incharges
+      queryClient.invalidateQueries({ queryKey: ['incharges'] });
+    },
+  });
+};

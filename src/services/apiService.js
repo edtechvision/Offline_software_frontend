@@ -17,9 +17,12 @@ const apiRequest = async (endpoint, options = {}) => {
     
     console.log('apiRequest: Making request to:', url);
     console.log('apiRequest: Config:', config);
+    console.log('apiRequest: Headers:', getDefaultHeaders());
+    console.log('apiRequest: Body:', body);
     
     const response = await fetch(url, config);
     console.log('apiRequest: Response status:', response.status);
+    console.log('apiRequest: Response status text:', response.statusText);
     console.log('apiRequest: Response headers:', Object.fromEntries(response.headers.entries()));
     
     const data = await response.json();
@@ -40,8 +43,9 @@ const apiRequest = async (endpoint, options = {}) => {
     // Return the data directly since the API already provides the proper structure
     return data;
   } catch (error) {
-    const errorInfo = handleApiError(error);
-    return { success: false, error: errorInfo };
+    console.error('API Request Error:', error);
+    // Re-throw the error so mutation hooks can handle it properly
+    throw error;
   }
 };
 
@@ -160,6 +164,21 @@ export const centerService = {
       method: 'DELETE',
     });
   },
+
+  // Block/Unblock center
+  blockCenter: async (id, block) => {
+    console.log('Blocking center:', { id, block });
+    console.log('Endpoint:', API_ENDPOINTS.CENTER.BLOCK(id));
+    console.log('Request body:', JSON.stringify({ block }));
+    
+    const result = await apiRequest(API_ENDPOINTS.CENTER.BLOCK(id), {
+      method: 'POST',
+      body: JSON.stringify({ block }),
+    });
+    
+    console.log('Block result:', result);
+    return result;
+  },
 };
 
 // Admission Incharge Services
@@ -201,6 +220,21 @@ export const inchargeService = {
       method: 'POST',
       body: JSON.stringify({ incharge_code: inchargeCode }),
     });
+  },
+
+  // Block/Unblock admission incharge
+  blockIncharge: async (id, block) => {
+    console.log('Blocking incharge:', { id, block });
+    console.log('Endpoint:', API_ENDPOINTS.INCHARGE.BLOCK(id));
+    console.log('Request body:', JSON.stringify({ block }));
+    
+    const result = await apiRequest(API_ENDPOINTS.INCHARGE.BLOCK(id), {
+      method: 'POST',
+      body: JSON.stringify({ block }),
+    });
+    
+    console.log('Block result:', result);
+    return result;
   },
 };
 

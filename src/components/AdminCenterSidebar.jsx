@@ -65,9 +65,9 @@ const AdminCenterSidebar = ({ isCollapsed, onToggle, onLogout }) => {
       ],
       color: '#16a34a'
     },
-    { id: 5, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
-    { id: 6, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
-    { id: 7, label: 'Offline Job Applications', icon: ListAlt, path: '/offline-job-applications', color: '#3b82f6' }
+    // { id: 5, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
+    // { id: 6, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
+    // { id: 7, label: 'Offline Job Applications', icon: ListAlt, path: '/offline-job-applications', color: '#3b82f6' }
   ];
 
   const isActive = (path) => location.pathname === path;

@@ -205,18 +205,7 @@ const CoursePage = () => {
       
       <div className="bg-bg-primary rounded-lg p-4 shadow-lg border border-gray-200">
         <h2 className="text-lg font-semibold text-text-primary mb-4">Available Courses</h2>
-        
-        {/* Debug Information */}
-        <Box sx={{ mb: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1, fontSize: '0.875rem' }}>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-            <strong>Debug Info:</strong><br/>
-            courses.length: {courses.length}<br/>
-            coursesData type: {typeof coursesData}<br/>
-            coursesData keys: {coursesData ? Object.keys(coursesData).join(', ') : 'null'}<br/>
-            courses type: {typeof courses}<br/>
-            courses is array: {Array.isArray(courses) ? 'true' : 'false'}
-          </Typography>
-        </Box>
+    
         
         {courses.length === 0 ? (
           <Box textAlign="center" py={4}>
@@ -227,12 +216,7 @@ const CoursePage = () => {
             <Typography variant="body2" color="text.secondary">
               Create your first course to get started
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Debug: courses.length = {courses.length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Raw coursesData: {JSON.stringify(coursesData, null, 2)}
-            </Typography>
+         
           </Box>
         ) : (
           <TableContainer component={Paper}>

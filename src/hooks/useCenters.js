@@ -120,3 +120,14 @@ export const useDeleteCenter = () => {
     },
   });
 };
+
+export const useBlockCenter = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, block }) => centerService.blockCenter(id, block),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['centers'] });
+    },
+  });
+};

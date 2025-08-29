@@ -36,9 +36,9 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { id: 'fee', label: 'Fee', icon: FaCreditCard, path: '/fee', hasSubmenu: true },
     { id: 'enquiry', label: 'Enquiry', icon: FaQuestionCircle, path: '/enquiry' },
     { id: 'stock-management', label: 'Stock Management', icon: FaBoxes, path: '/stock-management' },
-    { id: 'manage-job', label: 'Manage Job', icon: FaBriefcase, path: '/manage-job', hasSubmenu: true },
-    { id: 'slider', label: 'Slider', icon: FaImages, path: '/slider' },
-    { id: 'offline-job-applications', label: 'Offline Job Applications', icon: FaFileAlt, path: '/offline-job-applications' },
+    // { id: 'manage-job', label: 'Manage Job', icon: FaBriefcase, path: '/manage-job', hasSubmenu: true },
+    // { id: 'slider', label: 'Slider', icon: FaImages, path: '/slider' },
+    // { id: 'offline-job-applications', label: 'Offline Job Applications', icon: FaFileAlt, path: '/offline-job-applications' },
   ];
 
   const currentDate = new Date().toLocaleDateString('en-US', {

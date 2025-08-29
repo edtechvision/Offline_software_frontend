@@ -78,8 +78,8 @@ const AppRoutes = () => {
             onLogout={handleLogout}
           />
         );
-              default:
-          return null;
+      default:
+        return null;
     }
   };
 
@@ -112,17 +112,17 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public route - Login */}
-      <Route 
-        path="/login" 
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <LoginPage />
-          )
-        } 
-      />
+        {/* Public route - Login */}
+        <Route 
+          path="/login" 
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage />
+            )
+          } 
+        />
 
       {/* Protected routes */}
       <Route
@@ -185,7 +185,7 @@ const AppRoutes = () => {
       <Route
         path="/center"
         element={
-          <ProtectedLayout requiredRoles="admin">
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
             <CenterPage />
           </ProtectedLayout>
         }
