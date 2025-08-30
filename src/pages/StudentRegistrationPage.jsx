@@ -88,10 +88,11 @@ const StudentRegistrationPage = ({ onBack }) => {
     downPayment: '',
     nextPaymentDueDate: null,
     paymentMode: '',
+    transactionId: '',
     referenceNumber: '',
     
     // File Upload
-    image: null
+    imageFile: null
   });
 
   const [errors, setErrors] = useState({});
@@ -406,7 +407,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       studentData.append('collegeName', formData.collegeName);
       studentData.append('className', formData.className);
       
-      // Course Details
+      // Course Details - format exactly like Postman
       const courseDetails = {
         courseId: formData.courseId,
         additionalCourseId: formData.additionalCourseId || '',
@@ -417,9 +418,13 @@ const StudentRegistrationPage = ({ onBack }) => {
         batchId: formData.batchId || '',
         session: formData.session,
         paymentMode: formData.paymentMode || '',
+        transactionId: formData.transactionId || '',
         referenceNumber: formData.referenceNumber || ''
       };
-      studentData.append('courseDetails', JSON.stringify(courseDetails));
+      
+      // Format courseDetails exactly like Postman (compact JSON)
+      const courseDetailsString = JSON.stringify(courseDetails, null, 0);
+      studentData.append('courseDetails', courseDetailsString);
       
       // Image upload
       if (formData.imageFile) {
@@ -429,8 +434,14 @@ const StudentRegistrationPage = ({ onBack }) => {
       // Debug: Log the FormData contents
       console.log('FormData contents:');
       for (let [key, value] of studentData.entries()) {
-        console.log(`${key}:`, value);
+        if (value instanceof File) {
+          console.log(`${key}:`, `File: ${value.name} (${value.size} bytes, ${value.type})`);
+        } else {
+          console.log(`${key}:`, value);
+        }
       }
+      
+      console.log('Full FormData object:', studentData);
       
       // Call the API
       const result = await createStudentMutation.mutateAsync(studentData);
@@ -1032,23 +1043,23 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="Aadhar Number"
-                        value={formData.aadharNumber}
-                        onChange={(e) => handleInputChange('aadharNumber', e.target.value)}
-                        placeholder="Adhaar Number"
+                        value={formData.adharNumber}
+                        onChange={(e) => handleInputChange('adharNumber', e.target.value)}
+                        placeholder="Aadhar Number"
                         size="small"
-                        error={!!errors.aadharNumber}
-                        helperText={errors.aadharNumber}
+                        error={!!errors.adharNumber}
+                        helperText={errors.adharNumber}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
                             '& fieldset': {
-                              borderColor: errors.aadharNumber ? '#d32f2f' : '#d1d5db',
+                              borderColor: errors.adharNumber ? '#d32f2f' : '#d1d5db',
                             },
                             '&:hover fieldset': {
-                              borderColor: errors.aadharNumber ? '#d32f2f' : '#9ca3af',
+                              borderColor: errors.adharNumber ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.aadharNumber ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.adharNumber ? '#d32f2f' : '#1976d2',
                             },
                           },
                         }}
@@ -1586,10 +1597,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                             },
                           }}
                         >
-                          <MenuItem value="Class 9">Class 9</MenuItem>
-                          <MenuItem value="Class 10">Class 10</MenuItem>
-                          <MenuItem value="Class 11">Class 11</MenuItem>
-                          <MenuItem value="Class 12">Class 12</MenuItem>
+                          <MenuItem value="9th">9th</MenuItem>
+                          <MenuItem value="10th">10th</MenuItem>
+                          <MenuItem value="11th">11th</MenuItem>
+                          <MenuItem value="12th">12th</MenuItem>
                         </Select>
                       </FormControl>
                     </Box>
@@ -1999,6 +2010,31 @@ const StudentRegistrationPage = ({ onBack }) => {
                           />
                         </RadioGroup>
                       </FormControl>
+                    </Box>
+                    
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <TextField
+                        fullWidth
+                        label="Transaction ID (Optional)"
+                        value={formData.transactionId}
+                        onChange={(e) => handleInputChange('transactionId', e.target.value)}
+                        placeholder="Enter transaction ID if available"
+                        size="small"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '4px',
+                            '& fieldset': {
+                              borderColor: '#d1d5db',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#9ca3af',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#1976d2',
+                            },
+                          },
+                        }}
+                      />
                     </Box>
                   </Box>
                 </CardContent>
