@@ -149,7 +149,7 @@ const CenterPage = () => {
         fullAddress: center.fullAddress || '',
         state: center.state || '',
         district: center.district || '',
-        password: center.password || ''
+        password: '' // Clear password when editing - user must enter new one if they want to change it
       });
     } else {
       setEditingCenter(null);
@@ -180,6 +180,17 @@ const CenterPage = () => {
       district: '',
       password: ''
     });
+    // Clear form errors when closing
+    setFormErrors({
+      centerName: '',
+      centerHeadName: '',
+      email: '',
+      centerHeadMobileNo: '',
+      fullAddress: '',
+      state: '',
+      district: '',
+      password: ''
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -193,9 +204,17 @@ const CenterPage = () => {
     
     try {
       if (editingCenter) {
+        // For editing, create a copy of formData and handle password logic
+        const updateData = { ...formData };
+        
+        // If password is empty during edit, remove it from the update data
+        if (!updateData.password || updateData.password.trim() === '') {
+          delete updateData.password;
+        }
+        
         await updateCenterMutation.mutateAsync({
           id: editingCenter._id,
-          data: formData
+          data: updateData
         });
         showSnackbar('Center updated successfully!', 'success');
       } else {
@@ -322,8 +341,15 @@ const CenterPage = () => {
       fullAddress: validateAddress(formData.fullAddress),
       state: validateName(formData.state),
       district: validateName(formData.district),
-      password: validatePassword(formData.password)
     };
+    
+    // Password validation: only required for new centers, optional for editing
+    if (!editingCenter) {
+      errors.password = validatePassword(formData.password);
+    } else if (formData.password && formData.password.trim() !== '') {
+      // If editing and password is provided, validate it
+      errors.password = validatePassword(formData.password);
+    }
     
     setFormErrors(errors);
     
@@ -1218,19 +1244,45 @@ const CenterPage = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Password"
+                  label={editingCenter ? "New Password (leave blank to keep current)" : "Password"}
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
+                  required={!editingCenter}
+                  placeholder={editingCenter ? "Enter new password or leave blank" : "Enter password"}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <LockIcon sx={{ color: 'text.secondary' }} />
+                        <LockIcon sx={{ color: '#6b7280' }} />
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ borderRadius: 2 }}
+                  error={!!formErrors.password}
+                  helperText={editingCenter ? "Leave blank to keep current password unchanged" : formErrors.password}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '4px',
+                      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': {
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      },
+                      '&.Mui-focused': {
+                        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+                      },
+                      '&.Mui-error': {
+                        boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.1)',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#6b7280',
+                      fontWeight: 500,
+                    },
+                    '& .MuiFormHelperText-root': {
+                      marginLeft: 0,
+                      fontSize: '0.75rem',
+                    },
+                  }}
                 />
               </Grid>
             </Grid>
