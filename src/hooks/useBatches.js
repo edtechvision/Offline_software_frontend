@@ -65,3 +65,15 @@ export const useDeleteBatch = () => {
     },
   });
 };
+
+export const useToggleBatchStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, isActive }) => batchService.toggleStatus(id, isActive),
+    onSuccess: () => {
+      // Invalidate and refetch batches
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+    },
+  });
+};

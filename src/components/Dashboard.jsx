@@ -58,7 +58,7 @@ const Dashboard = () => {
     { title: "Today's Fee", value: '₹ 10400', color: 'red', icon: FaCreditCard, change: '+15%', changeType: 'up' },
     { title: 'Pending Fee', value: '₹ 1037950', color: 'yellow', icon: FaClock, change: '-5%', changeType: 'down' },
     { title: 'August Fee', value: '₹ 63300', color: 'gray', icon: FaCalendarAlt, change: '+22%', changeType: 'up' },
-    { title: 'Find Fees', value: '', color: 'accent-green', icon: FaSearch, change: 'Status', changeType: 'neutral' },
+    { title: 'August Admission', value: 'Status', color: 'accent-green', icon: FaSearch, change: 'View Details', changeType: 'neutral' },
     { title: 'Centers', value: '2', color: 'accent', icon: FaBuilding, change: '+0%', changeType: 'neutral' },
   ];
 

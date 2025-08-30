@@ -176,6 +176,37 @@ const StudentsPage = () => {
         }} />
       </Box>
 
+      {/* Add Student Button for Center Users */}
+      {isCenter && (
+        <Box sx={{ mb: 4 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setShowRegistration(true)}
+            sx={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              borderRadius: 3,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                boxShadow: '0 12px 35px rgba(16, 185, 129, 0.4)',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.3s ease',
+              minHeight: '48px',
+            }}
+          >
+            Add New Student
+          </Button>
+        </Box>
+      )}
+
  
 
 

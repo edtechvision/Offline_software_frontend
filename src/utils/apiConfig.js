@@ -37,7 +37,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/admissionIncharge/${id}`,
     UPDATE: (id) => `/admissionIncharge/${id}`,
     DELETE: (id) => `/admissionIncharge/${id}`,
-    BLOCK: (id) => `/admissionIncharge/${id}/block`,
+    BLOCK: (id) => `/admissionIncharge/block/${id}`,
   },
   
   // Course management
@@ -47,6 +47,18 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/courses/${id}`,
     UPDATE: (id) => `/courses/${id}`,
     DELETE: (id) => `/courses/${id}`,
+    TOGGLE_ACTIVE: (id) => `/courses/${id}/active`,
+  },
+
+  // Additional Course management
+  ADDITIONAL_COURSES: {
+    CREATE: '/additional-courses',
+    GET_ALL: '/additional-courses',
+    GET_BY_ID: (id) => `/additional-courses/${id}`,
+    UPDATE: (id) => `/additional-courses-byId/${id}`,
+    DELETE: (id) => `/additional-courses/${id}`,
+    TOGGLE_ACTIVE: (id) => `/additional-courses/${id}/active`,
+    GET_BY_INCHARGE: (id) => `/additional-courses/${id}`,
   },
 
   // Batch management
@@ -56,11 +68,12 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/batches/${id}`,
     UPDATE: (id) => `/batches/${id}`,
     DELETE: (id) => `/batches/${id}`,
+    TOGGLE_STATUS: (id) => `/batches/${id}/toggle-status`,
   },
 
   // Student management
   STUDENT: {
-    CREATE: '/students',
+    CREATE: '/student',
     GET_ALL: '/students',
     GET_BY_ID: (id) => `/students/${id}`,
     UPDATE: (id) => `/students/${id}`,

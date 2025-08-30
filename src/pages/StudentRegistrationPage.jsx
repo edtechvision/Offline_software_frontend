@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCourses, useBatches, useCreateStudent } from '../hooks';
+import { useCourses, useBatches, useCreateStudent, useAdditionalCourses } from '../hooks';
 import {
   Box,
   Card,
@@ -100,14 +100,16 @@ const StudentRegistrationPage = ({ onBack }) => {
   const [isValidatingIncharge, setIsValidatingIncharge] = useState(false);
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
 
-  // API hooks for courses and batches
+  // API hooks for courses, batches, and additional courses
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
   const { data: batchesData, isLoading: batchesLoading } = useBatches();
+  const { data: additionalCoursesData, isLoading: additionalCoursesLoading } = useAdditionalCourses();
   const createStudentMutation = useCreateStudent();
 
-  // Extract courses and batches from API response
+  // Extract courses, batches, and additional courses from API response
   const courses = coursesData?.items || coursesData?.data?.items || [];
   const batches = batchesData?.data?.batches || batchesData?.batches || [];
+  const additionalCourses = additionalCoursesData?.items || additionalCoursesData?.data?.items || [];
   
 
 
@@ -208,47 +210,114 @@ const StudentRegistrationPage = ({ onBack }) => {
 
   // Update permanent address when checkbox is checked
   useEffect(() => {
-    if (formData.sameAsPresent) {
+    if (formData.isPermanentSameAsPresent) {
       setFormData(prev => ({
         ...prev,
-        permanentAddress: prev.presentAddress,
-        permanentState: prev.presentState,
-        permanentDistrict: prev.presentDistrict,
-        permanentCountry: prev.presentCountry,
-        permanentPincode: prev.presentPincode
+        permanentAddress: prev.presentAddress
       }));
     }
-  }, [formData.sameAsPresent, formData.presentAddress, formData.presentState, formData.presentDistrict, formData.presentCountry, formData.presentPincode]);
+  }, [formData.isPermanentSameAsPresent, formData.presentAddress]);
 
   const validateForm = () => {
     const newErrors = {};
     
+    // Incharge validation
     if (!formData.inchargeCode.trim()) newErrors.inchargeCode = 'Incharge code is required';
     if (!isInchargeCodeValid) newErrors.inchargeCode = 'Please enter a valid incharge code';
-    if (!formData.studentName.trim()) newErrors.studentName = 'Student name is required';
-    if (!formData.fathersName.trim()) newErrors.fathersName = 'Father\'s name is required';
-    if (!formData.mothersName.trim()) newErrors.mothersName = 'Mother\'s name is required';
-    if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (!formData.mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
-    if (!formData.collegeName.trim()) newErrors.collegeName = 'College name is required';
-    if (!formData.className) newErrors.className = 'Class name is required';
-    if (!formData.courseId) newErrors.courseId = 'Course is required';
-    if (!formData.session.trim()) newErrors.session = 'Session is required';
     
-    // Mobile number validation
-    if (formData.mobile && !/^[6-9]\d{9}$/.test(formData.mobile)) {
-      newErrors.mobile = 'Please enter a valid 10-digit mobile number';
+    // Student personal information validation
+    if (!formData.studentName.trim()) newErrors.studentName = 'Student name is required';
+    if (formData.studentName.trim().length < 2) newErrors.studentName = 'Student name must be at least 2 characters';
+    if (!formData.fathersName.trim()) newErrors.fathersName = 'Father\'s name is required';
+    if (formData.fathersName.trim().length < 2) newErrors.fathersName = 'Father\'s name must be at least 2 characters';
+    if (!formData.mothersName.trim()) newErrors.mothersName = 'Mother\'s name is required';
+    if (formData.mothersName.trim().length < 2) newErrors.mothersName = 'Mother\'s name must be at least 2 characters';
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
+    
+    // Age validation (must be at least 5 years old)
+    if (formData.dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(formData.dateOfBirth);
+      const age = today.getFullYear() - birthDate.getFullYear();
+      if (age < 5) newErrors.dateOfBirth = 'Student must be at least 5 years old';
+      if (age > 100) newErrors.dateOfBirth = 'Please enter a valid date of birth';
     }
     
-    // Email validation
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (!formData.category) newErrors.category = 'Category is required';
+    if (!formData.nationality) newErrors.nationality = 'Nationality is required';
+    if (!formData.gender) newErrors.gender = 'Gender is required';
+    
+    // Contact validation
+    if (!formData.mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
+    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber.trim())) {
+      newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number starting with 6-9';
+    }
+    
+    // Alternative mobile validation (if provided)
+    if (formData.alternativeMobileNumber.trim() && !/^[6-9]\d{9}$/.test(formData.alternativeMobileNumber.trim())) {
+      newErrors.alternativeMobileNumber = 'Please enter a valid 10-digit mobile number';
+    }
+    
+    // Email validation (if provided)
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
     
-    // Aadhar validation
-    if (formData.aadharNumber && !/^\d{12}$/.test(formData.aadharNumber)) {
-      newErrors.aadharNumber = 'Aadhar number must be 12 digits';
+    // Aadhar validation (if provided)
+    if (formData.adharNumber.trim() && !/^\d{12}$/.test(formData.adharNumber.trim())) {
+      newErrors.adharNumber = 'Aadhar number must be exactly 12 digits';
+    }
+    
+    // Address validation
+    if (!formData.presentAddress.fullAddress.trim()) newErrors.presentAddress = 'Present address is required';
+    if (!formData.presentAddress.state) newErrors.presentState = 'Present state is required';
+    if (!formData.presentAddress.district) newErrors.presentDistrict = 'Present district is required';
+    if (!formData.presentAddress.country) newErrors.presentCountry = 'Present country is required';
+    if (!formData.presentAddress.pincode.trim()) newErrors.presentPincode = 'Present pincode is required';
+    if (!/^\d{6}$/.test(formData.presentAddress.pincode.trim())) {
+      newErrors.presentPincode = 'Pincode must be exactly 6 digits';
+    }
+    
+    // Permanent address validation (if not same as present)
+    if (!formData.isPermanentSameAsPresent) {
+      if (!formData.permanentAddress.fullAddress.trim()) newErrors.permanentAddress = 'Permanent address is required';
+      if (!formData.permanentAddress.state) newErrors.permanentState = 'Permanent state is required';
+      if (!formData.permanentAddress.district) newErrors.permanentDistrict = 'Permanent district is required';
+      if (!formData.permanentAddress.country) newErrors.permanentCountry = 'Permanent country is required';
+      if (!formData.permanentAddress.pincode.trim()) newErrors.permanentPincode = 'Permanent pincode is required';
+      if (!/^\d{6}$/.test(formData.permanentAddress.pincode.trim())) {
+        newErrors.permanentPincode = 'Pincode must be exactly 6 digits';
+      }
+    }
+    
+    // Academic validation
+    if (!formData.collegeName.trim()) newErrors.collegeName = 'College name is required';
+    if (formData.collegeName.trim().length < 3) newErrors.collegeName = 'College name must be at least 3 characters';
+    if (!formData.className) newErrors.className = 'Class name is required';
+    
+    // Course validation
+    if (!formData.courseId) newErrors.courseId = 'Course is required';
+    if (!formData.session.trim()) newErrors.session = 'Session is required';
+    if (!formData.paymentType) newErrors.paymentType = 'Payment type is required';
+    
+    // Payment validation
+    if (formData.paymentType === 'EMI') {
+      if (!formData.downPayment || parseFloat(formData.downPayment) <= 0) {
+        newErrors.downPayment = 'Down payment is required for EMI';
+      }
+      if (!formData.nextPaymentDueDate) {
+        newErrors.nextPaymentDueDate = 'Next payment due date is required for EMI';
+      }
+    }
+    
+    // Course fee validation
+    if (!formData.courseFee || parseFloat(formData.courseFee) <= 0) {
+      newErrors.courseFee = 'Course fee must be greater than 0';
+    }
+    
+    // Image validation
+    if (!formData.imageFile) {
+      newErrors.imageFile = 'Student photo is required';
     }
     
     setErrors(newErrors);
@@ -260,6 +329,42 @@ const StudentRegistrationPage = ({ onBack }) => {
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+    
+    // Auto-populate course fee when course is selected
+    if (field === 'courseId' && value) {
+      const selectedCourse = courses.find(course => course._id === value);
+      if (selectedCourse) {
+        setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
+        
+        // Auto-populate down payment with EMI fee if EMI is selected
+        if (formData.paymentType === 'EMI' && selectedCourse.emiFee) {
+          setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
+        }
+      }
+    }
+    
+    // Auto-populate additional course fee when additional course is selected
+    if (field === 'additionalCourseId' && value) {
+      const selectedAdditionalCourse = additionalCourses.find(course => course._id === value);
+      if (selectedAdditionalCourse) {
+        const currentFee = parseFloat(formData.courseFee) || 0;
+        const additionalFee = selectedAdditionalCourse.fee || 0;
+        setFormData(prev => ({ ...prev, courseFee: (currentFee + additionalFee).toString() }));
+        
+        // Auto-populate down payment with EMI fee if EMI is selected
+        if (formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee) {
+          setFormData(prev => ({ ...prev, downPayment: selectedAdditionalCourse.emiFee.toString() }));
+        }
+      }
+    }
+    
+    // Auto-populate down payment with EMI fee when payment type changes to EMI
+    if (field === 'paymentType' && value === 'EMI') {
+      const selectedCourse = courses.find(course => course._id === formData.courseId);
+      if (selectedCourse && selectedCourse.emiFee) {
+        setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
+      }
     }
   };
 
@@ -274,38 +379,58 @@ const StudentRegistrationPage = ({ onBack }) => {
     
     try {
       // Prepare the data according to API requirements
-      const studentData = {
-        inchargeCode: formData.inchargeCode,
-        inchargeName: formData.inchargeName,
-        studentName: formData.studentName,
-        fathersName: formData.fathersName,
-        mothersName: formData.mothersName,
-        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : '',
-        category: formData.category,
-        nationality: formData.nationality,
-        gender: formData.gender,
-        email: formData.email,
-        mobileNumber: formData.mobileNumber,
-        alternativeMobileNumber: formData.alternativeMobileNumber,
-        adharNumber: formData.adharNumber,
-        presentAddress: JSON.stringify(formData.presentAddress),
-        isPermanentSameAsPresent: formData.isPermanentSameAsPresent,
-        collegeName: formData.collegeName,
-        className: formData.className,
-        courseDetails: JSON.stringify({
-          courseId: formData.courseId,
-          additionalCourseId: formData.additionalCourseId,
-          paymentType: formData.paymentType,
-          downPayment: formData.downPayment,
-          nextPaymentDueDate: formData.nextPaymentDueDate ? formData.nextPaymentDueDate.toISOString().split('T')[0] : '',
-          courseFee: formData.courseFee,
-          batchId: formData.batchId,
-          session: formData.session,
-          paymentMode: formData.paymentMode,
-          referenceNumber: formData.referenceNumber
-        }),
-        image: formData.image
+      const studentData = new FormData();
+      
+      // Basic Information
+      studentData.append('inchargeCode', formData.inchargeCode);
+      studentData.append('inchargeName', formData.inchargeName);
+      studentData.append('studentName', formData.studentName);
+      studentData.append('fathersName', formData.fathersName);
+      studentData.append('mothersName', formData.mothersName);
+      studentData.append('dateOfBirth', formData.dateOfBirth ? formData.dateOfBirth.toISOString().split('T')[0] : '');
+      studentData.append('category', formData.category);
+      studentData.append('nationality', formData.nationality);
+      studentData.append('gender', formData.gender);
+      
+      // Contact Information
+      studentData.append('email', formData.email);
+      studentData.append('mobileNumber', formData.mobileNumber);
+      studentData.append('alternativeMobileNumber', formData.alternativeMobileNumber);
+      studentData.append('adharNumber', formData.adharNumber);
+      
+      // Address Information
+      studentData.append('presentAddress', JSON.stringify(formData.presentAddress));
+      studentData.append('isPermanentSameAsPresent', formData.isPermanentSameAsPresent.toString());
+      
+      // Academic Information
+      studentData.append('collegeName', formData.collegeName);
+      studentData.append('className', formData.className);
+      
+      // Course Details
+      const courseDetails = {
+        courseId: formData.courseId,
+        additionalCourseId: formData.additionalCourseId || '',
+        paymentType: formData.paymentType,
+        downPayment: formData.downPayment || '',
+        nextPaymentDueDate: formData.nextPaymentDueDate ? formData.nextPaymentDueDate.toISOString().split('T')[0] : '',
+        courseFee: formData.courseFee,
+        batchId: formData.batchId || '',
+        session: formData.session,
+        paymentMode: formData.paymentMode || '',
+        referenceNumber: formData.referenceNumber || ''
       };
+      studentData.append('courseDetails', JSON.stringify(courseDetails));
+      
+      // Image upload
+      if (formData.imageFile) {
+        studentData.append('image', formData.imageFile);
+      }
+      
+      // Debug: Log the FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of studentData.entries()) {
+        console.log(`${key}:`, value);
+      }
       
       // Call the API
       const result = await createStudentMutation.mutateAsync(studentData);
@@ -320,6 +445,7 @@ const StudentRegistrationPage = ({ onBack }) => {
         throw new Error(result.message || 'Failed to create student');
       }
     } catch (error) {
+      console.error('Student creation error:', error);
       // You can add error handling here (show error message to user)
     } finally {
       setIsSubmitting(false);
@@ -1005,8 +1131,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                           State
                         </InputLabel>
                         <Select
-                          value={formData.presentState}
-                          onChange={(e) => handleInputChange('presentState', e.target.value)}
+                          value={formData.presentAddress.state}
+                          onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, state: e.target.value })}
                           label="State"
                           sx={{
                             minWidth: '200px',
@@ -1056,8 +1182,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                           District
                         </InputLabel>
                         <Select
-                          value={formData.presentDistrict}
-                          onChange={(e) => handleInputChange('presentDistrict', e.target.value)}
+                          value={formData.presentAddress.district}
+                          onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, district: e.target.value })}
                           label="District"
                           sx={{
                             minWidth: '200px',
@@ -1107,8 +1233,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                           Country
                         </InputLabel>
                         <Select
-                          value={formData.presentCountry}
-                          onChange={(e) => handleInputChange('presentCountry', e.target.value)}
+                          value={formData.presentAddress.country}
+                          onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, country: e.target.value })}
                           label="Country"
                           sx={{
                             minWidth: '200px',
@@ -1143,8 +1269,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="Pincode"
-                        value={formData.presentPincode}
-                        onChange={(e) => handleInputChange('presentPincode', e.target.value)}
+                        value={formData.presentAddress.pincode}
+                        onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, pincode: e.target.value })}
                         placeholder="Pincode"
                         size="small"
                         sx={{
@@ -1200,9 +1326,9 @@ const StudentRegistrationPage = ({ onBack }) => {
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControlLabel
                         control={
-                          <Checkbox
-                            checked={formData.sameAsPresent}
-                            onChange={(e) => handleInputChange('sameAsPresent', e.target.checked)}
+                                                  <Checkbox
+                          checked={formData.isPermanentSameAsPresent}
+                          onChange={(e) => handleInputChange('isPermanentSameAsPresent', e.target.checked)}
                             sx={{ 
                               '&.Mui-checked': { 
                                 color: '#1976d2' 
@@ -1223,11 +1349,11 @@ const StudentRegistrationPage = ({ onBack }) => {
                         multiline
                         rows={3}
                         label="Full Address"
-                        value={formData.permanentAddress}
-                        onChange={(e) => handleInputChange('permanentAddress', e.target.value)}
+                        value={formData.permanentAddress.fullAddress}
+                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, fullAddress: e.target.value })}
                         placeholder="Full Address"
                         size="small"
-                        disabled={formData.sameAsPresent}
+                        disabled={formData.isPermanentSameAsPresent}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1251,10 +1377,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="State"
-                        value={formData.permanentState}
-                        onChange={(e) => handleInputChange('permanentState', e.target.value)}
+                        value={formData.permanentAddress.state}
+                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, state: e.target.value })}
                         size="small"
-                        disabled={formData.sameAsPresent}
+                        disabled={formData.isPermanentSameAsPresent}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1278,10 +1404,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="District"
-                        value={formData.permanentDistrict}
-                        onChange={(e) => handleInputChange('permanentDistrict', e.target.value)}
+                        value={formData.permanentAddress.district}
+                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, district: e.target.value })}
                         size="small"
-                        disabled={formData.sameAsPresent}
+                        disabled={formData.isPermanentSameAsPresent}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1305,10 +1431,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="Country"
-                        value={formData.permanentCountry}
-                        onChange={(e) => handleInputChange('permanentCountry', e.target.value)}
+                        value={formData.permanentAddress.country}
+                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, country: e.target.value })}
                         size="small"
-                        disabled={formData.sameAsPresent}
+                        disabled={formData.isPermanentSameAsPresent}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1332,11 +1458,11 @@ const StudentRegistrationPage = ({ onBack }) => {
                       <TextField
                         fullWidth
                         label="Pincode"
-                        value={formData.permanentPincode}
-                        onChange={(e) => handleInputChange('permanentPincode', e.target.value)}
+                        value={formData.permanentAddress.pincode}
+                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, pincode: e.target.value })}
                         placeholder="Pincode"
                         size="small"
-                        disabled={formData.sameAsPresent}
+                        disabled={formData.isPermanentSameAsPresent}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1611,19 +1737,19 @@ const StudentRegistrationPage = ({ onBack }) => {
                           }}
                         >
                           <MenuItem value="">None</MenuItem>
-                          {coursesLoading ? (
+                          {additionalCoursesLoading ? (
                             <MenuItem disabled>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <CircularProgress size={16} />
-                                Loading courses...
+                                Loading additional courses...
                               </Box>
                             </MenuItem>
-                          ) : courses.length === 0 ? (
+                          ) : additionalCourses.length === 0 ? (
                             <MenuItem disabled>
-                              No courses available
+                              No additional courses available
                             </MenuItem>
                           ) : (
-                            courses.map((course) => (
+                            additionalCourses.map((course) => (
                               <MenuItem key={course._id} value={course._id}>
                                 {course.name}
                               </MenuItem>
@@ -1677,7 +1803,6 @@ const StudentRegistrationPage = ({ onBack }) => {
                         >
                           <MenuItem value="Full Payment">Full Payment</MenuItem>
                           <MenuItem value="EMI">EMI</MenuItem>
-                          <MenuItem value="Installments">Installments</MenuItem>
                         </Select>
                       </FormControl>
                     </Box>
@@ -1908,63 +2033,165 @@ const StudentRegistrationPage = ({ onBack }) => {
                       </Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                    <Box sx={{ flex: '1 1 350px', minWidth: '350px' }}>
                       <Box>
-                        <Typography variant="body2" sx={{ mb: 1, color: '#333', fontWeight: 500 }}>
-                          Upload Image
+                        <Typography variant="body2" sx={{ mb: 2, color: '#333', fontWeight: 600, fontSize: '1rem' }}>
+                          Student Photo Upload *
                         </Typography>
-                        <Button
-                          variant="outlined"
-                          component="label"
-                          startIcon={<UploadIcon />}
-                          sx={{ 
-                            textTransform: 'none',
+                        <Typography variant="body2" sx={{ mb: 3, color: '#666', fontSize: '0.875rem' }}>
+                          Upload a clear passport-size photo of the student (JPG, PNG, JPEG - Max 5MB)
+                        </Typography>
+                        
+                        <Box sx={{ 
+                          border: '2px dashed #d1d5db', 
+                          borderRadius: 2, 
+                          p: 4, 
+                          textAlign: 'center',
+                          backgroundColor: formData.imageFile ? '#f0f9ff' : '#fafafa',
+                          borderColor: formData.imageFile ? '#1976d2' : '#d1d5db',
+                          transition: 'all 0.3s ease',
+                          minHeight: '200px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          '&:hover': {
                             borderColor: '#1976d2',
-                            color: '#1976d2',
-                            '&:hover': {
-                              borderColor: '#1565c0',
-                              backgroundColor: 'rgba(25, 118, 210, 0.04)'
-                            }
-                          }}
-                        >
-                          CHOOSE FILE
-                          <input
-                            type="file"
-                            hidden
-                            accept="image/*"
-                            onChange={handleFileChange}
-                          />
-                        </Button>
-                        <Typography variant="body2" sx={{ mt: 1, color: '#666' }}>
-                          {formData.imageFile ? formData.imageFile.name : 'No file chosen'}
-                        </Typography>
+                            backgroundColor: '#f0f9ff'
+                          }
+                        }}>
+                          {formData.imageFile ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <Box sx={{ 
+                                width: 80, 
+                                height: 80, 
+                                borderRadius: '50%', 
+                                overflow: 'hidden',
+                                border: '3px solid #1976d2',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#e3f2fd'
+                              }}>
+                                <img 
+                                  src={URL.createObjectURL(formData.imageFile)} 
+                                  alt="Student Preview" 
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                              </Box>
+                              <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 500 }}>
+                                {formData.imageFile.name}
+                              </Typography>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => setFormData(prev => ({ ...prev, imageFile: null }))}
+                                sx={{ 
+                                  textTransform: 'none',
+                                  borderColor: '#dc3545',
+                                  color: '#dc3545',
+                                  '&:hover': {
+                                    borderColor: '#c82333',
+                                    backgroundColor: 'rgba(220, 53, 69, 0.04)'
+                                  }
+                                }}
+                              >
+                                Remove Photo
+                              </Button>
+                            </Box>
+                          ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <Box sx={{ 
+                                width: 80, 
+                                height: 80, 
+                                borderRadius: '50%', 
+                                backgroundColor: '#e3f2fd',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '2px dashed #1976d2'
+                              }}>
+                                <UploadIcon sx={{ fontSize: 40, color: '#1976d2' }} />
+                              </Box>
+                              <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                                Click to upload student photo
+                              </Typography>
+                              <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<UploadIcon />}
+                                sx={{ 
+                                  textTransform: 'none',
+                                  borderColor: '#1976d2',
+                                  color: '#1976d2',
+                                  px: 3,
+                                  py: 1,
+                                  '&:hover': {
+                                    borderColor: '#1565c0',
+                                    backgroundColor: 'rgba(25, 118, 210, 0.04)'
+                                  }
+                                }}
+                              >
+                                CHOOSE PHOTO
+                                <input
+                                  type="file"
+                                  hidden
+                                  accept="image/*"
+                                  onChange={handleFileChange}
+                                />
+                              </Button>
+                            </Box>
+                          )}
+                        </Box>
+                        
+                        {formData.imageFile && (
+                          <Typography variant="body2" sx={{ mt: 2, color: '#10b981', fontWeight: 500, textAlign: 'center' }}>
+                            ✓ Photo uploaded successfully
+                          </Typography>
+                        )}
+                        
+                        {errors.imageFile && (
+                          <Typography variant="body2" sx={{ mt: 2, color: '#d32f2f', fontWeight: 500, textAlign: 'center' }}>
+                            {errors.imageFile}
+                          </Typography>
+                        )}
                       </Box>
                     </Box>
+                    
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <TextField
-                        fullWidth
-                        label="Reference Number (If any)"
-                        value={formData.referenceNumber}
-                        onChange={(e) => handleInputChange('referenceNumber', e.target.value)}
-                        placeholder="Enter Referal Student Admission Number"
-                        size="small"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: '4px',
-                            '& fieldset': {
-                              borderColor: '#d1d5db',
+                      <Box>
+                        <Typography variant="body2" sx={{ mb: 2, color: '#333', fontWeight: 600, fontSize: '1rem' }}>
+                          Reference Number (If any)
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 3, color: '#666', fontSize: '0.875rem' }}>
+                          Enter referral student admission number if applicable
+                        </Typography>
+                        
+                        <TextField
+                          fullWidth
+                          label="Reference Number"
+                          value={formData.referenceNumber}
+                          onChange={(e) => handleInputChange('referenceNumber', e.target.value)}
+                          placeholder="Enter Referral Student Admission Number"
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '4px',
+                              '& fieldset': {
+                                borderColor: '#d1d5db',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#9ca3af',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#1976d2',
+                              },
                             },
-                            '&:hover fieldset': {
-                              borderColor: '#9ca3af',
-                            },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
-                            },
-                          },
-                        }}
-                      />
+                          }}
+                        />
+                      </Box>
                     </Box>
+
                   </Box>
                 </CardContent>
               </Card>

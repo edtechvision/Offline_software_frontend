@@ -13,11 +13,18 @@ const apiRequest = async (endpoint, options = {}) => {
     // Add body if provided
     if (body) {
       config.body = body;
+      
+      // If body is FormData, don't set Content-Type header (let browser set it with boundary)
+      if (body instanceof FormData) {
+        delete config.headers['Content-Type'];
+        console.log('FormData detected, removed Content-Type header');
+      }
     }
     
     console.log('apiRequest: Making request to:', url);
     console.log('apiRequest: Config:', config);
-    console.log('apiRequest: Headers:', getDefaultHeaders());
+    console.log('apiRequest: Headers:', config.headers);
+    console.log('apiRequest: Body type:', body instanceof FormData ? 'FormData' : typeof body);
     console.log('apiRequest: Body:', body);
     
     const response = await fetch(url, config);
@@ -224,58 +231,58 @@ export const inchargeService = {
 
   // Block/Unblock admission incharge
   blockIncharge: async (id, block) => {
-    console.log('Blocking incharge:', { id, block });
-    console.log('Endpoint:', API_ENDPOINTS.INCHARGE.BLOCK(id));
-    console.log('Request body:', JSON.stringify({ block }));
-    
-    const result = await apiRequest(API_ENDPOINTS.INCHARGE.BLOCK(id), {
-      method: 'POST',
-      body: JSON.stringify({ block }),
-    });
-    
-    console.log('Block result:', result);
-    return result;
+    try {
+      console.log('Blocking incharge:', { id, block });
+      console.log('Endpoint:', API_ENDPOINTS.INCHARGE.BLOCK(id));
+      console.log('Full URL:', `${API_BASE_URL}${API_ENDPOINTS.INCHARGE.BLOCK(id)}`);
+      console.log('Request body:', JSON.stringify({ block }));
+      
+      const result = await apiRequest(API_ENDPOINTS.INCHARGE.BLOCK(id), {
+        method: 'POST',
+        body: JSON.stringify({ block }),
+      });
+      
+      console.log('Block result:', result);
+      return result;
+    } catch (error) {
+      console.error('Block incharge error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        endpoint: API_ENDPOINTS.INCHARGE.BLOCK(id),
+        fullUrl: `${API_BASE_URL}${API_ENDPOINTS.INCHARGE.BLOCK(id)}`,
+        requestBody: { block }
+      });
+      throw error;
+    }
   },
 };
 
 // Student Services
 export const studentService = {
   createStudent: async (studentData) => {
-
+    console.log('Creating student with data:', studentData);
     
-    // Handle file upload for image
-    if (studentData.image) {
-      const formData = new FormData();
-      
-      // Add all text fields
-      Object.keys(studentData).forEach(key => {
-        if (key !== 'image') {
-          if (typeof studentData[key] === 'object') {
-            formData.append(key, JSON.stringify(studentData[key]));
-          } else {
-            formData.append(key, studentData[key]);
-          }
-        }
-      });
-      
-      // Add image file
-      if (studentData.image instanceof File) {
-        formData.append('image', studentData.image);
-      }
-      
+    // Check if we have an image file
+    const hasImageFile = studentData instanceof FormData && studentData.has('image');
+    
+    if (hasImageFile) {
+      // FormData already prepared, use as is
+      console.log('Using FormData for student creation');
       const result = await apiRequest(API_ENDPOINTS.STUDENT.CREATE, {
         method: 'POST',
-        body: formData,
+        body: studentData,
       });
       console.log('Student creation result:', result);
       return result;
     } else {
       // No image, use regular JSON request
+      console.log('Using JSON for student creation');
       const result = await apiRequest(API_ENDPOINTS.STUDENT.CREATE, {
         method: 'POST',
         body: JSON.stringify(studentData),
       });
-
+      console.log('Student creation result:', result);
       return result;
     }
   },
@@ -340,6 +347,62 @@ export const courseService = {
       method: 'DELETE',
     });
   },
+
+  toggleActive: async (id, active) => {
+    return apiRequest(API_ENDPOINTS.COURSES.TOGGLE_ACTIVE(id), {
+      method: 'POST',
+      body: JSON.stringify({ active }),
+    });
+  },
+};
+
+// Additional Course Services
+export const additionalCourseService = {
+  createAdditionalCourse: async (courseData) => {
+    const result = await apiRequest(API_ENDPOINTS.ADDITIONAL_COURSES.CREATE, {
+      method: 'POST',
+      body: JSON.stringify(courseData),
+    });
+    return result;
+  },
+
+  getAdditionalCourses: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `${API_ENDPOINTS.ADDITIONAL_COURSES.GET_ALL}?${queryString}` : API_ENDPOINTS.ADDITIONAL_COURSES.GET_ALL;
+    const result = await apiRequest(endpoint);
+    return result;
+  },
+
+  getAdditionalCourseById: async (id) => {
+    return apiRequest(API_ENDPOINTS.ADDITIONAL_COURSES.GET_BY_ID(id));
+  },
+
+  updateAdditionalCourse: async (id, courseData) => {
+    return apiRequest(API_ENDPOINTS.ADDITIONAL_COURSES.UPDATE(id), {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  },
+
+  deleteAdditionalCourse: async (id) => {
+    return apiRequest(API_ENDPOINTS.ADDITIONAL_COURSES.DELETE(id), {
+      method: 'DELETE',
+    });
+  },
+
+  toggleActive: async (id, active) => {
+    return apiRequest(API_ENDPOINTS.ADDITIONAL_COURSES.TOGGLE_ACTIVE(id), {
+      method: 'PUT',
+      body: JSON.stringify({ active }),
+    });
+  },
+
+  getAdditionalCoursesByIncharge: async (inchargeId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `${API_ENDPOINTS.ADDITIONAL_COURSES.GET_BY_INCHARGE(inchargeId)}?${queryString}` : API_ENDPOINTS.ADDITIONAL_COURSES.GET_BY_INCHARGE(inchargeId);
+    const result = await apiRequest(endpoint);
+    return result;
+  },
 };
 
 // Batch Services
@@ -371,6 +434,13 @@ export const batchService = {
   deleteBatch: async (id) => {
     return apiRequest(API_ENDPOINTS.BATCHES.DELETE(id), {
       method: 'DELETE',
+    });
+  },
+
+  toggleStatus: async (id, isActive) => {
+    return apiRequest(API_ENDPOINTS.BATCHES.TOGGLE_STATUS(id), {
+      method: 'PATCH',
+      body: JSON.stringify({ isActive }),
     });
   },
 };

@@ -68,3 +68,15 @@ export const useDeleteCourse = () => {
     },
   });
 };
+
+export const useToggleCourseActive = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, active }) => courseService.toggleActive(id, active),
+    onSuccess: () => {
+      // Invalidate and refetch courses
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+};
