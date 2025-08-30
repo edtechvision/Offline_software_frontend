@@ -321,6 +321,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       newErrors.imageFile = 'Student photo is required';
     }
     
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -372,10 +373,15 @@ const StudentRegistrationPage = ({ onBack }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('Submit button clicked');
+    console.log('Form data:', formData);
+    
     if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
     
+    console.log('Form validation passed, proceeding with submission');
     setIsSubmitting(true);
     
     try {
@@ -993,23 +999,30 @@ const StudentRegistrationPage = ({ onBack }) => {
                         fullWidth
                         label="Mobile *"
                         value={formData.mobileNumber}
-                        onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
-                        placeholder="Mobile Number"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          handleInputChange('mobileNumber', value);
+                        }}
+                        placeholder="Enter 10-digit mobile number"
                         size="small"
                         required
+                        inputProps={{
+                          maxLength: 10,
+                          pattern: '[6-9][0-9]{9}'
+                        }}
                         error={!!errors.mobileNumber}
-                        helperText={errors.mobileNumber}
+                        helperText={errors.mobileNumber || 'Must start with 6-9 and be 10 digits'}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
                             '& fieldset': {
-                              borderColor: errors.mobile ? '#d32f2f' : '#d1d5db',
+                              borderColor: errors.mobileNumber ? '#d32f2f' : '#d1d5db',
                             },
                             '&:hover fieldset': {
-                              borderColor: errors.mobile ? '#d32f2f' : '#9ca3af',
+                              borderColor: errors.mobileNumber ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.mobile ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.mobileNumber ? '#d32f2f' : '#1976d2',
                             },
                           },
                         }}
@@ -1020,9 +1033,17 @@ const StudentRegistrationPage = ({ onBack }) => {
                         fullWidth
                         label="Alternate Mobile"
                         value={formData.alternativeMobileNumber}
-                        onChange={(e) => handleInputChange('alternativeMobileNumber', e.target.value)}
-                        placeholder="Alternate Mobile Number"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          handleInputChange('alternativeMobileNumber', value);
+                        }}
+                        placeholder="Enter 10-digit mobile number"
                         size="small"
+                        inputProps={{
+                          maxLength: 10,
+                          pattern: '[6-9][0-9]{9}'
+                        }}
+                        helperText="Optional - Must start with 6-9 and be 10 digits"
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1044,11 +1065,18 @@ const StudentRegistrationPage = ({ onBack }) => {
                         fullWidth
                         label="Aadhar Number"
                         value={formData.adharNumber}
-                        onChange={(e) => handleInputChange('adharNumber', e.target.value)}
-                        placeholder="Aadhar Number"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 12);
+                          handleInputChange('adharNumber', value);
+                        }}
+                        placeholder="Enter 12-digit Aadhar number"
                         size="small"
+                        inputProps={{
+                          maxLength: 12,
+                          pattern: '[0-9]{12}'
+                        }}
                         error={!!errors.adharNumber}
-                        helperText={errors.adharNumber}
+                        helperText={errors.adharNumber || 'Must be exactly 12 digits'}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
@@ -1279,22 +1307,32 @@ const StudentRegistrationPage = ({ onBack }) => {
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <TextField
                         fullWidth
-                        label="Pincode"
+                        label="Pincode *"
                         value={formData.presentAddress.pincode}
-                        onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, pincode: e.target.value })}
-                        placeholder="Pincode"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          handleInputChange('presentAddress', { ...formData.presentAddress, pincode: value });
+                        }}
+                        placeholder="Enter 6-digit pincode"
                         size="small"
+                        required
+                        inputProps={{
+                          maxLength: 6,
+                          pattern: '[0-9]{6}'
+                        }}
+                        error={!!errors.presentPincode}
+                        helperText={errors.presentPincode || 'Must be exactly 6 digits'}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
                             '& fieldset': {
-                              borderColor: '#d1d5db',
+                              borderColor: errors.presentPincode ? '#d32f2f' : '#d1d5db',
                             },
                             '&:hover fieldset': {
-                              borderColor: '#9ca3af',
+                              borderColor: errors.presentPincode ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: errors.presentPincode ? '#d32f2f' : '#1976d2',
                             },
                           },
                         }}
@@ -1468,23 +1506,33 @@ const StudentRegistrationPage = ({ onBack }) => {
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <TextField
                         fullWidth
-                        label="Pincode"
+                        label="Pincode *"
                         value={formData.permanentAddress.pincode}
-                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, pincode: e.target.value })}
-                        placeholder="Pincode"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          handleInputChange('permanentAddress', { ...formData.permanentAddress, pincode: value });
+                        }}
+                        placeholder="Enter 6-digit pincode"
                         size="small"
+                        required
                         disabled={formData.isPermanentSameAsPresent}
+                        inputProps={{
+                          maxLength: 6,
+                          pattern: '[0-9]{6}'
+                        }}
+                        error={!!errors.permanentPincode}
+                        helperText={errors.permanentPincode || 'Must be exactly 6 digits'}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
                             '& fieldset': {
-                              borderColor: '#d1d5db',
+                              borderColor: errors.permanentPincode ? '#d32f2f' : '#d1d5db',
                             },
                             '&:hover fieldset': {
-                              borderColor: '#9ca3af',
+                              borderColor: errors.permanentPincode ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: errors.permanentPincode ? '#d32f2f' : '#1976d2',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -2250,6 +2298,24 @@ const StudentRegistrationPage = ({ onBack }) => {
             </Card>
           )}
 
+          {/* Debug: Show validation errors */}
+          {Object.keys(errors).length > 0 && (
+            <Card sx={{ mb: 3, borderRadius: 3, border: '1px solid #f44336' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+                  Please fix the following errors:
+                </Typography>
+                <Box component="ul" sx={{ m: 0, pl: 2 }}>
+                  {Object.entries(errors).map(([field, error]) => (
+                    <Typography key={field} component="li" color="error" sx={{ mb: 1 }}>
+                      <strong>{field}:</strong> {error}
+                    </Typography>
+                  ))}
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Action Buttons */}
           {isInchargeCodeValid && (
             <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', mt: 4 }}>
@@ -2285,6 +2351,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                 type="submit"
                 variant="contained"
                 disabled={isSubmitting || createStudentMutation.isPending}
+                onClick={() => console.log('Submit button clicked via onClick')}
                 sx={{
                   background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
                   color: 'white',
@@ -2308,7 +2375,14 @@ const StudentRegistrationPage = ({ onBack }) => {
                   }
                 }}
               >
-                {isSubmitting || createStudentMutation.isPending ? 'Creating Student...' : 'Create Student'}
+                {isSubmitting || createStudentMutation.isPending ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={16} color="inherit" />
+                    Creating Student...
+                  </Box>
+                ) : (
+                  'Create Student'
+                )}
               </Button>
             </Box>
           )}
