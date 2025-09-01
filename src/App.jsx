@@ -10,6 +10,8 @@ import MainAdminSidebar from './components/MainAdminSidebar';
 import AdminCenterSidebar from './components/AdminCenterSidebar';
 import StudentsPage from './pages/StudentsPage';
 import StudentRegistrationPage from './pages/StudentRegistrationPage';
+import StudentViewPage from './pages/StudentViewPage';
+import StudentEditPage from './pages/StudentEditPage';
 import CoursePage from './pages/CoursePage';
 import BatchPage from './pages/BatchPage';
 import CenterPage from './pages/CenterPage';
@@ -149,6 +151,24 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles={["admin", "center"]}>
             <StudentsPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/students/:id"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <StudentViewPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/students/:id/edit"
+        element={
+          <ProtectedLayout requiredRoles={["admin"]}>
+            <StudentEditPage />
           </ProtectedLayout>
         }
       />

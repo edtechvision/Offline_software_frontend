@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -20,13 +21,20 @@ import {
   InputAdornment,
   Collapse,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Popover,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Snackbar,
+  Slide
 } from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
-  ViewList as ViewListIcon,
-  ViewModule as ViewModuleIcon,
+
   Edit as EditIcon,
   Delete as DeleteIcon,
   Block as BlockIcon,
@@ -39,9 +47,11 @@ import {
   FilterList as FilterListIcon,
   Description as DescriptionIcon,
   CloudUpload as UploadIcon,
-  MoreVert as MoreVertIcon
+  MoreVert as MoreVertIcon,
+  Visibility as ViewIcon,
+  CheckCircle as ActivateIcon
 } from '@mui/icons-material';
-import { useStudents, useDeleteStudent, useCourses, useBatches } from '../hooks';
+import { useStudents, useDeleteStudent, useCourses, useBatches, useActivateStudent, useDeactivateStudent } from '../hooks';
 import { useAuthContext } from '../contexts/AuthContext';
 import StudentRegistrationPage from './StudentRegistrationPage';
 
@@ -52,11 +62,20 @@ const StudentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
+  const [selectedClassName, setSelectedClassName] = useState('');
   const [pageSize, setPageSize] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState('table');
+
   const [showFilters, setShowFilters] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
   
   // Get user role from auth context
   const { userRole } = useAuthContext();
@@ -65,11 +84,16 @@ const StudentsPage = () => {
   const { data: studentsData, isLoading, error, refetch } = useStudents({
     page: currentPage,
     limit: pageSize,
-    search: searchTerm
+    search: searchTerm,
+    courseId: selectedCourse || '',
+    batchId: selectedBatch || '',
+    className: selectedClassName || ''
   });
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
   const { data: batchesData, isLoading: batchesLoading } = useBatches();
   const deleteStudentMutation = useDeleteStudent();
+  const activateStudentMutation = useActivateStudent();
+  const deactivateStudentMutation = useDeactivateStudent();
 
   // Extract students from API response
   const students = studentsData?.data?.students || studentsData?.students || [];
@@ -90,8 +114,9 @@ const StudentsPage = () => {
     
     const matchesCourse = !selectedCourse || student.courseDetails?.courseId?._id === selectedCourse;
     const matchesBatch = !selectedBatch || student.courseDetails?.batchId?._id === selectedBatch;
+    const matchesClass = !selectedClassName || student.className === selectedClassName;
     
-    return matchesSearch && matchesCourse && matchesBatch;
+    return matchesSearch && matchesCourse && matchesBatch && matchesClass;
   });
 
   // Role-based permissions
@@ -118,13 +143,89 @@ const StudentsPage = () => {
 
   const handleDelete = (studentId) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
-      deleteStudentMutation.mutate(studentId);
+      deleteStudentMutation.mutate(studentId, {
+        onSuccess: () => {
+          showSnackbar('Student deleted successfully', 'success');
+        },
+        onError: (error) => {
+          showSnackbar('Failed to delete student', 'error');
+          console.error('Failed to delete student:', error);
+        }
+      });
     }
   };
 
   const handleBlock = (studentId) => {
     // Implement block functionality
     console.log('Block student:', studentId);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleActionClick = (event, student) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedStudent(student);
+  };
+
+  const handleActionClose = () => {
+    setAnchorEl(null);
+    setSelectedStudent(null);
+  };
+
+  const handleView = () => {
+    if (selectedStudent?._id) {
+      navigate(`/students/${selectedStudent._id}`);
+    }
+    handleActionClose();
+  };
+
+  const handleEdit = () => {
+    if (selectedStudent?._id) {
+      navigate(`/students/${selectedStudent._id}/edit`);
+    }
+    handleActionClose();
+  };
+
+  const handleActivate = () => {
+    if (selectedStudent?._id) {
+      if (selectedStudent.isActive) {
+        deactivateStudentMutation.mutate(selectedStudent._id, {
+          onSuccess: () => {
+            showSnackbar('Student deactivated successfully', 'success');
+          },
+          onError: (error) => {
+            showSnackbar('Failed to deactivate student', 'error');
+            console.error('Failed to deactivate student:', error);
+          }
+        });
+      } else {
+        activateStudentMutation.mutate(selectedStudent._id, {
+          onSuccess: () => {
+            showSnackbar('Student activated successfully', 'success');
+          },
+          onError: (error) => {
+            showSnackbar('Failed to activate student', 'error');
+            console.error('Failed to activate student:', error);
+          }
+        });
+      }
+    }
+    handleActionClose();
+  };
+
+  const handleModify = () => {
+    console.log('Modify student:', selectedStudent);
+    handleActionClose();
   };
 
   // Show registration page if showRegistration is true
@@ -135,6 +236,8 @@ const StudentsPage = () => {
       />
     );
   }
+
+  // Route-based view/edit handled via navigate
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
@@ -253,6 +356,7 @@ const StudentsPage = () => {
                   setSearchTerm('');
                   setSelectedCourse('');
                   setSelectedBatch('');
+                  setSelectedClassName('');
                   setCurrentPage(1);
                 }}
                 sx={{ borderRadius: 2, width: '100%' }}
@@ -262,28 +366,287 @@ const StudentsPage = () => {
             </Grid>
               
             <Grid item xs={12} md={2}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton
                   onClick={() => setShowFilters(!showFilters)}
                   color={showFilters ? 'primary' : 'default'}
                 >
                   <FilterListIcon />
                 </IconButton>
+            </Grid>
+          </Grid>
+          {/* Advanced Filters */}
+          <Collapse in={showFilters}>
+            <Box sx={{ 
+              mt: 3, 
+              p: 3, 
+              backgroundColor: theme.palette.grey[50], 
+              borderRadius: 2,
+              border: `1px solid ${theme.palette.grey[200]}`
+            }}>
+              <Typography variant="h6" sx={{ 
+                mb: 3, 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <FilterListIcon color="primary" />
+                Advanced Filters
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      fontWeight: 600, 
+                      color: theme.palette.text.secondary 
+                    }}>
+                      Class
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={selectedClassName}
+                        onChange={(e) => { setSelectedClassName(e.target.value); setCurrentPage(1); }}
+                        displayEmpty
+                        sx={{ 
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          '& .MuiSelect-select': {
+                            color: selectedClassName ? theme.palette.primary.main : theme.palette.text.secondary
+                          }
+                        }}
+                      >
+                        <MenuItem value="">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.7 }}>
+                            <SchoolIcon fontSize="small" />
+                            All Classes
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="9th">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SchoolIcon fontSize="small" color="primary" />
+                            9th Standard
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="10th">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SchoolIcon fontSize="small" color="primary" />
+                            10th Standard
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="11th">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SchoolIcon fontSize="small" color="primary" />
+                            11th Standard
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="12th">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SchoolIcon fontSize="small" color="primary" />
+                            12th Standard
+                          </Box>
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      fontWeight: 600, 
+                      color: theme.palette.text.secondary 
+                    }}>
+                      Course
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={selectedCourse}
+                        onChange={(e) => { setSelectedCourse(e.target.value); setCurrentPage(1); }}
+                        displayEmpty
+                        sx={{ 
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          '& .MuiSelect-select': {
+                            color: selectedCourse ? theme.palette.primary.main : theme.palette.text.secondary
+                          }
+                        }}
+                      >
+                        <MenuItem value="">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.7 }}>
+                            <BusinessIcon fontSize="small" />
+                            All Courses
+                          </Box>
+                        </MenuItem>
+                        {courses.map((course) => (
+                          <MenuItem key={course._id || course.id} value={course._id || course.id}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <BusinessIcon fontSize="small" color="primary" />
+                              <Typography variant="body2" sx={{ 
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '200px'
+                              }}>
+                                {course.name}
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      fontWeight: 600, 
+                      color: theme.palette.text.secondary 
+                    }}>
+                      Batch
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={selectedBatch}
+                        onChange={(e) => { setSelectedBatch(e.target.value); setCurrentPage(1); }}
+                        displayEmpty
+                        sx={{ 
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          '& .MuiSelect-select': {
+                            color: selectedBatch ? theme.palette.primary.main : theme.palette.text.secondary
+                          }
+                        }}
+                      >
+                        <MenuItem value="">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.7 }}>
+                            <PersonIcon fontSize="small" />
+                            All Batches
+                          </Box>
+                        </MenuItem>
+                        {batches.map((batch) => (
+                          <MenuItem key={batch._id || batch.id} value={batch._id || batch.id}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <PersonIcon fontSize="small" color="primary" />
+                              <Typography variant="body2" sx={{ 
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '200px'
+                              }}>
+                                {batch.batchName || batch.name}
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      mb: 1, 
+                      fontWeight: 600, 
+                      color: theme.palette.text.secondary 
+                    }}>
+                      Quick Actions
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          setSearchTerm('');
+                          setSelectedCourse('');
+                          setSelectedBatch('');
+                          setSelectedClassName('');
+                          setCurrentPage(1);
+                        }}
+                        sx={{ 
+                          borderRadius: 2,
+                          flex: 1,
+                          borderColor: theme.palette.grey[300],
+                          color: theme.palette.text.secondary,
+                          '&:hover': {
+                            borderColor: theme.palette.error.main,
+                            color: theme.palette.error.main,
+                            backgroundColor: 'rgba(244, 67, 54, 0.04)'
+                          }
+                        }}
+                      >
+                        Clear All
+                      </Button>
                 <IconButton
-                  onClick={() => setViewMode('table')}
-                  color={viewMode === 'table' ? 'primary' : 'default'}
-                >
-                  <ViewListIcon />
+                        onClick={() => setShowFilters(false)}
+                        size="small"
+                        sx={{
+                          border: `1px solid ${theme.palette.grey[300]}`,
+                          borderRadius: 1,
+                          '&:hover': {
+                            backgroundColor: theme.palette.grey[100]
+                          }
+                        }}
+                      >
+                        <FilterListIcon fontSize="small" />
                 </IconButton>
-                <IconButton
-                  onClick={() => setViewMode('grid')}
-                  color={viewMode === 'grid' ? 'primary' : 'default'}
-                >
-                  <ViewModuleIcon />
-                </IconButton>
+                    </Box>
               </Box>
             </Grid>
           </Grid>
+
+              {/* Active Filters Display */}
+              {(selectedClassName || selectedCourse || selectedBatch) && (
+                <Box sx={{ mt: 3, pt: 2, borderTop: `1px solid ${theme.palette.grey[200]}` }}>
+                  <Typography variant="subtitle2" sx={{ 
+                    mb: 1, 
+                    fontWeight: 600, 
+                    color: theme.palette.text.secondary 
+                  }}>
+                    Active Filters:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {selectedClassName && (
+                      <Chip
+                        label={`Class: ${selectedClassName}`}
+                        size="small"
+                        onDelete={() => { setSelectedClassName(''); setCurrentPage(1); }}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ borderRadius: 2 }}
+                      />
+                    )}
+                    {selectedCourse && (
+                      <Chip
+                        label={`Course: ${courses.find(c => (c._id || c.id) === selectedCourse)?.name || selectedCourse}`}
+                        size="small"
+                        onDelete={() => { setSelectedCourse(''); setCurrentPage(1); }}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ borderRadius: 2 }}
+                      />
+                    )}
+                    {selectedBatch && (
+                      <Chip
+                        label={`Batch: ${batches.find(b => (b._id || b.id) === selectedBatch)?.batchName || batches.find(b => (b._id || b.id) === selectedBatch)?.name || selectedBatch}`}
+                        size="small"
+                        onDelete={() => { setSelectedBatch(''); setCurrentPage(1); }}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ borderRadius: 2 }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Collapse>
         </CardContent>
       </Card>
 
@@ -332,99 +695,14 @@ const StudentsPage = () => {
         </Card>
       ) : (
         <>
-          {/* View Toggle and Results Info */}
+                    {/* Results Info */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="body2" color="text.secondary">
               Showing {filteredStudents.length} of {totalStudents} students
             </Typography>
           </Box>
 
-          {/* Content View */}
-          {viewMode === 'grid' ? (
-            <Grid container spacing={3}>
-              {filteredStudents.map((student) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={student._id}>
-                  <Card sx={{ height: '100%', cursor: 'pointer' }}>
-                    <CardContent sx={{ 
-                      p: 2, 
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                      color: 'white',
-                      textAlign: 'center',
-                      position: 'relative'
-                    }}>
-                      <Avatar sx={{ 
-                        width: 64, 
-                        height: 64, 
-                        mx: 'auto', 
-                        mb: 2,
-                        bgcolor: 'rgba(255,255,255,0.2)'
-                      }}>
-                        {student.studentName?.charAt(0) || 'S'}
-                      </Avatar>
-                      <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
-                        {student.studentName || 'N/A'}
-                      </Typography>
-                      <Chip
-                        label={student.inchargeCode || 'N/A'}
-                        size="small"
-                        sx={{
-                          backgroundColor: 'rgba(255,255,255,0.2)',
-                          color: 'white',
-                          fontWeight: 600,
-                          mb: 1
-                        }}
-                      />
-                    </CardContent>
-                    
-                    <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <SchoolIcon sx={{ fontSize: 16, color: theme.palette.text.secondary, mr: 1 }} />
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          {student.courseDetails?.courseId?.name || 'N/A'}
-                        </Typography>
-                      </Box>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <BusinessIcon sx={{ fontSize: 16, color: theme.palette.text.secondary, mr: 1 }} />
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          {student.inchargeName || student.incharge_code || 'N/A'}
-                        </Typography>
-                      </Box>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <PhoneIcon sx={{ fontSize: 16, color: theme.palette.text.secondary, mr: 1 }} />
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
-                          {student.mobileNumber || 'N/A'}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                    
-                    {canViewActions && (
-                      <CardContent sx={{ p: 2, pt: 0 }}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            startIcon={<EditIcon />}
-                            sx={{ mr: 1 }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => handleDelete(student._id)}
-                          >
-                            Delete
-                          </Button>
-                        </Box>
-                      </CardContent>
-                    )}
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
+          {/* Table View */}
             <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
               <Box sx={{ overflowX: 'auto' }}>
                 <table style={{ 
@@ -456,18 +734,12 @@ const StudentsPage = () => {
                       <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}`, width: '120px' }}>
                         Center
                       </th>
-                      <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}`, width: '120px' }}>
-                        Icard
-                      </th>
-                   
                       <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}`, width: '80px' }}>
                         Status
                       </th>
-                      {canViewActions && (
                         <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}`, width: '60px' }}>
                           Action
                         </th>
-                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -478,7 +750,7 @@ const StudentsPage = () => {
                       }}>
                         <td style={{ padding: '8px', textAlign: 'center' }}>
                           <Avatar 
-                            src={`https://images.unsplash.com/photo-${1500000000000 + Math.random() * 1000}?w=64&h=64&fit=crop&crop=face`}
+                            src={student.image || `https://images.unsplash.com/photo-${1500000000000 + Math.random() * 1000}?w=64&h=64&fit=crop&crop=face`}
                             sx={{ 
                               width: 32, 
                               height: 32,
@@ -528,60 +800,17 @@ const StudentsPage = () => {
                           </Typography>
                         </td>
                         <td style={{ padding: '8px', textAlign: 'center' }}>
-                          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              sx={{
-                                backgroundColor: '#f59e0b',
-                                color: 'white',
-                                borderRadius: 1,
-                                px: 1,
-                                py: 0.25,
-                                fontWeight: 500,
-                                textTransform: 'none',
-                                fontSize: '0.65rem',
-                                minHeight: '20px',
-                                '&:hover': {
-                                  backgroundColor: '#d97706',
-                                },
-                              }}
-                            >
-                              Issue
-                            </Button>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              sx={{
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                borderRadius: 1,
-                                minWidth: 'auto',
-                                px: 0.5,
-                                py: 0.25,
-                                minHeight: '20px',
-                                '&:hover': {
-                                  backgroundColor: '#2563eb',
-                                },
-                              }}
-                            >
-                              <DescriptionIcon sx={{ fontSize: 12 }} />
-                            </Button>
-                          </Box>
-                        </td>
-                       
-                        <td style={{ padding: '8px', textAlign: 'center' }}>
                           <Chip
-                            label="Active"
+                            label={student.isActive ? "Active" : "Inactive"}
                             size="small"
-                            color="success"
+                            color={student.isActive ? "success" : "error"}
                             sx={{ fontWeight: 600, fontSize: '0.7rem', height: '20px' }}
                           />
                         </td>
-                        {canViewActions && (
                           <td style={{ padding: '8px', textAlign: 'center' }}>
                             <IconButton
                               size="small"
+                            onClick={(e) => handleActionClick(e, student)}
                               sx={{
                                 color: theme.palette.primary.main,
                                 '&:hover': {
@@ -592,14 +821,12 @@ const StudentsPage = () => {
                               <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </td>
-                        )}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </Box>
             </Card>
-          )}
         </>
       )}
 
@@ -628,6 +855,92 @@ const StudentsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Action Popover */}
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleActionClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <List sx={{ minWidth: 150, py: 1 }}>
+          <ListItemButton onClick={handleView}>
+            <ListItemIcon>
+              <ViewIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="View" />
+          </ListItemButton>
+          
+          {userRole === 'admin' && (
+            <>
+              <ListItemButton onClick={handleEdit}>
+                <ListItemIcon>
+                  <EditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Edit" />
+              </ListItemButton>
+              
+              <ListItemButton onClick={handleActivate}>
+                <ListItemIcon>
+                  <ActivateIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={selectedStudent?.isActive ? "Deactivate" : "Activate"} />
+              </ListItemButton>
+              
+              <ListItemButton onClick={handleModify}>
+                <ListItemIcon>
+                  <EditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Modify" />
+              </ListItemButton>
+              
+              <ListItemButton
+                onClick={() => {
+                  handleDelete(selectedStudent._id);
+                  handleActionClose();
+                }}
+                sx={{ color: 'error.main' }}
+              >
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" color="error" />
+                </ListItemIcon>
+                <ListItemText primary="Delete" />
+              </ListItemButton>
+            </>
+          )}
+        </List>
+      </Popover>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        TransitionComponent={Slide}
+        sx={{
+          zIndex: 9999,
+          '& .MuiSnackbarContent-root': {
+            borderRadius: 3,
+            fontWeight: 500,
+          },
+        }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

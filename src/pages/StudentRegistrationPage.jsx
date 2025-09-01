@@ -1860,7 +1860,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             },
                           }}
                         >
-                          <MenuItem value="Full Payment">Full Payment</MenuItem>
+                          <MenuItem value="Full-payment">Full-payment</MenuItem>
                           <MenuItem value="EMI">EMI</MenuItem>
                         </Select>
                       </FormControl>
@@ -1980,7 +1980,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                       />
                     </Box>
                     {/* Conditional EMI/Installment Fields */}
-                    {formData.paymentType !== 'Full Payment' && (
+                    {formData.paymentType !== 'Full-payment' && (
                       <>
                         <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                           <TextField

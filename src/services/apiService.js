@@ -310,6 +310,16 @@ export const studentService = {
       method: 'DELETE',
     });
   },
+
+  activateStudent: (studentId) => 
+    apiRequest(`/students/${studentId}/activate`, {
+      method: 'PUT',
+    }),
+  
+  deactivateStudent: (studentId) => 
+    apiRequest(`/students/${studentId}/deactivate`, {
+      method: 'PUT',
+    }),
 };
 
 // Course Services

@@ -59,3 +59,25 @@ export const useDeleteStudent = () => {
     },
   });
 };
+
+export const useActivateStudent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (studentId) => 
+      studentService.activateStudent(studentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['students']);
+    },
+  });
+};
+
+export const useDeactivateStudent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (studentId) => 
+      studentService.deactivateStudent(studentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['students']);
+    },
+  });
+};
