@@ -26,7 +26,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/center/get',
     GET_BY_ID: (id) => `/center/${id}`,
     UPDATE: (id) => `/centers/${id}`,
-    DELETE: (id) => `/center/${id}`,
+    DELETE: (id) => `/center-delete/${id}`,
     BLOCK: (id) => `/centers/${id}/block`,
   },
   

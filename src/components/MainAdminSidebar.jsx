@@ -74,8 +74,10 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
       path: '/fee',
       hasSubmenu: true,
       submenu: [
-        { label: 'Fee Pending Records', path: '/fee' },
-        { label: 'Fee Receipt', path: '/fee' }
+        { label: 'Collect Fee', path: '/fee/collect' },
+        { label: 'Pending Fee', path: '/fee/pending' },
+        { label: 'Fee History', path: '/fee/history' },
+        { label: 'Fee Discount', path: '/fee/discount' }
       ],
       color: '#16a34a'
     },

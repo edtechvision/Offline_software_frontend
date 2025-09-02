@@ -97,6 +97,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
 
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
@@ -168,9 +170,13 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
             referenceNumber: student.courseDetails?.referenceNumber || '',
             imageFile: null
           });
+        } else {
+          throw new Error(data.message || 'Failed to fetch student data');
         }
       } catch (error) {
         console.error('Error fetching student data:', error);
+        setErrorMessage(error.message || 'Failed to load student data. Please try again.');
+        setShowError(true);
       } finally {
         setIsLoading(false);
       }
@@ -219,7 +225,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         return false;
       }
     } catch (error) {
+      console.error('Incharge validation error:', error);
       setInchargeValidationResult({ success: false, message: 'Failed to validate incharge code. Please try again.' });
+      setErrorMessage('Failed to validate incharge code. Please check your connection and try again.');
+      setShowError(true);
       return false;
     } finally {
       setIsValidatingIncharge(false);
@@ -494,7 +503,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
       }
     } catch (error) {
       console.error('Student update error:', error);
-      // You can add error handling here (show error message to user)
+      setErrorMessage(error.message || 'Failed to update student. Please try again.');
+      setShowError(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -1584,6 +1594,22 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           sx={{ width: '100%' }}
         >
           Student updated successfully! Redirecting to dashboard...
+        </Alert>
+      </Snackbar>
+
+      {/* Error Notification */}
+      <Snackbar
+        open={showError}
+        autoHideDuration={5000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setShowError(false)} 
+          severity="error" 
+          sx={{ width: '100%' }}
+        >
+          {errorMessage}
         </Alert>
       </Snackbar>
     </Box>

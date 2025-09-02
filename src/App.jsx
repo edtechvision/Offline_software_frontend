@@ -16,6 +16,11 @@ import CoursePage from './pages/CoursePage';
 import BatchPage from './pages/BatchPage';
 import CenterPage from './pages/CenterPage';
 import FeePage from './pages/FeePage';
+import CollectFeePage from './pages/CollectFeePage';
+import FeeCollectionComponent from './pages/FeeCollectionComponent';
+import PendingFeePage from './pages/PendingFeePage';
+import FeeHistoryPage from './pages/FeeHistoryPage';
+import FeeDiscountPage from './pages/FeeDiscountPage';
 import ExpensesPage from './pages/ExpensesPage';
 import EnquiryPage from './pages/EnquiryPage';
 import StockManagementPage from './pages/StockManagementPage';
@@ -235,6 +240,51 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles={["admin", "center"]}>
             <FeePage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/fee/collect"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <CollectFeePage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/fee/collect/:id"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <FeeCollectionComponent />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/fee/pending"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <PendingFeePage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/fee/history"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <FeeHistoryPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/fee/discount"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <FeeDiscountPage />
           </ProtectedLayout>
         }
       />

@@ -428,7 +428,7 @@ const AdmissionInchargePage = () => {
             sx={{
               background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
               color: 'white',
-              borderRadius: 2,
+              borderRadius: '4px',
               px: 3,
               py: 1.5,
               textTransform: 'none',
@@ -456,7 +456,7 @@ const AdmissionInchargePage = () => {
             <Select
               value={pageSize}
               onChange={handlePageSizeChange}
-              sx={{ borderRadius: 1 }}
+              sx={{ borderRadius: '4px' }}
             >
               <MenuItem value={10}>10</MenuItem>
               <MenuItem value={25}>25</MenuItem>
@@ -487,7 +487,7 @@ const AdmissionInchargePage = () => {
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: 1,
+                borderRadius: '4px',
                 minWidth: 200,
               },
             }}
@@ -496,8 +496,8 @@ const AdmissionInchargePage = () => {
       </Box>
 
       {/* Table */}
-      <Card sx={{ borderRadius: 2, boxShadow: 2, border: '1px solid #e5e7eb' }}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+      <Card sx={{ borderRadius: '4px', boxShadow: 2, border: '1px solid #e5e7eb' }}>
+        <TableContainer component={Paper} sx={{ borderRadius: '4px' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f8fafc' }}>
@@ -544,7 +544,7 @@ const AdmissionInchargePage = () => {
                         sx={{
                           background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                           color: 'white',
-                          borderRadius: 2,
+                          borderRadius: '4px',
                           px: 3,
                           py: 1.5,
                           textTransform: 'none',
@@ -602,7 +602,7 @@ const AdmissionInchargePage = () => {
                           backgroundColor: incharge.isBlocked ? '#fef2f2' : '#dcfce7',
                           color: incharge.isBlocked ? '#dc2626' : '#166534',
                           fontWeight: 500,
-                          borderRadius: 1,
+                          borderRadius: '4px',
                         }}
                       />
                     </TableCell>
@@ -1071,7 +1071,7 @@ const AdmissionInchargePage = () => {
               sx={{
                 background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                 color: 'white',
-                borderRadius: 2,
+                borderRadius: '4px',
                 px: 3,
                 py: 1.5,
                 textTransform: 'none',
@@ -1142,7 +1142,7 @@ const AdmissionInchargePage = () => {
                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                 : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
-              borderRadius: 2,
+              borderRadius: '4px',
               px: 3,
               py: 1.5,
               textTransform: 'none',
@@ -1210,7 +1210,7 @@ const AdmissionInchargePage = () => {
             sx={{
               background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
-              borderRadius: 2,
+              borderRadius: '4px',
               px: 3,
               py: 1.5,
               textTransform: 'none',
@@ -1234,7 +1234,7 @@ const AdmissionInchargePage = () => {
         TransitionComponent={Slide}
         sx={{
           '& .MuiSnackbarContent-root': {
-            borderRadius: 2,
+            borderRadius: '4px',
             fontWeight: 500,
           },
         }}

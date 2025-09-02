@@ -240,11 +240,11 @@ const StudentsPage = () => {
   // Route-based view/edit handled via navigate
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    <Box sx={{  backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       {/* Modern Header */}
       <Box sx={{ 
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: 3,
+        borderRadius: '4px',
         p: 4,
         mb: 4,
         color: 'white',
@@ -289,7 +289,7 @@ const StudentsPage = () => {
             sx={{
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: 'white',
-              borderRadius: 3,
+              borderRadius: '4px',
               px: 4,
               py: 1.5,
               fontSize: '1rem',
@@ -314,7 +314,7 @@ const StudentsPage = () => {
 
 
       {/* Search and Controls */}
-      <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ mb: 4, borderRadius: '4px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
         <CardContent sx={{ p: 3 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={6}>
@@ -330,7 +330,7 @@ const StudentsPage = () => {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ borderRadius: 2 }}
+                sx={{ borderRadius: '4px' }}
               />
             </Grid>
             
@@ -339,7 +339,7 @@ const StudentsPage = () => {
                 <Select
                   value={pageSize}
                   onChange={handlePageSizeChange}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 >
                   <MenuItem value={10}>10 entries</MenuItem>
                   <MenuItem value={25}>25 entries</MenuItem>
@@ -359,7 +359,7 @@ const StudentsPage = () => {
                   setSelectedClassName('');
                   setCurrentPage(1);
                 }}
-                sx={{ borderRadius: 2, width: '100%' }}
+                sx={{ borderRadius: '4px', width: '100%' }}
               >
                 Clear
               </Button>
@@ -380,7 +380,7 @@ const StudentsPage = () => {
               mt: 3, 
               p: 3, 
               backgroundColor: theme.palette.grey[50], 
-              borderRadius: 2,
+              borderRadius: '4px',
               border: `1px solid ${theme.palette.grey[200]}`
             }}>
               <Typography variant="h6" sx={{ 
@@ -411,7 +411,7 @@ const StudentsPage = () => {
                         onChange={(e) => { setSelectedClassName(e.target.value); setCurrentPage(1); }}
                         displayEmpty
                         sx={{ 
-                          borderRadius: 2,
+                          borderRadius: '4px',
                           backgroundColor: 'white',
                           '& .MuiSelect-select': {
                             color: selectedClassName ? theme.palette.primary.main : theme.palette.text.secondary
@@ -468,7 +468,7 @@ const StudentsPage = () => {
                         onChange={(e) => { setSelectedCourse(e.target.value); setCurrentPage(1); }}
                         displayEmpty
                         sx={{ 
-                          borderRadius: 2,
+                          borderRadius: '4px',
                           backgroundColor: 'white',
                           '& .MuiSelect-select': {
                             color: selectedCourse ? theme.palette.primary.main : theme.palette.text.secondary
@@ -516,7 +516,7 @@ const StudentsPage = () => {
                         onChange={(e) => { setSelectedBatch(e.target.value); setCurrentPage(1); }}
                         displayEmpty
                         sx={{ 
-                          borderRadius: 2,
+                          borderRadius: '4px',
                           backgroundColor: 'white',
                           '& .MuiSelect-select': {
                             color: selectedBatch ? theme.palette.primary.main : theme.palette.text.secondary
@@ -570,7 +570,7 @@ const StudentsPage = () => {
                           setCurrentPage(1);
                         }}
                         sx={{ 
-                          borderRadius: 2,
+                          borderRadius: '4px',
                           flex: 1,
                           borderColor: theme.palette.grey[300],
                           color: theme.palette.text.secondary,
@@ -588,7 +588,7 @@ const StudentsPage = () => {
                         size="small"
                         sx={{
                           border: `1px solid ${theme.palette.grey[300]}`,
-                          borderRadius: 1,
+                          borderRadius: '4px',
                           '&:hover': {
                             backgroundColor: theme.palette.grey[100]
                           }
@@ -619,7 +619,7 @@ const StudentsPage = () => {
                         onDelete={() => { setSelectedClassName(''); setCurrentPage(1); }}
                         color="primary"
                         variant="outlined"
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: '4px' }}
                       />
                     )}
                     {selectedCourse && (
@@ -629,7 +629,7 @@ const StudentsPage = () => {
                         onDelete={() => { setSelectedCourse(''); setCurrentPage(1); }}
                         color="primary"
                         variant="outlined"
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: '4px' }}
                       />
                     )}
                     {selectedBatch && (
@@ -639,7 +639,7 @@ const StudentsPage = () => {
                         onDelete={() => { setSelectedBatch(''); setCurrentPage(1); }}
                         color="primary"
                         variant="outlined"
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: '4px' }}
                       />
                     )}
                   </Box>
@@ -654,14 +654,14 @@ const StudentsPage = () => {
 
       {/* Content */}
       {isLoading ? (
-        <Card sx={{ borderRadius: 3, p: 4, textAlign: 'center' }}>
+        <Card sx={{ borderRadius: '4px', p: 4, textAlign: 'center' }}>
           <CircularProgress size={60} sx={{ mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
             Loading students...
           </Typography>
         </Card>
       ) : error ? (
-        <Card sx={{ borderRadius: 3, p: 4, textAlign: 'center' }}>
+        <Card sx={{ borderRadius: '4px', p: 4, textAlign: 'center' }}>
           <Alert severity="error" sx={{ mb: 2 }}>
             <Typography variant="h6" sx={{ mb: 1 }}>
               Error loading students
@@ -673,7 +673,7 @@ const StudentsPage = () => {
           </Button>
         </Card>
       ) : filteredStudents.length === 0 ? (
-        <Card sx={{ borderRadius: 3, p: 8, textAlign: 'center' }}>
+        <Card sx={{ borderRadius: '4px', p: 8, textAlign: 'center' }}>
           <PersonIcon sx={{ fontSize: 80, color: theme.palette.text.secondary, mb: 3 }} />
           <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
             No Students Found
@@ -687,7 +687,7 @@ const StudentsPage = () => {
               startIcon={<AddIcon />}
               onClick={() => setShowRegistration(true)}
               size="large"
-              sx={{ borderRadius: 2 }}
+                                      sx={{ borderRadius: '4px' }}
             >
               Add First Student
             </Button>
@@ -703,7 +703,7 @@ const StudentsPage = () => {
           </Box>
 
           {/* Table View */}
-            <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <Card sx={{ borderRadius: '4px', overflow: 'hidden' }}>
               <Box sx={{ overflowX: 'auto' }}>
                 <table style={{ 
                   width: '100%', 
@@ -832,7 +832,7 @@ const StudentsPage = () => {
 
       {/* Pagination */}
       {totalStudents > 0 && (
-        <Card sx={{ mt: 4, borderRadius: 3 }}>
+        <Card sx={{ mt: 4, borderRadius: '4px' }}>
           <CardContent sx={{ p: 3 }}>
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid item>
@@ -928,7 +928,7 @@ const StudentsPage = () => {
         sx={{
           zIndex: 9999,
           '& .MuiSnackbarContent-root': {
-            borderRadius: 3,
+            borderRadius: '4px',
             fontWeight: 500,
           },
         }}

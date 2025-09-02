@@ -427,7 +427,7 @@ const CenterPage = () => {
                 variant="outlined"
                 startIcon={<FilterIcon />}
                 onClick={() => setShowFilters(!showFilters)}
-                sx={{ borderRadius: 2 }}
+                sx={{ borderRadius: '4px' }}
               >
                 Filters
               </Button>
@@ -435,7 +435,7 @@ const CenterPage = () => {
                 variant="outlined"
                 startIcon={<RefreshIcon />}
                 onClick={() => refetch()}
-                sx={{ borderRadius: 2 }}
+                sx={{ borderRadius: '4px' }}
               >
                 Refresh
               </Button>
@@ -444,7 +444,7 @@ const CenterPage = () => {
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenDialog()}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: '4px',
                   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
                 }}
               >
@@ -500,7 +500,7 @@ const CenterPage = () => {
             <Card sx={{
               background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               color: 'white',
-              borderRadius: 3
+              borderRadius: '4px'
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -522,7 +522,7 @@ const CenterPage = () => {
             <Card sx={{
               background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
               color: 'white',
-              borderRadius: 3
+              borderRadius: '4px'
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -544,7 +544,7 @@ const CenterPage = () => {
             <Card sx={{
               background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
               color: 'white',
-              borderRadius: 3
+              borderRadius: '4px'
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -566,7 +566,7 @@ const CenterPage = () => {
             <Card sx={{
               background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
               color: 'white',
-              borderRadius: 3
+              borderRadius: '4px'
             }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -586,7 +586,7 @@ const CenterPage = () => {
         </Grid> */}
 
         {/* Search and Controls */}
-        <Card sx={{ mb: 4, borderRadius: 3, overflow: 'hidden' }}>
+        <Card sx={{ mb: 4, borderRadius: '4px', overflow: 'hidden' }}>
           <CardContent sx={{ p: 3 }}>
             <Grid container spacing={3} alignItems="center">
               <Grid item xs={12} md={6}>
@@ -602,7 +602,7 @@ const CenterPage = () => {
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -611,7 +611,7 @@ const CenterPage = () => {
                   <Select
                     value={pageSize}
                     onChange={handlePageSizeChange}
-                    sx={{ borderRadius: 2 }}
+                    sx={{ borderRadius: '4px' }}
                   >
                     <MenuItem value={10}>10 entries</MenuItem>
                     <MenuItem value={25}>25 entries</MenuItem>
@@ -628,7 +628,7 @@ const CenterPage = () => {
                     setSearchTerm('');
                     setCurrentPage(1);
                   }}
-                  sx={{ borderRadius: 2, width: '100%' }}
+                  sx={{ borderRadius: '4px', width: '100%' }}
                 >
                   Clear
                 </Button>
@@ -656,7 +656,7 @@ const CenterPage = () => {
 
         {/* Filters Section */}
         <Collapse in={showFilters}>
-          <Card sx={{ mb: 4, borderRadius: 3 }}>
+          <Card sx={{ mb: 4, borderRadius: '4px' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                 Advanced Filters
@@ -667,7 +667,7 @@ const CenterPage = () => {
                     <Select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      sx={{ borderRadius: 2 }}
+                      sx={{ borderRadius: '4px' }}
                     >
                       <MenuItem value="all">All Status</MenuItem>
                       <MenuItem value="active">Active Only</MenuItem>
@@ -682,14 +682,14 @@ const CenterPage = () => {
 
         {/* Content */}
         {isLoading ? (
-          <Card sx={{ borderRadius: 3, p: 4, textAlign: 'center' }}>
+          <Card sx={{ borderRadius: '4px', p: 4, textAlign: 'center' }}>
             <CircularProgress size={60} sx={{ mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
               Loading centers...
             </Typography>
           </Card>
         ) : error ? (
-          <Card sx={{ borderRadius: 3, p: 4, textAlign: 'center' }}>
+          <Card sx={{ borderRadius: '4px', p: 4, textAlign: 'center' }}>
             <Alert severity="error" sx={{ mb: 2 }}>
               <Typography variant="h6" sx={{ mb: 1 }}>
                 Error loading centers
@@ -701,7 +701,7 @@ const CenterPage = () => {
             </Button>
           </Card>
         ) : filteredCenters.length === 0 ? (
-          <Card sx={{ borderRadius: 3, p: 8, textAlign: 'center' }}>
+          <Card sx={{ borderRadius: '4px', p: 8, textAlign: 'center' }}>
             <BusinessIcon sx={{ fontSize: 80, color: theme.palette.text.secondary, mb: 3 }} />
             <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
               No Centers Found
@@ -715,7 +715,7 @@ const CenterPage = () => {
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenDialog()}
                 size="large"
-                sx={{ borderRadius: 2 }}
+                sx={{ borderRadius: '4px' }}
               >
                 Add First Center
               </Button>
@@ -839,7 +839,7 @@ const CenterPage = () => {
                 ))}
               </Grid>
             ) : (
-              <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
+              <Card sx={{ borderRadius: '4px', overflow: 'hidden' }}>
                 <Box sx={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
@@ -977,7 +977,7 @@ const CenterPage = () => {
 
         {/* Pagination */}
         {totalCenters > 0 && (
-          <Card sx={{ mt: 4, borderRadius: 3 }}>
+          <Card sx={{ mt: 4, borderRadius: '4px' }}>
             <CardContent sx={{ p: 3 }}>
               <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
@@ -1009,7 +1009,7 @@ const CenterPage = () => {
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 3 }
+          sx: { borderRadius: '4px' }
         }}
       >
         <DialogTitle sx={{ pb: 2, borderBottom: '1px solid #e5e7eb' }}>
@@ -1128,7 +1128,7 @@ const CenterPage = () => {
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -1147,7 +1147,7 @@ const CenterPage = () => {
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -1206,7 +1206,7 @@ const CenterPage = () => {
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                   required
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -1217,7 +1217,7 @@ const CenterPage = () => {
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                   required
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -1237,7 +1237,7 @@ const CenterPage = () => {
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: '4px' }}
                 />
               </Grid>
 
@@ -1292,7 +1292,7 @@ const CenterPage = () => {
             <Button
               onClick={handleCloseDialog}
               variant="outlined"
-              sx={{ borderRadius: 2 }}
+                                sx={{ borderRadius: '4px' }}
             >
               Cancel
             </Button>
@@ -1302,7 +1302,7 @@ const CenterPage = () => {
               disabled={createCenterMutation.isPending || updateCenterMutation.isPending}
               startIcon={createCenterMutation.isPending || updateCenterMutation.isPending ? <CircularProgress size={16} /> : <SaveIcon />}
               sx={{
-                borderRadius: 2,
+                borderRadius: '4px',
                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
               }}
             >
@@ -1323,7 +1323,7 @@ const CenterPage = () => {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 3 }
+          sx: { borderRadius: '4px' }
         }}
       >
         <DialogTitle sx={{ pb: 1 }}>
@@ -1364,7 +1364,7 @@ const CenterPage = () => {
             sx={{
               color: '#6b7280',
               borderColor: '#d1d5db',
-              borderRadius: 2,
+              borderRadius: '4px',
               '&:hover': {
                 borderColor: '#9ca3af',
                 backgroundColor: '#f9fafb',
@@ -1380,7 +1380,7 @@ const CenterPage = () => {
             sx={{
               background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
-              borderRadius: 2,
+              borderRadius: '4px',
               px: 3,
               py: 1.5,
               textTransform: 'none',
@@ -1402,7 +1402,7 @@ const CenterPage = () => {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 3 }
+          sx: { borderRadius: '4px' }
         }}
       >
         <DialogTitle sx={{ pb: 1 }}>
@@ -1449,7 +1449,7 @@ const CenterPage = () => {
             sx={{
               color: '#6b7280',
               borderColor: '#d1d5db',
-              borderRadius: 2,
+              borderRadius: '4px',
               '&:hover': {
                 borderColor: '#9ca3af',
                 backgroundColor: '#f9fafb',
@@ -1467,7 +1467,7 @@ const CenterPage = () => {
                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                 : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
-              borderRadius: 2,
+              borderRadius: '4px',
               px: 3,
               py: 1.5,
               textTransform: 'none',

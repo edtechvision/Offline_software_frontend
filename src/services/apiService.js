@@ -454,3 +454,70 @@ export const batchService = {
     });
   },
 };
+
+// Collect Fees Services
+export const collectFeesService = {
+  getStudentsForFeeCollection: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/students-collect-fees?${queryString}` : '/students-collect-fees';
+    return apiRequest(endpoint);
+  },
+};
+
+// Student Fees Services
+export const studentFeesService = {
+  getFeesByStudent: async (studentId) => {
+    return apiRequest(`/fees-by-student/${studentId}`);
+  },
+};
+
+// Pending Fees Services
+export const pendingFeesService = {
+  getPendingFees: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/fees/pending?${queryString}` : '/fees/pending';
+    return apiRequest(endpoint);
+  },
+};
+
+// Fee History Services
+export const feeHistoryService = {
+  getAllPayments: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/fees/all-payments?${queryString}` : '/fees/all-payments';
+    return apiRequest(endpoint);
+  },
+};
+
+// Fee Discount Services
+export const feeDiscountService = {
+  createDiscount: async (discountData) => {
+    return apiRequest('/fees-discounts', {
+      method: 'POST',
+      body: JSON.stringify(discountData),
+    });
+  },
+
+  getDiscounts: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/fees-discounts?${queryString}` : '/fees-discounts';
+    return apiRequest(endpoint);
+  },
+
+  getDiscountById: async (id) => {
+    return apiRequest(`/fees-discounts/${id}`);
+  },
+
+  updateDiscount: async (id, discountData) => {
+    return apiRequest(`/fees-discounts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(discountData),
+    });
+  },
+
+  deleteDiscount: async (id) => {
+    return apiRequest(`/fees-discounts/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};

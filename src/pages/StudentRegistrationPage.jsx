@@ -37,8 +37,11 @@ import {
   LocationOn as LocationIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const StudentRegistrationPage = ({ onBack }) => {
+  const { currentUser } = useAuthContext();
+  const [center, setCenter] = useState('');
   const [formData, setFormData] = useState({
     // Basic Information
     inchargeCode: '',
@@ -398,6 +401,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       studentData.append('category', formData.category);
       studentData.append('nationality', formData.nationality);
       studentData.append('gender', formData.gender);
+      studentData.append('centerCode', currentUser.centerCode);
       
       // Contact Information
       studentData.append('email', formData.email);
