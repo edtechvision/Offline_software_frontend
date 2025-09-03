@@ -308,6 +308,12 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (formData.paymentType === 'EMI') {
       if (!formData.downPayment || parseFloat(formData.downPayment) <= 0) {
         newErrors.downPayment = 'Down payment is required for EMI';
+      } else {
+        const courseFee = parseFloat(formData.courseFee) || 0;
+        const downPayment = parseFloat(formData.downPayment) || 0;
+        if (downPayment > courseFee) {
+          newErrors.downPayment = `Down payment (₹${downPayment}) cannot exceed course fee (₹${courseFee})`;
+        }
       }
       if (!formData.nextPaymentDueDate) {
         newErrors.nextPaymentDueDate = 'Next payment due date is required for EMI';
@@ -336,15 +342,30 @@ const StudentRegistrationPage = ({ onBack }) => {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
     
+    // Real-time validation for down payment
+    if (field === 'downPayment') {
+      const courseFee = parseFloat(formData.courseFee) || 0;
+      const downPayment = parseFloat(value) || 0;
+      
+      if (downPayment > courseFee) {
+        setErrors(prev => ({ 
+          ...prev, 
+          downPayment: `Down payment (₹${downPayment}) cannot exceed course fee (₹${courseFee})` 
+        }));
+      } else if (errors.downPayment) {
+        setErrors(prev => ({ ...prev, downPayment: '' }));
+      }
+    }
+    
     // Auto-populate course fee when course is selected
     if (field === 'courseId' && value) {
       const selectedCourse = courses.find(course => course._id === value);
       if (selectedCourse) {
-        setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
-        
-        // Auto-populate down payment with EMI fee if EMI is selected
-        if (formData.paymentType === 'EMI' && selectedCourse.emiFee) {
-          setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
+        // Set course fee based on payment type
+        if (formData.paymentType === 'EMI' && selectedCourse.emiFee > 0) {
+          setFormData(prev => ({ ...prev, courseFee: selectedCourse.emiFee.toString() }));
+        } else {
+          setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
         }
       }
     }
@@ -354,21 +375,25 @@ const StudentRegistrationPage = ({ onBack }) => {
       const selectedAdditionalCourse = additionalCourses.find(course => course._id === value);
       if (selectedAdditionalCourse) {
         const currentFee = parseFloat(formData.courseFee) || 0;
-        const additionalFee = selectedAdditionalCourse.fee || 0;
+        // Add additional fee based on payment type
+        const additionalFee = formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee > 0 
+          ? selectedAdditionalCourse.emiFee 
+          : selectedAdditionalCourse.fee || 0;
         setFormData(prev => ({ ...prev, courseFee: (currentFee + additionalFee).toString() }));
-        
-        // Auto-populate down payment with EMI fee if EMI is selected
-        if (formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee) {
-          setFormData(prev => ({ ...prev, downPayment: selectedAdditionalCourse.emiFee.toString() }));
-        }
       }
     }
     
-    // Auto-populate down payment with EMI fee when payment type changes to EMI
-    if (field === 'paymentType' && value === 'EMI') {
+    // Auto-populate course fee and down payment when payment type changes
+    if (field === 'paymentType') {
       const selectedCourse = courses.find(course => course._id === formData.courseId);
-      if (selectedCourse && selectedCourse.emiFee) {
-        setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
+      if (selectedCourse) {
+        if (value === 'EMI' && selectedCourse.emiFee > 0) {
+          // Set EMI fee as course fee
+          setFormData(prev => ({ ...prev, courseFee: selectedCourse.emiFee.toString() }));
+        } else {
+          // Set regular fee as course fee
+          setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
+        }
       }
     }
   };
@@ -1993,17 +2018,20 @@ const StudentRegistrationPage = ({ onBack }) => {
                             value={formData.downPayment}
                             onChange={(e) => handleInputChange('downPayment', e.target.value)}
                             size="small"
+                            type="number"
+                            error={!!errors.downPayment}
+                            helperText={errors.downPayment || `Maximum: ₹${formData.courseFee || 0}`}
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: '4px',
                                 '& fieldset': {
-                                  borderColor: '#d1d5db',
+                                  borderColor: errors.downPayment ? '#d32f2f' : '#d1d5db',
                                 },
                                 '&:hover fieldset': {
-                                  borderColor: '#9ca3af',
+                                  borderColor: errors.downPayment ? '#d32f2f' : '#9ca3af',
                                 },
                                 '&.Mui-focused fieldset': {
-                                  borderColor: '#1976d2',
+                                  borderColor: errors.downPayment ? '#d32f2f' : '#1976d2',
                                 },
                               },
                             }}
