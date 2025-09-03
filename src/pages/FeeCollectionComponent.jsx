@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useStudentFees } from '../hooks';
+import { useStudentFees, useFeeDiscounts, useCollectPayment, useRevertPayment } from '../hooks';
 import {
   Box,
   Card,
@@ -33,7 +33,11 @@ import {
   Avatar,
   InputAdornment,
   Checkbox,
-  Tooltip
+  Tooltip,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormHelperText
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -65,25 +69,42 @@ const FeeCollectionComponent = () => {
     amount: '',
     paymentMode: 'Cash',
     transactionId: '',
-    remarks: ''
+    remarks: '',
+    discountCode: '',
+    discountAmount: 0,
+    fine: 0,
+    paymentDate: new Date().toISOString().split('T')[0]
   });
+  const [calculatedDiscount, setCalculatedDiscount] = useState(0);
+  const [discountDetails, setDiscountDetails] = useState(null);
+  const [discountFile, setDiscountFile] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [revertDialog, setRevertDialog] = useState({ open: false, feeId: null, receiptNo: null });
 
   // Fetch student data
   const { data: studentData, isLoading, error: studentError } = useStudent(id);
-  
+
   // Fetch student fees data
   const { data: feesData, isLoading: feesLoading, error: feesError } = useStudentFees(id);
+  
+  // Fetch discount codes
+  const { data: discountsData } = useFeeDiscounts();
+  
+  // Fee collection mutation
+  const collectPaymentMutation = useCollectPayment();
+  
+  // Revert payment mutation
+  const revertPaymentMutation = useRevertPayment();
 
   useEffect(() => {
     if (studentData?.success && studentData?.data) {
       setStudent(studentData.data);
     }
-    
+
     if (studentError || feesError) {
       setError(studentError?.message || feesError?.message || 'Failed to load data');
     }
-    
+
     if (!isLoading && !feesLoading) {
       setLoading(false);
     }
@@ -101,7 +122,7 @@ const FeeCollectionComponent = () => {
       const studentInfo = feeRecord.studentId;
       const courseInfo = feeRecord.courseId;
       const batchInfo = feeRecord.batchId;
-      
+
       // Determine status based on payment
       let status = "Pending";
       if (feeRecord.paidAmount >= feeRecord.totalFee) {
@@ -144,8 +165,8 @@ const FeeCollectionComponent = () => {
   };
 
   const handleSelectFee = (feeId) => {
-    setSelectedFees(prev => 
-      prev.includes(feeId) 
+    setSelectedFees(prev =>
+      prev.includes(feeId)
         ? prev.filter(id => id !== feeId)
         : [...prev, feeId]
     );
@@ -171,14 +192,165 @@ const FeeCollectionComponent = () => {
     setOpenPaymentDialog(true);
   };
 
-  const handlePaymentSubmit = () => {
+  // Calculate discount based on code
+  const calculateDiscount = (discountCode, amount) => {
+    if (!discountCode || !discountsData?.success || !discountsData?.data) {
+      setCalculatedDiscount(0);
+      setDiscountDetails(null);
+      return 0;
+    }
+
+    const discount = discountsData.data.find(d => d.discountCode === discountCode);
+    if (!discount) {
+      setCalculatedDiscount(0);
+      setDiscountDetails(null);
+      return 0;
+    }
+
+    let discountAmount = 0;
+    if (discount.discountType === 'percentage') {
+      discountAmount = (amount * discount.percentage) / 100;
+    } else if (discount.discountType === 'fixed') {
+      discountAmount = discount.amount;
+    }
+
+    setCalculatedDiscount(discountAmount);
+    setDiscountDetails(discount);
+    return discountAmount;
+  };
+
+  // Handle discount code change
+  const handleDiscountCodeChange = (discountCode) => {
+    setPaymentData({ ...paymentData, discountCode });
+    if (paymentData.amount) {
+      const discountAmount = calculateDiscount(discountCode, parseFloat(paymentData.amount));
+      setPaymentData(prev => ({ ...prev, discountAmount }));
+    }
+  };
+
+  // Handle amount change
+  const handleAmountChange = (amount) => {
+    setPaymentData({ ...paymentData, amount });
+    if (paymentData.discountCode) {
+      const discountAmount = calculateDiscount(paymentData.discountCode, parseFloat(amount));
+      setPaymentData(prev => ({ ...prev, discountAmount }));
+    }
+  };
+
+  const handlePaymentSubmit = async () => {
+    if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a valid payment amount',
+        severity: 'error'
+      });
+      return;
+    }
+
+    if (selectedFees.length === 0) {
+      setSnackbar({
+        open: true,
+        message: 'Please select at least one fee to collect',
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      // For now, collect payment for the first selected fee
+      // In a real scenario, you might want to collect for all selected fees
+      const feeId = selectedFees[0];
+      const feeRecord = feeGroups.find(f => f.id === feeId);
+      
+      if (!feeRecord) {
+        setSnackbar({
+          open: true,
+          message: 'Selected fee not found',
+          severity: 'error'
+        });
+        return;
+      }
+
+      const paymentPayload = {
+        feeId: feeRecord.id,
+        amount: parseFloat(paymentData.amount),
+        paymentMode: paymentData.paymentMode,
+        transactionId: paymentData.transactionId,
+        remarks: paymentData.remarks,
+        paymentDate: paymentData.paymentDate,
+        discountCode: paymentData.discountCode,
+        discountAmount: paymentData.discountAmount,
+        fine: paymentData.fine,
+        discountFile: discountFile
+      };
+
+      await collectPaymentMutation.mutateAsync(paymentPayload);
+
     setSnackbar({
       open: true,
       message: `Payment of ₹${paymentData.amount} collected successfully`,
       severity: 'success'
     });
+      
     setOpenPaymentDialog(false);
     setSelectedFees([]);
+      setPaymentData({
+        amount: '',
+        paymentMode: 'Cash',
+        transactionId: '',
+        remarks: '',
+        discountCode: '',
+        discountAmount: 0,
+        fine: 0,
+        paymentDate: new Date().toISOString().split('T')[0]
+      });
+      setCalculatedDiscount(0);
+      setDiscountDetails(null);
+      setDiscountFile(null);
+      
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.message || 'Failed to collect payment',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleRevertPayment = (feeId, receiptNo) => {
+    if (!receiptNo) {
+      setSnackbar({
+        open: true,
+        message: 'No receipt number found for this payment',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setRevertDialog({ open: true, feeId, receiptNo });
+  };
+
+  const confirmRevertPayment = async () => {
+    try {
+      await revertPaymentMutation.mutateAsync({
+        feeId: revertDialog.feeId,
+        receiptNo: revertDialog.receiptNo
+      });
+
+      setSnackbar({
+        open: true,
+        message: `Payment ${revertDialog.receiptNo} reverted successfully`,
+        severity: 'success'
+      });
+      
+      setRevertDialog({ open: false, feeId: null, receiptNo: null });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.message || 'Failed to revert payment',
+        severity: 'error'
+      });
+    }
   };
 
   const getStatusColor = (status) => {
@@ -281,14 +453,14 @@ const FeeCollectionComponent = () => {
             >
               {student.studentName?.charAt(0)}
             </Avatar>
-            
+
             {/* Student Details - Two Column Layout */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 {/* Row 1 */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   py: 1.5,
                   borderBottom: '1px solid #f0f0f0'
@@ -296,8 +468,8 @@ const FeeCollectionComponent = () => {
                   <Box sx={{ display: 'flex', gap: 2, flex: 1 }}>
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
-                      Name:
-                    </Typography>
+                        Name:
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.studentName}
@@ -307,18 +479,18 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Class (Section):
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.className} ({student.courseDetails?.courseId?.name})
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 {/* Row 2 */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   py: 1.5,
                   borderBottom: '1px solid #f0f0f0'
@@ -327,7 +499,7 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Father Name:
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.fathersName}
@@ -337,18 +509,18 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Admission No:
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.registrationNo}
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 {/* Row 3 */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   py: 1.5,
                   borderBottom: '1px solid #f0f0f0'
@@ -357,7 +529,7 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Mobile Number:
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.mobileNumber}
@@ -367,18 +539,18 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Roll Number:
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.registrationNo}
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 {/* Row 4 */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   py: 1.5
                 }}>
@@ -386,7 +558,7 @@ const FeeCollectionComponent = () => {
                     <Box sx={{ minWidth: '120px' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#424242' }}>
                         Category:
-                    </Typography>
+                      </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.8rem', color: '#424242' }}>
                       {student.category || ''}
@@ -447,45 +619,45 @@ const FeeCollectionComponent = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {/* Header with Select All */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Checkbox
-                      checked={selectedFees.length === feeGroups.length}
-                      indeterminate={selectedFees.length > 0 && selectedFees.length < feeGroups.length}
-                      onChange={handleSelectAll}
-                      size="small"
-                    />
+          <Checkbox
+            checked={selectedFees.length === feeGroups.length}
+            indeterminate={selectedFees.length > 0 && selectedFees.length < feeGroups.length}
+            onChange={handleSelectAll}
+            size="small"
+          />
           <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
             Select All Fees
-                    </Typography>
-                  </Box>
+          </Typography>
+        </Box>
 
         {/* Fee Group Boxes */}
-              {feeGroups.map((feeGroup) => (
-          <Card key={feeGroup.id} sx={{ 
-            borderRadius: 1, 
+        {feeGroups.map((feeGroup) => (
+          <Card key={feeGroup.id} sx={{
+            borderRadius: 1,
             border: '1px solid #e0e0e0',
             backgroundColor: '#ffffff',
             overflow: 'hidden'
           }}>
             <CardContent sx={{ p: 1.5 }}>
               {/* Fee Group Header */}
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'space-between',
                 mb: 1,
                 pb: 1,
                 borderBottom: '1px solid #f0f0f0'
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                        <Checkbox
-                          checked={selectedFees.includes(feeGroup.id)}
-                          onChange={() => handleSelectFee(feeGroup.id)}
-                          size="small"
-                        />
+                  <Checkbox
+                    checked={selectedFees.includes(feeGroup.id)}
+                    onChange={() => handleSelectFee(feeGroup.id)}
+                    size="small"
+                  />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', mb: 0.5 }}>
-                          {feeGroup.name}
-                        </Typography>
+                      {feeGroup.name}
+                    </Typography>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                       <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
                         Code: {feeGroup.code}
@@ -504,29 +676,29 @@ const FeeCollectionComponent = () => {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', mr: 1 }}>
-                        ₹{feeGroup.amount.toFixed(2)}
-                      </Typography>
-                      <IconButton size="small" color="primary">
-                        <PrintIcon fontSize="small" />
-                      </IconButton>
+                    ₹{feeGroup.amount.toFixed(2)}
+                  </Typography>
+                  <IconButton size="small" color="primary">
+                    <PrintIcon fontSize="small" />
+                  </IconButton>
                 </Box>
               </Box>
 
               {/* Payment Details */}
               {feeGroup.payments.length > 0 && (
                 <Box sx={{ ml: 0 }}>
-                  <Typography variant="caption" sx={{ 
-                    fontSize: '0.7rem', 
-                    color: 'text.secondary', 
+                  <Typography variant="caption" sx={{
+                    fontSize: '0.7rem',
+                    color: 'text.secondary',
                     fontWeight: 600,
                     mb: 1,
                     display: 'block'
                   }}>
                     Payment History:
-                        </Typography>
+                  </Typography>
                   {feeGroup.payments.map((payment, index) => (
-                    <Card key={payment.id} sx={{ 
-                      mb: 1, 
+                    <Card key={payment.id} sx={{
+                      mb: 1,
                       backgroundColor: '#fafafa',
                       border: '1px solid #e8e8e8',
                       borderRadius: 0.5
@@ -535,37 +707,43 @@ const FeeCollectionComponent = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1 }}>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, minWidth: '80px' }}>
-                          {payment.paymentId}
-                        </Typography>
+                              {payment.paymentId}
+                            </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '60px' }}>
-                          {payment.mode}
-                        </Typography>
+                              {payment.mode}
+                            </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '80px' }}>
-                          {new Date(payment.date).toLocaleDateString()}
-                        </Typography>
+                              {new Date(payment.date).toLocaleDateString()}
+                            </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '60px' }}>
                               Discount: ₹{payment.discount.toFixed(2)}
-                        </Typography>
+                            </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '50px' }}>
                               Fine: ₹{payment.fine.toFixed(2)}
-                        </Typography>
-                            <Typography variant="caption" sx={{ 
-                              fontSize: '0.7rem', 
-                              fontWeight: 600, 
+                            </Typography>
+                            <Typography variant="caption" sx={{
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
                               color: 'success.main',
                               minWidth: '70px'
                             }}>
                               Paid: ₹{payment.amount.toFixed(2)}
-                        </Typography>
+                            </Typography>
                           </Box>
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          <IconButton size="small" color="primary">
-                            <RefreshIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton size="small" color="info">
-                            <PrintIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={() => handleRevertPayment(feeGroup.id, payment.paymentId)}
+                              disabled={revertPaymentMutation.isPending}
+                              title="Revert Payment"
+                            >
+                              <RefreshIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" color="info">
+                              <PrintIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>
@@ -574,9 +752,9 @@ const FeeCollectionComponent = () => {
               )}
 
               {/* Fee Group Summary */}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 mt: 1,
                 pt: 1,
@@ -591,16 +769,16 @@ const FeeCollectionComponent = () => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Typography variant="caption" sx={{ 
-                    fontSize: '0.7rem', 
-                    fontWeight: 600, 
+                  <Typography variant="caption" sx={{
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
                     color: 'success.main'
                   }}>
                     Paid: ₹{feeGroup.paid.toFixed(2)}
                   </Typography>
-                  <Typography variant="caption" sx={{ 
-                    fontSize: '0.7rem', 
-                    fontWeight: 600, 
+                  <Typography variant="caption" sx={{
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
                     color: 'error.main'
                   }}>
                     Balance: ₹{feeGroup.balance.toFixed(2)}
@@ -612,8 +790,8 @@ const FeeCollectionComponent = () => {
         ))}
 
         {/* Grand Total Box */}
-        <Card sx={{ 
-          borderRadius: 1, 
+        <Card sx={{
+          borderRadius: 1,
           border: '2px solid #1976d2',
           backgroundColor: '#e3f2fd',
           mt: 1
@@ -622,7 +800,7 @@ const FeeCollectionComponent = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
                 Grand Total
-                  </Typography>
+              </Typography>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
                   Amount: ₹{feeGroups.reduce((sum, fee) => sum + fee.amount, 0).toFixed(2)}
@@ -633,24 +811,24 @@ const FeeCollectionComponent = () => {
                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
                   Fine: ₹{feeGroups.reduce((sum, fee) => sum + fee.fine, 0).toFixed(2)}
                 </Typography>
-                <Typography variant="body2" sx={{ 
-                  fontWeight: 700, 
+                <Typography variant="body2" sx={{
+                  fontWeight: 700,
                   fontSize: '0.8rem',
                   color: 'success.main'
                 }}>
                   Paid: ₹{feeGroups.reduce((sum, fee) => sum + fee.paid, 0).toFixed(2)}
-                  </Typography>
-                <Typography variant="body2" sx={{ 
-                  fontWeight: 700, 
+                </Typography>
+                <Typography variant="body2" sx={{
+                  fontWeight: 700,
                   fontSize: '0.8rem',
                   color: 'error.main'
                 }}>
                   Balance: ₹{feeGroups.reduce((sum, fee) => sum + fee.balance, 0).toFixed(2)}
-                  </Typography>
+                </Typography>
               </Box>
             </Box>
           </CardContent>
-      </Card>
+        </Card>
       </Box>
 
       {/* Payment Dialog */}
@@ -662,75 +840,159 @@ const FeeCollectionComponent = () => {
         PaperProps={{ sx: { borderRadius: 1 } }}
       >
         <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #e5e7eb' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <MoneyIcon sx={{ color: 'primary.main', fontSize: '1.2rem' }} />
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Collect Fee Payment
+          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
+            {selectedFees.length > 0 && feeGroups.find(f => f.id === selectedFees[0]) 
+              ? `${feeGroups.find(f => f.id === selectedFees[0]).name} (${feeGroups.find(f => f.id === selectedFees[0]).amount})`
+              : 'Collect Fee Payment'
+            }
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {student.studentName} - {student.registrationNo}
-              </Typography>
-            </Box>
-          </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
+        <DialogContent sx={{ pt: 4, pb: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            {/* Date Field */}
               <TextField
                 fullWidth
-                label="Payment Amount"
+              label="Date"
+              type="date"
+              value={paymentData.paymentDate}
+              onChange={(e) => setPaymentData({ ...paymentData, paymentDate: e.target.value })}
+              size="small"
+              sx={{ borderRadius: 1 }}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            
+            {/* Amount Field */}
+            <TextField
+              fullWidth
+              label="Amount (₹)"
                 value={paymentData.amount}
-                onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                }}
+              onChange={(e) => handleAmountChange(e.target.value)}
                 size="small"
                 sx={{ borderRadius: 1 }}
+              type="number"
+              required
               />
-            </Grid>
-            <Grid item xs={12}>
+            
+            {/* Discount Group */}
               <FormControl fullWidth size="small">
-                <InputLabel>Payment Mode</InputLabel>
+              <InputLabel>Discount Group</InputLabel>
                 <Select
-                  value={paymentData.paymentMode}
-                  onChange={(e) => setPaymentData({ ...paymentData, paymentMode: e.target.value })}
-                  label="Payment Mode"
-                >
-                  <MenuItem value="Cash">Cash</MenuItem>
-                  <MenuItem value="UPI">UPI</MenuItem>
-                  <MenuItem value="Card">Card</MenuItem>
-                  <MenuItem value="Cheque">Cheque</MenuItem>
+                value={paymentData.discountCode}
+                onChange={(e) => handleDiscountCodeChange(e.target.value)}
+                label="Discount Group"
+              >
+                <MenuItem value="">Select</MenuItem>
+                {discountsData?.success && discountsData?.data?.map((discount) => (
+                  <MenuItem key={discount._id} value={discount.discountCode}>
+                    {discount.discountCode} - {discount.name}
+                  </MenuItem>
+                ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Transaction ID (if applicable)"
-                value={paymentData.transactionId}
-                onChange={(e) => setPaymentData({ ...paymentData, transactionId: e.target.value })}
-                size="small"
-                sx={{ borderRadius: 1 }}
+            
+                        {/* Discount Amount */}
+            <TextField
+              fullWidth
+              label="Discount (₹)"
+              value={paymentData.discountAmount}
+              onChange={(e) => setPaymentData({ ...paymentData, discountAmount: parseFloat(e.target.value) || 0 })}
+              size="small"
+              sx={{ borderRadius: 1 }}
+              type="number"
+              required
+            />
+            
+            {/* Discount File Upload */}
+            <FormControl fullWidth size="small">
+              <input
+                accept="image/*,.pdf,.doc,.docx"
+                style={{ display: 'none' }}
+                id="discount-file-upload"
+                type="file"
+                onChange={(e) => setDiscountFile(e.target.files[0] || null)}
               />
-            </Grid>
-            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <label htmlFor="discount-file-upload" style={{ flex: 1 }}>
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    size="small"
+                    fullWidth
+                    sx={{ 
+                      borderRadius: 1,
+                      textTransform: 'none',
+                      justifyContent: 'flex-start',
+                      color: discountFile ? 'success.main' : 'text.secondary'
+                    }}
+                  >
+                    {discountFile ? `📎 ${discountFile.name}` : '📎 Upload Discount Proof (Optional)'}
+                  </Button>
+                </label>
+                {discountFile && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() => setDiscountFile(null)}
+                    sx={{ minWidth: 'auto', px: 1 }}
+                  >
+                    ✕
+                  </Button>
+                )}
+              </Box>
+              <FormHelperText>
+                Upload proof for discount (Image, PDF, or Document)
+              </FormHelperText>
+            </FormControl>
+            
+            {/* Fine Amount */}
               <TextField
                 fullWidth
-                label="Remarks"
+              label="Fine (₹)"
+              value={paymentData.fine}
+              onChange={(e) => setPaymentData({ ...paymentData, fine: parseFloat(e.target.value) || 0 })}
+              size="small"
+              sx={{ borderRadius: 1 }}
+              type="number"
+              required
+            />
+            
+            {/* Payment Mode - Radio Buttons */}
+            <FormControl component="fieldset">
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                Payment Mode
+              </Typography>
+              <RadioGroup
+                value={paymentData.paymentMode}
+                onChange={(e) => setPaymentData({ ...paymentData, paymentMode: e.target.value })}
+                row
+              >
+                <FormControlLabel value="Cash" control={<Radio size="small" />} label="Cash" />
+                <FormControlLabel value="Cheque" control={<Radio size="small" />} label="Cheque" />
+                <FormControlLabel value="DD" control={<Radio size="small" />} label="DD" />
+                <FormControlLabel value="Bank Transfer" control={<Radio size="small" />} label="Bank Transfer" />
+                <FormControlLabel value="UPI" control={<Radio size="small" />} label="UPI" />
+                <FormControlLabel value="Card" control={<Radio size="small" />} label="Card" />
+              </RadioGroup>
+            </FormControl>
+            
+            {/* Note Field */}
+            <TextField
+              fullWidth
+              label="Note"
                 multiline
-                rows={2}
+              rows={3}
                 value={paymentData.remarks}
                 onChange={(e) => setPaymentData({ ...paymentData, remarks: e.target.value })}
                 size="small"
                 sx={{ borderRadius: 1 }}
               />
-            </Grid>
-          </Grid>
+          </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, pt: 1 }}>
+        <DialogActions sx={{ p: 2, pt: 1, justifyContent: 'space-between' }}>
           <Button
             onClick={() => setOpenPaymentDialog(false)}
             variant="outlined"
@@ -739,14 +1001,83 @@ const FeeCollectionComponent = () => {
           >
             Cancel
           </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             onClick={handlePaymentSubmit}
             variant="contained"
-            startIcon={<MoneyIcon />}
+              startIcon={collectPaymentMutation.isPending ? <CircularProgress size={16} /> : <MoneyIcon />}
+            size="small"
+              disabled={collectPaymentMutation.isPending}
+              sx={{ 
+                borderRadius: 1,
+                backgroundColor: '#4caf50',
+                '&:hover': { backgroundColor: '#45a049' }
+              }}
+            >
+              {collectPaymentMutation.isPending ? 'Processing...' : '₹ Collect Fees'}
+          </Button>
+            <Button
+              onClick={handlePaymentSubmit}
+              variant="contained"
+              startIcon={<PrintIcon />}
+              size="small"
+              disabled={collectPaymentMutation.isPending}
+              sx={{ 
+                borderRadius: 1,
+                backgroundColor: '#4caf50',
+                '&:hover': { backgroundColor: '#45a049' }
+              }}
+            >
+              ₹ Collect & Print
+            </Button>
+          </Box>
+        </DialogActions>
+      </Dialog>
+
+      {/* Revert Payment Confirmation Dialog */}
+      <Dialog
+        open={revertDialog.open}
+        onClose={() => setRevertDialog({ open: false, feeId: null, receiptNo: null })}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 1 } }}
+      >
+        <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
+            Confirm Payment Revert
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>Warning:</strong> This action will permanently revert the payment and cannot be undone.
+            </Typography>
+          </Alert>
+          <Typography variant="body1" sx={{ textAlign: 'center' }}>
+            Are you sure you want to revert payment <strong>{revertDialog.receiptNo}</strong>?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, pt: 1, justifyContent: 'center', gap: 2 }}>
+          <Button
+            onClick={() => setRevertDialog({ open: false, feeId: null, receiptNo: null })}
+            variant="outlined"
             size="small"
             sx={{ borderRadius: 1 }}
           >
-            Collect Payment
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmRevertPayment}
+            variant="contained"
+            color="error"
+            size="small"
+            disabled={revertPaymentMutation.isPending}
+            startIcon={revertPaymentMutation.isPending ? <CircularProgress size={16} /> : <RefreshIcon />}
+            sx={{ borderRadius: 1 }}
+          >
+            {revertPaymentMutation.isPending ? 'Reverting...' : 'Revert Payment'}
           </Button>
         </DialogActions>
       </Dialog>

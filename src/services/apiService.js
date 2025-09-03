@@ -462,6 +462,50 @@ export const collectFeesService = {
     const endpoint = queryString ? `/students-collect-fees?${queryString}` : '/students-collect-fees';
     return apiRequest(endpoint);
   },
+  
+  collectPayment: async (paymentData) => {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('feeId', paymentData.feeId);
+    formData.append('amount', paymentData.amount);
+    formData.append('paymentMode', paymentData.paymentMode);
+    
+    // Add optional fields if provided
+    if (paymentData.transactionId) {
+      formData.append('transactionId', paymentData.transactionId);
+    }
+    if (paymentData.remarks) {
+      formData.append('remarks', paymentData.remarks);
+    }
+    if (paymentData.paymentDate) {
+      formData.append('paymentDate', paymentData.paymentDate);
+    }
+    if (paymentData.discountCode) {
+      formData.append('discountCode', paymentData.discountCode);
+    }
+    if (paymentData.discountAmount) {
+      formData.append('discountAmount', paymentData.discountAmount);
+    }
+    if (paymentData.fine) {
+      formData.append('fine', paymentData.fine);
+    }
+    if (paymentData.discountFile) {
+      formData.append('discountFile', paymentData.discountFile);
+    }
+    
+    return apiRequest('/fees/collect-payment', {
+      method: 'POST',
+      body: formData
+    });
+  },
+  
+  revertPayment: async (revertData) => {
+    return apiRequest('/fees/revert-payment', {
+      method: 'POST',
+      body: JSON.stringify(revertData)
+    });
+  },
 };
 
 // Student Fees Services

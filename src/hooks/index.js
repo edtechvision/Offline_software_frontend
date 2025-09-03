@@ -5,7 +5,7 @@ export { useIncharges, useCheckInchargeByCode } from './useIncharges';
 export { useStudents, useStudent, useCreateStudent, useUpdateStudent, useDeleteStudent, useActivateStudent, useDeactivateStudent } from './useStudents';
 export { useCourses, useCourse, useCreateCourse, useUpdateCourse, useDeleteCourse, useToggleCourseActive } from './useCourses';
 export { useBatches, useBatch, useCreateBatch, useUpdateBatch, useDeleteBatch, useToggleBatchStatus } from './useBatches';
-export { useCollectFeeStudents } from './useCollectFees';
+export { useCollectFeeStudents, useCollectPayment, useRevertPayment } from './useCollectFees';
 export { useStudentFees } from './useStudentFees';
 export { usePendingFees } from './usePendingFees';
 export { useFeeHistory } from './useFeeHistory';

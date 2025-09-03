@@ -31,6 +31,7 @@ import JobCategoryPage from './pages/JobCategoryPage';
 import JobsPage from './pages/JobsPage';
 import JobApplicationsListPage from './pages/JobApplicationsListPage';
 import AdmissionInchargePage from './pages/AdmissionInchargePage';
+import FeeReceiptDemo from './pages/FeeReceiptDemo';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -370,6 +371,16 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles="admin">
             <SliderPage />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Fee Receipt Demo Route */}
+      <Route
+        path="/fee-receipt-demo"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center"]}>
+            <FeeReceiptDemo />
           </ProtectedLayout>
         }
       />

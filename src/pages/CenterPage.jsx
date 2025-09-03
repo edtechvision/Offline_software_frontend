@@ -241,7 +241,7 @@ const CenterPage = () => {
       } else if (error.message && error.message.includes('email')) {
         showSnackbar('Invalid email format. Please enter a valid email address.', 'error');
       } else {
-        showSnackbar(error.message || 'Operation failed', 'error');
+      showSnackbar(error.message || 'Operation failed', 'error');
       }
     }
   };
@@ -258,11 +258,11 @@ const CenterPage = () => {
     try {
       const { centerId } = deleteDialog;
       await deleteCenterMutation.mutateAsync(centerId);
-      showSnackbar('Center deleted successfully!', 'success');
+        showSnackbar('Center deleted successfully!', 'success');
       setDeleteDialog({ open: false, centerId: null, centerName: '' });
-    } catch (error) {
-      showSnackbar(error.message || 'Delete failed', 'error');
-    }
+      } catch (error) {
+        showSnackbar(error.message || 'Delete failed', 'error');
+      }
   };
 
   const closeDeleteDialog = () => {
@@ -1026,11 +1026,11 @@ const CenterPage = () => {
             </Box>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, color: '#1f2937', mb: 0.5 }}>
-                {editingCenter ? 'Edit Center' : 'Add New Center'}
-              </Typography>
+              {editingCenter ? 'Edit Center' : 'Add New Center'}
+            </Typography>
               <Typography variant="body2" color="text.secondary">
                 {editingCenter ? 'Update the center information' : 'Create a new center for your organization'}
-              </Typography>
+            </Typography>
             </Box>
           </Box>
         </DialogTitle>

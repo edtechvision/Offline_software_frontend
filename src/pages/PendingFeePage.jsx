@@ -83,7 +83,7 @@ const PendingFeePage = () => {
 
   const handleSendEmail = (student) => {
     // For now, send to dummy email - later will use student's actual email
-    const dummyEmail = 'john@email.com';
+    const dummyEmail = 'sarojajeet660@gmail.com';
 
     // Create email content
     const subject = `Fee Payment Reminder - ${student.studentName}`;

@@ -77,7 +77,8 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
         { label: 'Collect Fee', path: '/fee/collect' },
         { label: 'Pending Fee', path: '/fee/pending' },
         { label: 'Fee History', path: '/fee/history' },
-        { label: 'Fee Discount', path: '/fee/discount' }
+        { label: 'Fee Discount', path: '/fee/discount' },
+        { label: 'Receipt Demo', path: '/fee-receipt-demo' }
       ],
       color: '#16a34a'
     },

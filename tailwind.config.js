@@ -16,8 +16,11 @@ export default {
         'primary-900': 'rgb(61, 61, 78)',
       },
       fontFamily: {
-        'mona': ['Mona Sans', 'sans-serif'],
-        'manrope': ['Manrope', 'sans-serif'],
+        'mona': ['Mona Sans', 'Manrope', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        'manrope': ['Manrope', 'Mona Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        'sans': ['Manrope', 'Mona Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        'heading': ['Mona Sans', 'Manrope', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        'body': ['Manrope', 'Mona Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
       },
     },
   },

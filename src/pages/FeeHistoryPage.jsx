@@ -52,17 +52,22 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useFeeHistory } from '../hooks';
+import FeeReceiptGenerator from '../components/FeeReceiptGenerator';
+import { useNavigate } from 'react-router-dom';
 
 const FeeHistoryPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPaymentMode, setFilterPaymentMode] = useState('all');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedPayment, setSelectedPayment] = useState(null);
-  const [openReceiptDialog, setOpenReceiptDialog] = useState(false);
+  const [openReceiptGenerator, setOpenReceiptGenerator] = useState(false);
+  const [openReceiptModal, setOpenReceiptModal] = useState(false);
+  const [downloadingPaymentId, setDownloadingPaymentId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -98,21 +103,80 @@ const FeeHistoryPage = () => {
 
   const handleViewReceipt = (payment) => {
     setSelectedPayment(payment);
-    setOpenReceiptDialog(true);
+    setOpenReceiptModal(true);
   };
 
   const handlePrintReceipt = (payment) => {
+    // Store payment data in sessionStorage and redirect to receipt demo page
+    sessionStorage.setItem('receiptData', JSON.stringify(payment));
+    navigate('/fee-receipt-demo');
+  };
+
+  const handleDownloadReceipt = async (payment) => {
+    const paymentId = payment.studentId + payment.paymentDate; // Unique identifier for this payment
+    setDownloadingPaymentId(paymentId);
+    try {
+      // Import the PDF generation function
+      const { pdf } = await import('@react-pdf/renderer');
+      const FeeReceiptPDF = (await import('../components/FeeReceiptPDF')).default;
+      
+      // Generate PDF blob
+      const blob = await pdf(<FeeReceiptPDF data={payment} />).toBlob();
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Fee_Receipt_${payment.receiptNo || payment.studentName}.pdf`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+      
+      setSnackbar({
+        open: true,
+        message: `Receipt downloaded successfully for ${payment.studentName}`,
+        severity: 'success'
+      });
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to download receipt. Please try again.',
+        severity: 'error'
+      });
+    } finally {
+      setDownloadingPaymentId(null);
+    }
+  };
+
+  const handleCloseReceiptGenerator = () => {
+    setOpenReceiptGenerator(false);
+    setSelectedPayment(null);
+  };
+
+  const handleCloseReceiptModal = () => {
+    setOpenReceiptModal(false);
+    setSelectedPayment(null);
+  };
+
+  const handleReceiptPrint = (receiptData) => {
     setSnackbar({
       open: true,
-      message: `Printing receipt for ${payment.studentName}`,
+      message: `Receipt printed successfully for ${receiptData.studentName}`,
       severity: 'success'
     });
   };
 
-  const handleDownloadReceipt = (payment) => {
+  const handleReceiptDownload = (receiptData) => {
     setSnackbar({
       open: true,
-      message: `Downloading receipt for ${payment.studentName}`,
+      message: `Receipt downloaded successfully for ${receiptData.studentName}`,
       severity: 'success'
     });
   };
@@ -455,8 +519,13 @@ const FeeHistoryPage = () => {
                               size="small"
                               color="success"
                               onClick={() => handleDownloadReceipt(payment)}
+                              disabled={downloadingPaymentId === (payment.studentId + payment.paymentDate)}
                             >
-                              <DownloadIcon />
+                              {downloadingPaymentId === (payment.studentId + payment.paymentDate) ? (
+                                <CircularProgress size={16} />
+                              ) : (
+                                <DownloadIcon />
+                              )}
                             </IconButton>
                           </Tooltip>
                         </Box>
@@ -514,107 +583,184 @@ const FeeHistoryPage = () => {
           </Card>
         )}
 
-        {/* Receipt Dialog */}
+        {/* Receipt Generator */}
+        <FeeReceiptGenerator
+          isOpen={openReceiptGenerator}
+          onClose={handleCloseReceiptGenerator}
+          receiptData={selectedPayment}
+          onPrint={handleReceiptPrint}
+          onDownload={handleReceiptDownload}
+        />
+
+        {/* Receipt Details Modal */}
         <Dialog
-          open={openReceiptDialog}
-          onClose={() => setOpenReceiptDialog(false)}
+          open={openReceiptModal}
+          onClose={handleCloseReceiptModal}
           maxWidth="md"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '4px' } }}
         >
-          <DialogTitle sx={{ pb: 2, borderBottom: '1px solid #e5e7eb' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <ReceiptIcon sx={{ color: 'primary.main', fontSize: '1.5rem' }} />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Payment Receipt
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedPayment?.receiptNo || 'N/A'}
-                </Typography>
-              </Box>
-            </Box>
+          <DialogTitle sx={{ 
+            backgroundColor: '#1976d2', 
+            color: 'white', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1 
+          }}>
+            <ReceiptIcon />
+            Receipt Details
           </DialogTitle>
-
-          <DialogContent sx={{ pt: 3 }}>
+          <DialogContent sx={{ p: 3 }}>
             {selectedPayment && (
-              <Box sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                gap: 3 
-              }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Box>
+                {/* Student Information */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
                     Student Information
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {selectedPayment.studentName || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {selectedPayment.registrationNo || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {selectedPayment.courseName || 'N/A'}
-                  </Typography>
-                  {selectedPayment.className && (
-                    <Typography variant="body2" color="text.secondary">
-                      Class: {selectedPayment.className}
-                    </Typography>
-                  )}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Student Name</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.studentName || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Registration No.</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.registrationNo || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Class</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.className || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Course</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.courseName || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Batch</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.batchName || 'N/A'}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Payment Information */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
                     Payment Information
                   </Typography>
-                  <Typography variant="body2">
-                    <strong>Amount:</strong> ₹{(selectedPayment.amount || 0).toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Mode:</strong> {selectedPayment.paymentMode || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Date:</strong> {selectedPayment.paymentDate ? new Date(selectedPayment.paymentDate).toLocaleDateString() : 'N/A'}
-                  </Typography>
-                  {selectedPayment.transactionId && (
-                    <Typography variant="body2">
-                      <strong>Transaction ID:</strong> {selectedPayment.transactionId}
-                    </Typography>
-                  )}
-                  <Typography variant="body2">
-                    <strong>Total Fee:</strong> ₹{(selectedPayment.totalFee || 0).toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Pending After Payment:</strong> ₹{(selectedPayment.pendingAmountAfterPayment || 0).toLocaleString()}
-                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Receipt No.</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.receiptNo || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Payment Date</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.paymentDate ? new Date(selectedPayment.paymentDate).toLocaleDateString() : 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Payment Mode</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.paymentMode || 'N/A'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Transaction ID</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.transactionId || 'N/A'}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-                <Box sx={{ gridColumn: '1 / -1' }}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Remarks
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Amount Information */}
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+                    Amount Details
                   </Typography>
-                  <Typography variant="body2">
-                    {selectedPayment.remarks || 'No remarks'}
-                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Total Fee</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'success.main' }}>
+                        ₹{(selectedPayment.totalFee || 0).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Amount Received</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'success.main' }}>
+                        ₹{(selectedPayment.amount || 0).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Previous Received</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'info.main' }}>
+                        ₹{(selectedPayment.previousReceivedAmount || 0).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Pending Amount</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'warning.main' }}>
+                        ₹{(selectedPayment.pendingAmountAfterPayment || 0).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {selectedPayment.remarks && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary">Remarks</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {selectedPayment.remarks}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             )}
           </DialogContent>
-
-          <DialogActions sx={{ p: 3, pt: 1 }}>
+          <DialogActions sx={{ p: 2, gap: 1 }}>
             <Button
-              onClick={() => setOpenReceiptDialog(false)}
               variant="outlined"
+              onClick={handleCloseReceiptModal}
               sx={{ borderRadius: '4px' }}
             >
               Close
             </Button>
             <Button
-              onClick={() => handlePrintReceipt(selectedPayment)}
               variant="contained"
               startIcon={<PrintIcon />}
+              onClick={() => {
+                handleCloseReceiptModal();
+                handlePrintReceipt(selectedPayment);
+              }}
               sx={{ borderRadius: '4px' }}
             >
               Print Receipt
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={downloadingPaymentId === (selectedPayment?.studentId + selectedPayment?.paymentDate) ? <CircularProgress size={16} /> : <DownloadIcon />}
+              onClick={() => {
+                handleCloseReceiptModal();
+                handleDownloadReceipt(selectedPayment);
+              }}
+              disabled={downloadingPaymentId === (selectedPayment?.studentId + selectedPayment?.paymentDate)}
+              sx={{ borderRadius: '4px' }}
+            >
+              Download PDF
             </Button>
           </DialogActions>
         </Dialog>

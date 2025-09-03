@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   
   body {
@@ -14,16 +14,55 @@
     font-size: 16px;
     line-height: 28px;
     overflow: hidden;
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  /* Font family utilities */
+  .font-manrope {
+    font-family: 'Manrope', 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  .font-mona {
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  /* Typography scale with both fonts */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  
+  /* Body text uses Manrope for better readability */
+  p, span, div, button, input, textarea, select {
+    font-family: 'Manrope', 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 }
 
 @layer components {
   .btn-primary {
     @apply bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium;
+    font-family: 'Manrope', 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   
   .btn-secondary {
     @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium;
+    font-family: 'Manrope', 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  /* Typography utilities */
+  .text-heading {
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+  }
+  
+  .text-body {
+    font-family: 'Manrope', 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  .text-display {
+    font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
   }
 }
 
