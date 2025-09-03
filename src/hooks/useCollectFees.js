@@ -24,10 +24,11 @@ export const useCollectPayment = () => {
       return result;
     },
     onSuccess: (data, variables) => {
-      // Invalidate and refetch student fees data
-      queryClient.invalidateQueries({ queryKey: ['studentFees', variables.studentId] });
+      // Invalidate and refetch all fee-related data
+      queryClient.invalidateQueries({ queryKey: ['studentFees'] });
       queryClient.invalidateQueries({ queryKey: ['feeHistory'] });
       queryClient.invalidateQueries({ queryKey: ['pendingFees'] });
+      queryClient.invalidateQueries({ queryKey: ['collectFeeStudents'] });
     },
   });
 };

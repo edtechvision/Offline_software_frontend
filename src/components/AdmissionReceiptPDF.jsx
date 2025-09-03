@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 15,
     fontFamily: 'Helvetica',
     position: 'relative',
   },
@@ -14,46 +14,46 @@ const styles = StyleSheet.create({
   // Header Styles
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
     borderBottom: '2px solid #1976d2',
-    paddingBottom: 15,
+    paddingBottom: 8,
   },
   
   logo: {
-    width: 60,
-    height: 60,
-    marginBottom: 10,
-    borderRadius: 30,
+    width: 45,
+    height: 45,
+    marginBottom: 6,
+    borderRadius: 22,
   },
   
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#1976d2',
-    marginBottom: 5,
+    marginBottom: 3,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   
   subtitle: {
-    fontSize: 14,
+    fontSize: 11,
     color: '#374151',
-    marginBottom: 2,
+    marginBottom: 1,
     fontWeight: 'bold',
   },
   
   contact: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#6B7280',
-    marginBottom: 5,
+    marginBottom: 3,
   },
   
   // Receipt Title
   receiptTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
     color: '#1976d2',
     textTransform: 'uppercase',
   },
@@ -61,12 +61,12 @@ const styles = StyleSheet.create({
   // Main Content Layout
   mainContent: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   
   leftColumn: {
     flex: 1,
-    marginRight: 20,
+    marginRight: 15,
   },
   
   rightColumn: {
@@ -76,34 +76,34 @@ const styles = StyleSheet.create({
   // Student Photo Section
   photoSection: {
     alignItems: 'center',
-    marginBottom: 20,
-    paddingRight: '100px',
+    marginBottom: 12,
+    paddingRight: '80px',
   },
   
   studentPhoto: {
-    width: 160,
-    height: 160,
-    border: '1px solid #1976d2',
+    width: 120,
+    height: 120,
+    border: '1px solid #000000',
     borderRadius: 4,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   
   // Detail Rows
   detailRow: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 5,
     alignItems: 'center',
   },
   
   detailLabel: {
-    fontSize: 11,
+    fontSize: 9,
     color: '#374151',
-    width: 140,
+    width: 120,
     fontWeight: 'bold',
   },
   
   detailValue: {
-    fontSize: 11,
+    fontSize: 9,
     color: '#1976d2',
     fontWeight: 'bold',
     flex: 1,
@@ -111,46 +111,46 @@ const styles = StyleSheet.create({
   
   // Declaration Section
   declarationSection: {
-    marginTop: 30,
-    padding: 15,
+    marginTop: 15,
+    padding: 10,
     border: '1px solid #E5E7EB',
     borderRadius: 4,
   },
   
   declarationTitle: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#1976d2',
-    marginBottom: 10,
+    marginBottom: 6,
     textAlign: 'center',
   },
   
   declarationText: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#374151',
-    lineHeight: 1.4,
-    marginBottom: 15,
+    lineHeight: 1.3,
+    marginBottom: 8,
   },
   
   signatureRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 12,
   },
   
   signatureBox: {
-    width: 150,
+    width: 120,
     textAlign: 'center',
   },
   
   signatureLine: {
     borderBottom: '1px solid #374151',
-    marginBottom: 5,
-    height: 20,
+    marginBottom: 3,
+    height: 15,
   },
   
   signatureLabel: {
-    fontSize: 9,
+    fontSize: 7,
     color: '#374151',
   },
   
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    fontSize: 120,
+    fontSize: 80,
     color: '#F3F4F6',
     fontWeight: 'bold',
     zIndex: -1,
@@ -173,8 +173,8 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     opacity: 0.05,
     zIndex: -1,
   },
@@ -264,15 +264,16 @@ const AdmissionReceiptPDF = ({ data }) => {
           <View style={styles.leftColumn}>
             {/* Student Photo */}
             <View style={styles.photoSection}>
-              {image ? (
+              {image && image.trim() !== '' ? (
                 <Image 
                   style={styles.studentPhoto} 
-                  src={image} 
+                  src={image}
+                  cache={false}
                 />
               ) : (
                 <View style={[styles.studentPhoto, { backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }]}>
-                  <Text style={{ fontSize: 24, color: '#1976d2', fontWeight: 'bold' }}>
-                    {studentName?.charAt(0) || 'S'}
+                  <Text style={{ fontSize: 16, color: '#1976d2', fontWeight: 'bold' }}>
+                    {studentName?.charAt(0)?.toUpperCase() || 'S'}
                   </Text>
                 </View>
               )}

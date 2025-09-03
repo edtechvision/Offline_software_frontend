@@ -286,14 +286,15 @@ const FeeCollectionComponent = () => {
 
       await collectPaymentMutation.mutateAsync(paymentPayload);
 
-    setSnackbar({
-      open: true,
-      message: `Payment of ₹${paymentData.amount} collected successfully`,
-      severity: 'success'
-    });
+      setSnackbar({
+        open: true,
+        message: `Payment of ₹${paymentData.amount} collected successfully`,
+        severity: 'success'
+      });
       
-    setOpenPaymentDialog(false);
-    setSelectedFees([]);
+      // Reset form and close dialog
+      setOpenPaymentDialog(false);
+      setSelectedFees([]);
       setPaymentData({
         amount: '',
         paymentMode: 'Cash',
@@ -307,6 +308,9 @@ const FeeCollectionComponent = () => {
       setCalculatedDiscount(0);
       setDiscountDetails(null);
       setDiscountFile(null);
+      
+      // The data will be automatically refreshed due to React Query cache invalidation
+      // in the useCollectPayment hook's onSuccess callback
       
     } catch (error) {
       setSnackbar({
@@ -848,7 +852,7 @@ const FeeCollectionComponent = () => {
               </Typography>
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 4, pb: 2 }}>
+        <DialogContent sx={{ pt: 4, pb: 2,mt:2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Date Field */}
               <TextField
@@ -858,7 +862,7 @@ const FeeCollectionComponent = () => {
               value={paymentData.paymentDate}
               onChange={(e) => setPaymentData({ ...paymentData, paymentDate: e.target.value })}
               size="small"
-              sx={{ borderRadius: 1 }}
+              sx={{ borderRadius: 0.5 }}
               InputLabelProps={{ shrink: true }}
               required
             />
@@ -899,7 +903,7 @@ const FeeCollectionComponent = () => {
               value={paymentData.discountAmount}
               onChange={(e) => setPaymentData({ ...paymentData, discountAmount: parseFloat(e.target.value) || 0 })}
               size="small"
-              sx={{ borderRadius: 1 }}
+              sx={{ borderRadius: 0.5 }}
               type="number"
               required
             />
@@ -954,7 +958,7 @@ const FeeCollectionComponent = () => {
               value={paymentData.fine}
               onChange={(e) => setPaymentData({ ...paymentData, fine: parseFloat(e.target.value) || 0 })}
               size="small"
-              sx={{ borderRadius: 1 }}
+              sx={{ borderRadius: 0.5 }}
               type="number"
               required
             />

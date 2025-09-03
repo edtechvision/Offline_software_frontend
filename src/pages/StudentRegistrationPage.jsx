@@ -103,6 +103,7 @@ const StudentRegistrationPage = ({ onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingIncharge, setIsValidatingIncharge] = useState(false);
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
+  const [apiError, setApiError] = useState(null);
 
   // API hooks for courses, batches, and additional courses
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
@@ -401,15 +402,14 @@ const StudentRegistrationPage = ({ onBack }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Submit button clicked');
-    console.log('Form data:', formData);
+    // Clear any previous API errors
+    setApiError(null);
     
+    // Validate all mandatory fields first
     if (!validateForm()) {
-      console.log('Form validation failed');
       return;
     }
     
-    console.log('Form validation passed, proceeding with submission');
     setIsSubmitting(true);
     
     try {
@@ -466,18 +466,6 @@ const StudentRegistrationPage = ({ onBack }) => {
         studentData.append('image', formData.imageFile);
       }
       
-      // Debug: Log the FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of studentData.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}:`, `File: ${value.name} (${value.size} bytes, ${value.type})`);
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-      
-      console.log('Full FormData object:', studentData);
-      
       // Call the API
       const result = await createStudentMutation.mutateAsync(studentData);
       
@@ -488,11 +476,11 @@ const StudentRegistrationPage = ({ onBack }) => {
           onBack();
         }, 3000);
       } else {
-        throw new Error(result.message || 'Failed to create student');
+        setApiError(result.message || 'Failed to create student');
       }
     } catch (error) {
       console.error('Student creation error:', error);
-      // You can add error handling here (show error message to user)
+      setApiError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -2330,23 +2318,8 @@ const StudentRegistrationPage = ({ onBack }) => {
             </Card>
           )}
 
-          {/* Debug: Show validation errors */}
-          {Object.keys(errors).length > 0 && (
-            <Card sx={{ mb: 3, borderRadius: 3, border: '1px solid #f44336' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-                  Please fix the following errors:
-                </Typography>
-                <Box component="ul" sx={{ m: 0, pl: 2 }}>
-                  {Object.entries(errors).map(([field, error]) => (
-                    <Typography key={field} component="li" color="error" sx={{ mb: 1 }}>
-                      <strong>{field}:</strong> {error}
-                    </Typography>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          )}
+          {/* Show validation errors */}
+         
 
           {/* Action Buttons */}
           {isInchargeCodeValid && (
@@ -2434,6 +2407,22 @@ const StudentRegistrationPage = ({ onBack }) => {
           sx={{ width: '100%' }}
         >
           Student registered successfully! Redirecting to dashboard...
+        </Alert>
+      </Snackbar>
+
+      {/* API Error Notification */}
+      <Snackbar
+        open={!!apiError}
+        autoHideDuration={6000}
+        onClose={() => setApiError(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setApiError(null)} 
+          severity="error" 
+          sx={{ width: '100%' }}
+        >
+          {apiError}
         </Alert>
       </Snackbar>
     </Box>
