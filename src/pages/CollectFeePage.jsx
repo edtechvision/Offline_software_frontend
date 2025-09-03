@@ -90,7 +90,7 @@ const CollectFeePage = () => {
   const classOptions = ['9th', '10th', '11th', '12th'];
 
   const handleViewStudent = (student) => {
-    navigate(`/fee/collect/${student._id}`);
+    navigate(`/fee/collect/${student.studentId}`);
   };
 
   const handleClearFilters = () => {
@@ -111,13 +111,11 @@ const CollectFeePage = () => {
   };
 
   const calculatePendingAmount = (student) => {
-    const courseFee = student.courseDetails?.courseFee || 0;
-    const downPayment = student.courseDetails?.downPayment || 0;
-    return courseFee - downPayment;
+    return student.pendingAmount || 0;
   };
 
   const calculatePaidAmount = (student) => {
-    return student.courseDetails?.downPayment || 0;
+    return student.paidAmount || 0;
   };
 
   return (
@@ -279,10 +277,10 @@ const CollectFeePage = () => {
                     <TableCell>
                       <Box>
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {student.courseDetails?.courseId?.name || 'N/A'}
+                          {student.course || 'N/A'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {student.courseDetails?.batchId?.batchName || 'N/A'}
+                          {student.batch || 'N/A'}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -303,7 +301,7 @@ const CollectFeePage = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        ₹{student.courseDetails?.courseFee?.toLocaleString() || '0'}
+                        ₹{student.totalFee?.toLocaleString() || '0'}
                       </Typography>
                     </TableCell>
                     <TableCell>
