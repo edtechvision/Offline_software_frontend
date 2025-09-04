@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStudentFees, useFeeDiscounts, useCollectPayment, useRevertPayment } from '../hooks';
+import { pdf } from '@react-pdf/renderer';
+import FeeCollectReceipt from '../components/FeeCollectReceipt';
+import IndividualFeeReceipt from '../components/IndividualFeeReceipt';
 import {
   Box,
   Card,
@@ -80,6 +83,8 @@ const FeeCollectionComponent = () => {
   const [discountFile, setDiscountFile] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [revertDialog, setRevertDialog] = useState({ open: false, feeId: null, receiptNo: null });
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [individualPdfLoading, setIndividualPdfLoading] = useState({});
 
   // Fetch student data
   const { data: studentData, isLoading, error: studentError } = useStudent(id);
@@ -116,8 +121,6 @@ const FeeCollectionComponent = () => {
       return [];
     }
 
-
-
     return feesData.data.map((feeRecord, index) => {
       const studentInfo = feeRecord.studentId;
       const courseInfo = feeRecord.courseId;
@@ -138,8 +141,8 @@ const FeeCollectionComponent = () => {
         mode: payment.paymentMode || "Cash",
         date: payment.paymentDate,
         amount: payment.amount || 0,
-        discount: 0, // Not available in API
-        fine: 0, // Not available in API
+        discount: payment.discountAmount || 0,
+        fine: payment.fine || 0,
         transactionId: payment.transactionId || "",
         remarks: payment.remarks || ""
       })) || [];
@@ -153,8 +156,8 @@ const FeeCollectionComponent = () => {
         amount: feeRecord.totalFee || 0,
         paid: feeRecord.paidAmount || 0,
         balance: feeRecord.pendingAmount || 0,
-        discount: 0, // Not available in API
-        fine: 0, // Not available in API
+        discount: payments.reduce((sum, payment) => sum + (payment.discount || 0), 0),
+        fine: payments.reduce((sum, payment) => sum + (payment.fine || 0), 0),
         payments: payments
       };
     });
@@ -286,15 +289,15 @@ const FeeCollectionComponent = () => {
 
       await collectPaymentMutation.mutateAsync(paymentPayload);
 
-      setSnackbar({
-        open: true,
-        message: `Payment of ₹${paymentData.amount} collected successfully`,
-        severity: 'success'
-      });
+    setSnackbar({
+      open: true,
+      message: `Payment of ₹${paymentData.amount} collected successfully`,
+      severity: 'success'
+    });
       
       // Reset form and close dialog
-      setOpenPaymentDialog(false);
-      setSelectedFees([]);
+    setOpenPaymentDialog(false);
+    setSelectedFees([]);
       setPaymentData({
         amount: '',
         paymentMode: 'Cash',
@@ -354,6 +357,113 @@ const FeeCollectionComponent = () => {
         message: error.message || 'Failed to revert payment',
         severity: 'error'
       });
+    }
+  };
+
+  // Generate and download fee receipt PDF
+  const handleGenerateFeeReceipt = async () => {
+    if (selectedFees.length === 0) {
+      setSnackbar({
+        open: true,
+        message: 'Please select at least one fee to generate receipt',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    setPdfLoading(true);
+    try {
+      const feeId = selectedFees[0];
+      const feeRecord = feeGroups.find(f => f.id === feeId);
+      
+      if (!feeRecord) {
+        setSnackbar({
+          open: true,
+          message: 'Selected fee not found',
+          severity: 'error'
+        });
+        return;
+      }
+
+      const receiptData = {
+        student: student,
+        feeGroup: feeRecord,
+        paymentData: paymentData
+      };
+
+      const blob = await pdf(<FeeCollectReceipt data={receiptData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Fee_Receipt_${student?.studentName}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSnackbar({
+        open: true,
+        message: 'Fee receipt generated successfully',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to generate fee receipt',
+        severity: 'error'
+      });
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  // Generate individual payment receipt
+  const handleGenerateIndividualReceipt = async (paymentId, feeGroupId) => {
+    setIndividualPdfLoading(prev => ({ ...prev, [paymentId]: true }));
+    
+    try {
+      const feeRecord = feeGroups.find(f => f.id === feeGroupId);
+      const payment = feeRecord?.payments?.find(p => p.id === paymentId);
+      
+      if (!feeRecord || !payment) {
+        setSnackbar({
+          open: true,
+          message: 'Payment record not found',
+          severity: 'error'
+        });
+        return;
+      }
+
+      const receiptData = {
+        student: student,
+        payment: payment,
+        feeGroup: feeRecord,
+        collectedBy: 'Super Admin(9000)' // You can make this dynamic
+      };
+
+      const blob = await pdf(<IndividualFeeReceipt data={receiptData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Individual_Receipt_${payment.paymentId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSnackbar({
+        open: true,
+        message: 'Individual receipt generated successfully',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to generate individual receipt',
+        severity: 'error'
+      });
+    } finally {
+      setIndividualPdfLoading(prev => ({ ...prev, [paymentId]: false }));
     }
   };
 
@@ -427,12 +537,13 @@ const FeeCollectionComponent = () => {
       <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
         <Button
           variant="outlined"
-          startIcon={<PrintIcon />}
-          onClick={() => window.print()}
+          startIcon={pdfLoading ? <CircularProgress size={16} /> : <PrintIcon />}
+          onClick={handleGenerateFeeReceipt}
+          disabled={selectedFees.length === 0 || pdfLoading}
           size="small"
           sx={{ borderRadius: 1, fontSize: '0.75rem', py: 0.5, px: 1 }}
         >
-          Print Selected
+          {pdfLoading ? 'Generating...' : 'Print Receipt'}
         </Button>
         <Button
           variant="contained"
@@ -744,8 +855,17 @@ const FeeCollectionComponent = () => {
                             >
                               <RefreshIcon fontSize="small" />
                             </IconButton>
-                            <IconButton size="small" color="info">
+                            <IconButton 
+                              size="small" 
+                              color="info"
+                              onClick={() => handleGenerateIndividualReceipt(payment.id, feeGroup.id)}
+                              disabled={individualPdfLoading[payment.id]}
+                            >
+                              {individualPdfLoading[payment.id] ? (
+                                <CircularProgress size={16} />
+                              ) : (
                               <PrintIcon fontSize="small" />
+                              )}
                             </IconButton>
                           </Box>
                         </Box>
@@ -897,12 +1017,12 @@ const FeeCollectionComponent = () => {
               </FormControl>
             
                         {/* Discount Amount */}
-            <TextField
-              fullWidth
+              <TextField
+                fullWidth
               label="Discount (₹)"
               value={paymentData.discountAmount}
               onChange={(e) => setPaymentData({ ...paymentData, discountAmount: parseFloat(e.target.value) || 0 })}
-              size="small"
+                size="small"
               sx={{ borderRadius: 0.5 }}
               type="number"
               required
@@ -1021,7 +1141,12 @@ const FeeCollectionComponent = () => {
               {collectPaymentMutation.isPending ? 'Processing...' : '₹ Collect Fees'}
           </Button>
             <Button
-              onClick={handlePaymentSubmit}
+              onClick={async () => {
+                await handlePaymentSubmit();
+                if (collectPaymentMutation.isSuccess) {
+                  handleGenerateFeeReceipt();
+                }
+              }}
               variant="contained"
               startIcon={<PrintIcon />}
               size="small"
