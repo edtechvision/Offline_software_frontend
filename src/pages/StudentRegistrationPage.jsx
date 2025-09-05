@@ -968,7 +968,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('nationality', e.target.value)}
                           label="Nationality *"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1274,7 +1274,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, state: e.target.value })}
                           label="State"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1325,7 +1325,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, district: e.target.value })}
                           label="District"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1376,7 +1376,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, country: e.target.value })}
                           label="Country"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1723,7 +1723,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('className', e.target.value)}
                           label="Class Name *"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1809,7 +1809,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('courseId', e.target.value)}
                           label="Course *"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1873,7 +1873,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('additionalCourseId', e.target.value)}
                           label="Additional Course"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -1938,7 +1938,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('paymentType', e.target.value)}
                           label="Payment Type *"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -2014,7 +2014,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('batchId', e.target.value)}
                           label="Batch"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
@@ -2213,7 +2213,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('discountCode', e.target.value)}
                           label="Discount Code"
                           sx={{
-                            minWidth: '200px',
+                            minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {

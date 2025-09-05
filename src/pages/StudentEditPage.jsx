@@ -372,6 +372,12 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (formData.paymentType === 'EMI') {
       if (!formData.downPayment || parseFloat(formData.downPayment) <= 0) {
         newErrors.downPayment = 'Down payment is required for EMI';
+      } else {
+        const courseFee = parseFloat(formData.courseFee) || 0;
+        const downPayment = parseFloat(formData.downPayment) || 0;
+        if (downPayment > courseFee) {
+          newErrors.downPayment = `Down payment (₹${downPayment}) cannot exceed course fee (₹${courseFee})`;
+        }
       }
       if (!formData.nextPaymentDueDate) {
         newErrors.nextPaymentDueDate = 'Next payment due date is required for EMI';
@@ -889,6 +895,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.nationality}
                       onChange={(e) => handleInputChange('nationality', e.target.value)}
                       label="Nationality *"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="Indian">Indian</MenuItem>
                       <MenuItem value="NRI">NRI</MenuItem>
@@ -903,6 +924,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.category}
                       onChange={(e) => handleInputChange('category', e.target.value)}
                       label="Category *"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="General">General</MenuItem>
                       <MenuItem value="OBC">OBC</MenuItem>
@@ -937,6 +973,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     size="small"
                     error={!!errors.email}
                     helperText={errors.email}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.email ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.email ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.email ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -954,6 +1004,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     inputProps={{ maxLength: 10, pattern: '[6-9][0-9]{9}' }}
                     error={!!errors.mobileNumber}
                     helperText={errors.mobileNumber || 'Must start with 6-9 and be 10 digits'}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.mobileNumber ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.mobileNumber ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.mobileNumber ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -969,6 +1033,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     size="small"
                     inputProps={{ maxLength: 10, pattern: '[6-9][0-9]{9}' }}
                     helperText="Optional - Must start with 6-9 and be 10 digits"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -985,6 +1063,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     inputProps={{ maxLength: 12, pattern: '[0-9]{12}' }}
                     error={!!errors.adharNumber}
                     helperText={errors.adharNumber || 'Must be exactly 12 digits'}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.adharNumber ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.adharNumber ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.adharNumber ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -1031,6 +1123,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, fullAddress: e.target.value })}
                     placeholder="Full Address"
                     size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1040,6 +1146,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.presentAddress.state}
                       onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, state: e.target.value })}
                       label="State"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="Bihar">Bihar</MenuItem>
                       <MenuItem value="Jharkhand">Jharkhand</MenuItem>
@@ -1056,6 +1177,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.presentAddress.district}
                       onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, district: e.target.value })}
                       label="District"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="Araria">Araria</MenuItem>
                       <MenuItem value="Purnia">Purnia</MenuItem>
@@ -1072,6 +1208,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.presentAddress.country}
                       onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, country: e.target.value })}
                       label="Country"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="India">India</MenuItem>
                       <MenuItem value="Nepal">Nepal</MenuItem>
@@ -1093,6 +1244,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     inputProps={{ maxLength: 6, pattern: '[0-9]{6}' }}
                     error={!!errors.presentPincode}
                     helperText={errors.presentPincode || 'Must be exactly 6 digits'}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.presentPincode ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.presentPincode ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.presentPincode ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -1155,6 +1320,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     placeholder="Full Address"
                     size="small"
                     disabled={formData.isPermanentSameAsPresent}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1165,6 +1347,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, state: e.target.value })}
                     size="small"
                     disabled={formData.isPermanentSameAsPresent}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1175,6 +1374,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, district: e.target.value })}
                     size="small"
                     disabled={formData.isPermanentSameAsPresent}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1185,6 +1401,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, country: e.target.value })}
                     size="small"
                     disabled={formData.isPermanentSameAsPresent}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1202,6 +1435,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     inputProps={{ maxLength: 6, pattern: '[0-9]{6}' }}
                     error={!!errors.permanentPincode}
                     helperText={errors.permanentPincode || 'Must be exactly 6 digits'}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.permanentPincode ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.permanentPincode ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.permanentPincode ? '#d32f2f' : '#1976d2',
+                        },
+                        '&.Mui-disabled': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -1249,6 +1499,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     required
                     error={!!errors.collegeName}
                     helperText={errors.collegeName}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.collegeName ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.collegeName ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.collegeName ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1258,6 +1522,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.className}
                       onChange={(e) => handleInputChange('className', e.target.value)}
                       label="Class Name *"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: errors.className ? '#d32f2f' : '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: errors.className ? '#d32f2f' : '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: errors.className ? '#d32f2f' : '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="9th">9th</MenuItem>
                       <MenuItem value="10th">10th</MenuItem>
@@ -1307,6 +1586,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.courseId}
                       onChange={(e) => handleInputChange('courseId', e.target.value)}
                       label="Course *"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: errors.courseId ? '#d32f2f' : '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: errors.courseId ? '#d32f2f' : '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: errors.courseId ? '#d32f2f' : '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       {coursesLoading ? (
                         <MenuItem disabled>
@@ -1334,6 +1628,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.additionalCourseId}
                       onChange={(e) => handleInputChange('additionalCourseId', e.target.value)}
                       label="Additional Course"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">None</MenuItem>
                       {additionalCoursesLoading ? (
@@ -1362,6 +1671,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.paymentType}
                       onChange={(e) => handleInputChange('paymentType', e.target.value)}
                       label="Payment Type *"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="Full-payment">Full-payment</MenuItem>
                       <MenuItem value="EMI">EMI</MenuItem>
@@ -1403,6 +1727,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       value={formData.batchId}
                       onChange={(e) => handleInputChange('batchId', e.target.value)}
                       label="Batch"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '4px',
+                          '& fieldset': {
+                            borderColor: '#d1d5db',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#9ca3af',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                      }}
                     >
                       {batchesLoading ? (
                         <MenuItem disabled>
@@ -1434,19 +1773,23 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     required
                     error={!!errors.session}
                     helperText={errors.session}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: errors.session ? '#d32f2f' : '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: errors.session ? '#d32f2f' : '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: errors.session ? '#d32f2f' : '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 {formData.paymentType !== 'Full-payment' && (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Down Payment"
-                        value={formData.downPayment}
-                        onChange={(e) => handleInputChange('downPayment', e.target.value)}
-                        size="small"
-                      />
-                    </Grid>
                     <Grid item xs={12} sm={6}>
                       <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
@@ -1457,45 +1800,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                         />
                       </LocalizationProvider>
                     </Grid>
-                  </>
                 )}
-                <Grid item xs={12} sm={6}>
-                  <FormControl component="fieldset">
-                    <FormLabel component="legend">Payment Mode</FormLabel>
-                    <RadioGroup
-                      row
-                      value={formData.paymentMode}
-                      onChange={(e) => handleInputChange('paymentMode', e.target.value)}
-                    >
-                      <FormControlLabel value="Cash" control={<Radio />} label="Cash" />
-                      <FormControlLabel value="UPI" control={<Radio />} label="UPI" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Transaction ID (Optional)"
-                    value={formData.transactionId}
-                    onChange={(e) => handleInputChange('transactionId', e.target.value)}
-                    placeholder="Enter transaction ID if available"
-                    size="small"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '4px',
-                        '& fieldset': {
-                          borderColor: '#d1d5db',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#9ca3af',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#1976d2',
-                        },
-                      },
-                    }}
-                  />
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
                     <InputLabel 
@@ -1757,6 +2062,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     onChange={(e) => handleInputChange('referenceNumber', e.target.value)}
                     placeholder="Enter Referral Student Admission Number"
                     size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '4px',
+                        '& fieldset': {
+                          borderColor: '#d1d5db',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#9ca3af',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#1976d2',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
