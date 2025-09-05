@@ -1,5 +1,27 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+Font.register({
+  family: 'Montserrat',
+  fonts: [
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXpsog.woff2',
+      fontWeight: 400, // Normal
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCs16Hw5aXpsog.woff2',
+      fontWeight: 300, // Light
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w5aXpsog.woff2',
+      fontWeight: 700, // Bold
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw3aXpsog.woff2',
+      fontWeight: 100, // Thin
+    },
+  ],
+});
 
 // Create styles for the PDF
 const styles = StyleSheet.create({
@@ -7,176 +29,239 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 15,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Montserrat',
     position: 'relative',
+    overflow: 'hidden',
   },
-  
-  // Header Styles
-  header: {
-    alignItems: 'center',
-    marginBottom: 12,
-    borderBottom: '2px solid #1976d2',
-    paddingBottom: 8,
-  },
-  
-  logo: {
-    width: 45,
-    height: 45,
-    marginBottom: 6,
-    borderRadius: 22,
-  },
-  
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: 3,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  
-  subtitle: {
-    fontSize: 11,
-    color: '#374151',
-    marginBottom: 1,
-    fontWeight: 'bold',
-  },
-  
-  contact: {
-    fontSize: 10,
-    color: '#6B7280',
-    marginBottom: 3,
-  },
-  
-  // Receipt Title
-  receiptTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#1976d2',
-    textTransform: 'uppercase',
-  },
-  
-  // Main Content Layout
-  mainContent: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  
-  leftColumn: {
-    flex: 1,
-    marginRight: 15,
-  },
-  
-  rightColumn: {
-    flex: 1,
-  },
-  
-  // Student Photo Section
-  photoSection: {
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingRight: '80px',
-  },
-  
-  studentPhoto: {
-    width: 120,
-    height: 120,
-    border: '1px solid #000000',
-    borderRadius: 4,
-    marginBottom: 6,
-  },
-  
-  // Detail Rows
-  detailRow: {
-    flexDirection: 'row',
-    marginBottom: 5,
-    alignItems: 'center',
-  },
-  
-  detailLabel: {
-    fontSize: 9,
-    color: '#374151',
-    width: 120,
-    fontWeight: 'bold',
-  },
-  
-  detailValue: {
-    fontSize: 9,
-    color: '#1976d2',
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  
-  // Declaration Section
-  declarationSection: {
-    marginTop: 15,
-    padding: 10,
-    border: '1px solid #E5E7EB',
-    borderRadius: 4,
-  },
-  
-  declarationTitle: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  
-  declarationText: {
-    fontSize: 8,
-    color: '#374151',
-    lineHeight: 1.3,
-    marginBottom: 8,
-  },
-  
-  signatureRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  
-  signatureBox: {
-    width: 120,
-    textAlign: 'center',
-  },
-  
-  signatureLine: {
-    borderBottom: '1px solid #374151',
-    marginBottom: 3,
-    height: 15,
-  },
-  
-  signatureLabel: {
-    fontSize: 7,
-    color: '#374151',
-  },
-  
-  // Watermark
   watermark: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    fontSize: 80,
-    color: '#F3F4F6',
+    fontSize: 200,
+    color: '#f3f4f6',
     fontWeight: 'bold',
-    zIndex: -1,
-    opacity: 0.1,
+    zIndex: 0,
+    opacity: 0.05,
   },
-  
-  // Background Logo Watermark
   backgroundLogo: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
+    top: '40%',
+    left: '30%',
     transform: 'translate(-50%, -50%)',
-    width: 200,
-    height: 200,
-    opacity: 0.05,
-    zIndex: -1,
+    width: 300,
+    height: 300,
+    opacity: 0.3,
+    zIndex: 0,
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    borderBottom: '1px solid #000000',
+    paddingBottom: 8,
+    position: 'relative',
+    zIndex: 1,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    flexShrink: 0,
+  },
+  headerText: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 2,
+    letterSpacing: 1,
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+  },
+  subtitleText: {
+    fontSize: 14,
+    color: '#000000',
+    fontWeight: 100, // Using the thin font weight
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+    marginBottom: 4,
+    marginTop: 2,
+  },
+  tagline: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+  },
+  phoneContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexShrink: 0,
+  },
+  phoneText: {
+    fontSize: 14,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  receiptTitle: {
+    backgroundColor: '#000000',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    paddingVertical: 4,
+    marginBottom: 8,
+    position: 'relative',
+    zIndex: 1,
+  },
+  receiptTitleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  avatarContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 8,
+    width: '100%',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 4,
+    border: '1px solid #000000',
+  },
+  mainContent: {
+    display: 'flex',
+    flexDirection: 'row',
+    border: '1px solid #000000',
+    position: 'relative',
+    zIndex: 1,
+  },
+  leftColumn: {
+    flex: 1,
+    borderRight: '1px solid #000000',
+    padding: 8,
+    minHeight: 300,
+  },
+  studentDetailsTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 8,
+    textDecoration: 'underline',
+    fontFamily: 'Montserrat',
+  },
+  detailItem: {
+    marginBottom: 4,
+  },
+  detailText: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  rightColumn: {
+    width: 250,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  infoBox: {
+    borderBottom: '1px solid #000000',
+    padding: 6,
+  },
+  infoBoxAlt: {
+    borderBottom: '1px solid #000000',
+    padding: 6,
+    backgroundColor: '#f5f5f5',
+  },
+  infoBoxLast: {
+    padding: 6,
+    backgroundColor: '#f5f5f5',
+    flex: 1,
+  },
+  infoText: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  bottomSection: {
+    display: 'flex',
+    flexDirection: 'row',
+    border: '1px solid #000000',
+    borderTop: 'none',
+    position: 'relative',
+    zIndex: 1,
+  },
+  declaration: {
+    flex: 1,
+    borderRight: '1px solid #000000',
+    padding: 8,
+  },
+  declarationHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  declarationTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000000',
+    fontFamily: 'Montserrat',
+  },
+  receivedBy: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000000',
+    fontFamily: 'Montserrat',
+  },
+  declarationText: {
+    fontSize: 10,
+    color: '#000000',
+    lineHeight: 1.4,
+    textAlign: 'justify',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  signatures: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    position: 'relative',
+    zIndex: 1,
+  },
+  signatureBox: {
+    textAlign: 'center',
+  },
+  signatureLine: {
+    borderBottom: '1px dotted #000000',
+    paddingBottom: 4,
+    minWidth: 200,
+    display: 'inline-block',
+    height: 10,
+  },
+  signatureLabel: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    marginTop: 4,
+    fontFamily: 'Montserrat',
   },
 });
 
@@ -221,153 +306,121 @@ const AdmissionReceiptPDF = ({ data }) => {
     image
   } = data;
 
-  // Calculate admission date (current date)
   const admissionDate = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
   });
 
-  // Generate admission number if not available
   const admissionNo = registrationNo || `TB${Date.now().toString().slice(-7)}`;
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Watermark */}
         <Text style={styles.watermark}>TB</Text>
-        
-        {/* Background Logo Watermark */}
-        <Image 
-          style={styles.backgroundLogo} 
-          src="/logo.png" 
-        />
-        
-        {/* Header */}
+        <Image style={styles.backgroundLogo} src="/logo.png" />
         <View style={styles.header}>
-          <Image 
-            style={styles.logo} 
-            src="/logo.png" 
-          />
-          <Text style={styles.title}>TARGET BOARD</Text>
-          <Text style={styles.subtitle}>TARGET BOARD JEHANABAD 804408</Text>
-          <Text style={styles.subtitle}>Bihar Board NO-1 Educational Platform</Text>
-          <Text style={styles.contact}>P.H No. -7779855339</Text>
+          <View>
+            <Image style={styles.logo} src="/logo.png" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>TARGET BOARD</Text>
+            <Text style={styles.subtitleText}>TARGET BOARD JEHANABAD 804408</Text>
+            <Text style={styles.tagline}>Bihar Board NO-1 Educational Platform</Text>
+            <Text style={styles.phoneText}>+91 7779855339</Text>
+          </View>
         </View>
-
-        {/* Receipt Title */}
-        <Text style={styles.receiptTitle}>Admission Receipt</Text>
-
-        {/* Main Content */}
+        <View style={styles.receiptTitle}>
+          <Text style={styles.receiptTitleText}>Admission Receipt</Text>
+        </View>
+        <View style={styles.avatarContainer}>
+          <Image src={image} style={styles.avatar} />
+        </View>
         <View style={styles.mainContent}>
-          {/* Left Column - Student Photo and Basic Info */}
           <View style={styles.leftColumn}>
-            {/* Student Photo */}
-            <View style={styles.photoSection}>
-              {image && image.trim() !== '' ? (
-                <Image 
-                  style={styles.studentPhoto} 
-                  src={image}
-                  cache={false}
-                />
-              ) : (
-                <View style={[styles.studentPhoto, { backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }]}>
-                  <Text style={{ fontSize: 16, color: '#1976d2', fontWeight: 'bold' }}>
-                    {studentName?.charAt(0)?.toUpperCase() || 'S'}
-                  </Text>
-                </View>
-              )}
+            <Text style={styles.studentDetailsTitle}>Student Details:</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>{studentName || 'N/A'}</Text>
             </View>
-
-            {/* Student Details */}
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Name :</Text>
-              <Text style={styles.detailValue}>{studentName || 'N/A'}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>F. Name-</Text> {fathersName || 'N/A'}
+              </Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Father's Name :</Text>
-              <Text style={styles.detailValue}>{fathersName || 'N/A'}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Date of Birth :</Text> {formatDate(dateOfBirth)}
+              </Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Date of Birth :</Text>
-              <Text style={styles.detailValue}>{formatDate(dateOfBirth)}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Address :</Text> {formatAddress(presentAddress)}
+              </Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Gender :</Text>
-              <Text style={styles.detailValue}>{gender || 'N/A'}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Class :</Text> {className || 'N/A'}
+              </Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mobile No. :</Text>
-              <Text style={styles.detailValue}>{mobileNumber || 'N/A'}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Course :</Text> {courseDetails?.courseId?.name || 'N/A'}
+              </Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Permanent Address :</Text>
-              <Text style={styles.detailValue}>{formatAddress(presentAddress)}</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {courseDetails?.batchId?.batchName || 'N/A'}
+              </Text>
             </View>
           </View>
-
-          {/* Right Column - Admission Details */}
           <View style={styles.rightColumn}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Admission No. :</Text>
-              <Text style={styles.detailValue}>{admissionNo}</Text>
+            <View style={styles.infoBoxAlt}>
+              <Text style={styles.infoText}>Date : {admissionDate}</Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Admission Date :</Text>
-              <Text style={styles.detailValue}>{admissionDate}</Text>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>Session : {courseDetails?.session || 'N/A'}</Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Class :</Text>
-              <Text style={styles.detailValue}>{className || 'N/A'}</Text>
+            <View style={styles.infoBoxAlt}>
+              <Text style={styles.infoText}>Admission No : {admissionNo}</Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Course :</Text>
-              <Text style={styles.detailValue}>{courseDetails?.courseId?.name || 'N/A'}</Text>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>Admission Date : {admissionDate}</Text>
             </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Batch :</Text>
-              <Text style={styles.detailValue}>{courseDetails?.batchId?.batchName || 'N/A'}</Text>
-            </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Session :</Text>
-              <Text style={styles.detailValue}>{courseDetails?.session || new Date().getFullYear() + 1}</Text>
-            </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Admission Received By :</Text>
-              <Text style={styles.detailValue}>{inchargeName || 'N/A'}</Text>
+            <View style={styles.infoBoxLast}>
+              <Text style={styles.infoText}>Mobile Number : {mobileNumber || 'N/A'}</Text>
             </View>
           </View>
         </View>
-
-        {/* Declaration Section */}
-        <View style={styles.declarationSection}>
-          <Text style={styles.declarationTitle}>Declaration</Text>
-          <Text style={styles.declarationText}>
-            I, Mr/Mrs ________________________ S/o or D/O ________________________ hereby declare that the information provided above is true, complete and accurate to the best of my knowledge. I agree to obey the rules and regulations of the institution. I understand that any false information provided by me can lead to cancellation of my admission without any refund. I also understand that failure to abide by the rules and regulations may result in disciplinary action against me.
-          </Text>
-        </View>
-
-        {/* Signatures */}
-        <View style={styles.signatureRow}>
-          <View style={styles.signatureBox}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Signature of Student/Parent</Text>
+        <View style={styles.bottomSection}>
+          <View style={styles.declaration}>
+            <View style={styles.declarationHeader}>
+              <Text style={styles.declarationTitle}>DECLARATION</Text>
+              <View style={{textAlign: 'left'}}>
+                <Text style={styles.receivedBy}>ADMISSION RECEIVED BY</Text>
+                <Text style={styles.receivedBy}>{inchargeName || 'N/A'}</Text>
+              </View>
+            </View>
+            <Text style={styles.declarationText}>
+              I Mr/Mrs.................................................................S/o or D/o....................................................hereby declare that
+              The information provided in this form and all supporting documents is true, complete,
+              and accurate to the best of my knowledge.
+              {'\n'}I Will Obey all the Rules and Regulations Of the Institution and be fully responsible for
+              violating the rules.
+              {'\n'}I understand that any false or misleading information may result in the cancellation of my
+              admission and after payble no any payment refunded by institution.
+              {'\n'}I agree to abide by the rules and regulations of Target Board and understand that failure
+              to do so may result in disciplinary action.
+            </Text>
           </View>
-          
+        </View>
+        <View style={styles.signatures}>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
             <Text style={styles.signatureLabel}>Signature of Authority</Text>
+          </View>
+          <View style={styles.signatureBox}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Signature of Student/Parent</Text>
           </View>
         </View>
       </Page>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCourses, useBatches, useCreateStudent, useAdditionalCourses } from '../hooks';
+import { useCourses, useBatches, useCreateStudent, useAdditionalCourses, useFeeDiscounts } from '../hooks';
 import {
   Box,
   Card,
@@ -94,6 +94,11 @@ const StudentRegistrationPage = ({ onBack }) => {
     transactionId: '',
     referenceNumber: '',
     
+    // Discount Information
+    discountCode: '',
+    discountAmount: '',
+    discountFile: null,
+    
     // File Upload
     imageFile: null
   });
@@ -105,16 +110,18 @@ const StudentRegistrationPage = ({ onBack }) => {
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
   const [apiError, setApiError] = useState(null);
 
-  // API hooks for courses, batches, and additional courses
+  // API hooks for courses, batches, additional courses, and fee discounts
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
   const { data: batchesData, isLoading: batchesLoading } = useBatches();
   const { data: additionalCoursesData, isLoading: additionalCoursesLoading } = useAdditionalCourses();
+  const { data: feeDiscountsData, isLoading: feeDiscountsLoading } = useFeeDiscounts();
   const createStudentMutation = useCreateStudent();
 
-  // Extract courses, batches, and additional courses from API response
+  // Extract courses, batches, additional courses, and fee discounts from API response
   const courses = coursesData?.items || coursesData?.data?.items || [];
   const batches = batchesData?.data?.batches || batchesData?.batches || [];
   const additionalCourses = additionalCoursesData?.items || additionalCoursesData?.data?.items || [];
+  const feeDiscounts = feeDiscountsData?.data || feeDiscountsData || [];
   
 
 
@@ -368,6 +375,23 @@ const StudentRegistrationPage = ({ onBack }) => {
         } else {
           setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
         }
+        
+        // Recalculate discount if one is selected
+        if (formData.discountCode) {
+          const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
+          if (selectedDiscount) {
+            const courseFee = formData.paymentType === 'EMI' && selectedCourse.emiFee > 0 ? selectedCourse.emiFee : selectedCourse.fee;
+            let discountAmount = 0;
+            
+            if (selectedDiscount.discountType === 'percentage') {
+              discountAmount = (courseFee * selectedDiscount.percentage) / 100;
+            } else {
+              discountAmount = selectedDiscount.amount;
+            }
+            
+            setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
+          }
+        }
       }
     }
     
@@ -380,7 +404,24 @@ const StudentRegistrationPage = ({ onBack }) => {
         const additionalFee = formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee > 0 
           ? selectedAdditionalCourse.emiFee 
           : selectedAdditionalCourse.fee || 0;
-        setFormData(prev => ({ ...prev, courseFee: (currentFee + additionalFee).toString() }));
+        const newCourseFee = currentFee + additionalFee;
+        setFormData(prev => ({ ...prev, courseFee: newCourseFee.toString() }));
+        
+        // Recalculate discount if one is selected
+        if (formData.discountCode) {
+          const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
+          if (selectedDiscount) {
+            let discountAmount = 0;
+            
+            if (selectedDiscount.discountType === 'percentage') {
+              discountAmount = (newCourseFee * selectedDiscount.percentage) / 100;
+            } else {
+              discountAmount = selectedDiscount.amount;
+            }
+            
+            setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
+          }
+        }
       }
     }
     
@@ -388,13 +429,52 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (field === 'paymentType') {
       const selectedCourse = courses.find(course => course._id === formData.courseId);
       if (selectedCourse) {
+        let newCourseFee = 0;
         if (value === 'EMI' && selectedCourse.emiFee > 0) {
           // Set EMI fee as course fee
-          setFormData(prev => ({ ...prev, courseFee: selectedCourse.emiFee.toString() }));
+          newCourseFee = selectedCourse.emiFee;
         } else {
           // Set regular fee as course fee
-          setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
+          newCourseFee = selectedCourse.fee;
         }
+        setFormData(prev => ({ ...prev, courseFee: newCourseFee.toString() }));
+        
+        // Recalculate discount if one is selected
+        if (formData.discountCode) {
+          const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
+          if (selectedDiscount) {
+            let discountAmount = 0;
+            
+            if (selectedDiscount.discountType === 'percentage') {
+              discountAmount = (newCourseFee * selectedDiscount.percentage) / 100;
+            } else {
+              discountAmount = selectedDiscount.amount;
+            }
+            
+            setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
+          }
+        }
+      }
+    }
+    
+    // Auto-calculate discount amount when discount code is selected
+    if (field === 'discountCode') {
+      if (value) {
+        const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === value);
+        if (selectedDiscount) {
+          const courseFee = parseFloat(formData.courseFee) || 0;
+          let discountAmount = 0;
+          
+          if (selectedDiscount.discountType === 'percentage') {
+            discountAmount = (courseFee * selectedDiscount.percentage) / 100;
+          } else {
+            discountAmount = selectedDiscount.amount;
+          }
+          
+          setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
+        }
+      } else {
+        setFormData(prev => ({ ...prev, discountAmount: '' }));
       }
     }
   };
@@ -454,7 +534,10 @@ const StudentRegistrationPage = ({ onBack }) => {
         session: formData.session,
         paymentMode: formData.paymentMode || '',
         transactionId: formData.transactionId || '',
-        referenceNumber: formData.referenceNumber || ''
+        referenceNumber: formData.referenceNumber || '',
+        discountCode: formData.discountCode || '',
+        discountAmount: formData.discountAmount || '',
+        discountFile: formData.discountFile || ''
       };
       
       // Format courseDetails exactly like Postman (compact JSON)
@@ -1889,9 +1972,13 @@ const StudentRegistrationPage = ({ onBack }) => {
                         value={formData.courseFee}
                         onChange={(e) => handleInputChange('courseFee', e.target.value)}
                         size="small"
+                        InputProps={{
+                          readOnly: !!formData.courseId,
+                        }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
+                            backgroundColor: formData.courseId ? '#f5f5f5' : 'transparent',
                             '& fieldset': {
                               borderColor: '#d1d5db',
                             },
@@ -1903,6 +1990,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             },
                           },
                         }}
+                        helperText={formData.courseId ? 'Auto-calculated from selected course' : 'Select a course to auto-calculate fee'}
                       />
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
@@ -2091,6 +2179,100 @@ const StudentRegistrationPage = ({ onBack }) => {
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: '4px',
+                            '& fieldset': {
+                              borderColor: '#d1d5db',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#9ca3af',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#1976d2',
+                            },
+                          },
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: '#374151',
+                            '&.Mui-focused': {
+                              color: '#1976d2',
+                            },
+                            '&.MuiInputLabel-shrink': {
+                              color: '#374151',
+                            },
+                          }}
+                        >
+                          Discount Code
+                        </InputLabel>
+                        <Select
+                          value={formData.discountCode}
+                          onChange={(e) => handleInputChange('discountCode', e.target.value)}
+                          label="Discount Code"
+                          sx={{
+                            minWidth: '200px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '4px',
+                              '& fieldset': {
+                                borderColor: '#d1d5db',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#9ca3af',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#1976d2',
+                              },
+                            },
+                            '& .MuiSelect-icon': {
+                              color: '#6b7280',
+                            },
+                            '& .MuiInputLabel-root': {
+                              backgroundColor: 'white',
+                              paddingRight: 1,
+                            },
+                          }}
+                        >
+                          <MenuItem value="">No Discount</MenuItem>
+                          {feeDiscountsLoading ? (
+                            <MenuItem disabled>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CircularProgress size={16} />
+                                Loading discounts...
+                              </Box>
+                            </MenuItem>
+                          ) : feeDiscounts.length === 0 ? (
+                            <MenuItem disabled>
+                              No discounts available
+                            </MenuItem>
+                          ) : (
+                            feeDiscounts.map((discount) => (
+                              <MenuItem key={discount._id} value={discount.discountCode}>
+                                {discount.name} ({discount.discountCode}) - {discount.discountType === 'percentage' ? `${discount.percentage}%` : `₹${discount.amount}`}
+                              </MenuItem>
+                            ))
+                          )}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+                      <TextField
+                        fullWidth
+                        label="Discount Amount"
+                        value={formData.discountAmount}
+                        onChange={(e) => handleInputChange('discountAmount', e.target.value)}
+                        placeholder="Auto-calculated or enter manually"
+                        size="small"
+                        type="number"
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '4px',
+                            backgroundColor: '#f5f5f5',
                             '& fieldset': {
                               borderColor: '#d1d5db',
                             },

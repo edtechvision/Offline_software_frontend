@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -24,6 +24,10 @@
   
   .font-mona {
     font-family: 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  .font-montserrat {
+    font-family: 'Montserrat', 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   
   /* Typography scale with both fonts */

@@ -1,5 +1,19 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+Font.register({
+  family: 'Montserrat',
+  fonts: [
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXpsog.woff2',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw3aXpsog.woff2',
+      fontWeight: 'bold',
+    },
+  ],
+});
 
 // Create styles for the PDF
 const styles = StyleSheet.create({
@@ -7,166 +21,245 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 15,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Montserrat',
     position: 'relative',
   },
   
   // Header Styles
   header: {
+    display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    borderBottom: '2px solid #1976d2',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    borderBottom: '1px solid #000000',
     paddingBottom: 8,
+    position: 'relative',
+    zIndex: 1,
   },
   
   logo: {
-    width: 45,
-    height: 45,
-    marginBottom: 6,
-    borderRadius: 22,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    flexShrink: 0,
+  },
+  
+  headerText: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 16,
   },
   
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: 3,
-    textTransform: 'uppercase',
+    color: '#000000',
+    marginBottom: 2,
     letterSpacing: 1,
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
   },
   
   subtitle: {
-    fontSize: 11,
-    color: '#374151',
-    marginBottom: 1,
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#000000',
+    fontWeight: 'normal',
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+    marginBottom: 4,
+    marginTop: 2,
   },
   
-  contact: {
-    fontSize: 10,
-    color: '#6B7280',
-    marginBottom: 3,
+  tagline: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+  },
+  
+  phoneText: {
+    fontSize: 14,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+  },
+  
+  // Watermark
+  watermark: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    fontSize: 200,
+    color: '#f3f4f6',
+    fontWeight: 700,
+    zIndex: 0,
+    opacity: 0.05,
+  },
+  
+  // Background Logo Watermark
+  backgroundLogo: {
+    position: 'absolute',
+    top: '40%',
+    left: '30%',
+    transform: 'translate(-50%, -50%)',
+    width: 300,
+    height: 300,
+    opacity: 0.3,
+    zIndex: 0,
   },
   
   // Receipt Title
   receiptTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    backgroundColor: '#000000',
+    color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 12,
-    color: '#1976d2',
-    textTransform: 'uppercase',
+    paddingVertical: 4,
+    marginBottom: 8,
+    position: 'relative',
+    zIndex: 1,
+  },
+  
+  receiptTitleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   // Main Content Layout
   mainContent: {
+    display: 'flex',
     flexDirection: 'row',
-    marginBottom: 12,
+    border: '1px solid #000000',
+    position: 'relative',
+    zIndex: 1,
+    marginBottom: 8,
   },
   
   leftColumn: {
     flex: 1,
-    marginRight: 15,
+    borderRight: '1px solid #000000',
+    padding: 8,
+    minHeight: 200,
   },
   
   rightColumn: {
-    flex: 1,
+    width: 250,
+    display: 'flex',
+    flexDirection: 'column',
   },
   
-  // Student Photo Section
-  photoSection: {
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingRight: '80px',
-  },
-  
-  studentPhoto: {
-    width: 120,
-    height: 120,
-    border: '1px solid #000000',
-    borderRadius: 4,
-    marginBottom: 6,
+  // Student Details Title
+  studentDetailsTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 8,
+    textDecoration: 'underline',
+    fontFamily: 'Montserrat',
   },
   
   // Detail Rows
   detailRow: {
-    flexDirection: 'row',
-    marginBottom: 5,
-    alignItems: 'center',
+    marginBottom: 4,
   },
   
-  detailLabel: {
-    fontSize: 9,
-    color: '#374151',
-    width: 120,
+  detailText: {
+    fontSize: 12,
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
-  detailValue: {
-    fontSize: 9,
-    color: '#1976d2',
-    fontWeight: 'bold',
+  // Info Boxes for Right Column
+  infoBox: {
+    borderBottom: '1px solid #000000',
+    padding: 6,
+  },
+  
+  infoBoxAlt: {
+    borderBottom: '1px solid #000000',
+    padding: 6,
+    backgroundColor: '#f5f5f5',
+  },
+  
+  infoBoxLast: {
+    padding: 6,
+    backgroundColor: '#f5f5f5',
     flex: 1,
   },
   
-  // Fee Details Section
-  feeDetailsSection: {
-    marginTop: 15,
-    padding: 10,
-    border: '1px solid #E5E7EB',
-    borderRadius: 4,
+  infoText: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
-  feeDetailsTitle: {
-    fontSize: 11,
+  // Fee Receipt Table
+  feeReceiptTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: 6,
     textAlign: 'center',
+    marginBottom: 8,
+    color: '#000000',
+    fontFamily: 'Montserrat',
   },
   
   feeTable: {
-    marginBottom: 10,
-  },
-  
-  feeTableRow: {
-    flexDirection: 'row',
-    marginBottom: 3,
-    paddingVertical: 2,
+    border: '1px solid #000000',
+    marginBottom: 8,
   },
   
   feeTableHeader: {
     flexDirection: 'row',
-    marginBottom: 5,
-    paddingVertical: 3,
-    backgroundColor: '#f5f5f5',
-    borderBottom: '1px solid #E5E7EB',
+    backgroundColor: '#000000',
+    paddingVertical: 4,
   },
   
   feeTableHeaderText: {
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: 'bold',
-    color: '#374151',
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+  },
+  
+  feeTableRow: {
+    flexDirection: 'row',
+    borderBottom: '1px solid #000000',
+    paddingVertical: 4,
+    minHeight: 20,
   },
   
   feeTableCell: {
-    fontSize: 8,
-    color: '#374151',
+    fontSize: 10,
+    color: '#000000',
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 2,
   },
   
   feeTableCellAmount: {
-    fontSize: 8,
-    color: '#1976d2',
+    fontSize: 10,
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+    paddingHorizontal: 2,
   },
   
   // Payment Summary
   paymentSummary: {
-    marginTop: 10,
+    marginTop: 8,
     padding: 8,
-    backgroundColor: '#f9f9f9',
-    border: '1px solid #E5E7EB',
-    borderRadius: 4,
+    border: '1px solid #000000',
+    borderTop: 'none',
   },
   
   summaryRow: {
@@ -176,15 +269,17 @@ const styles = StyleSheet.create({
   },
   
   summaryLabel: {
-    fontSize: 9,
-    color: '#374151',
+    fontSize: 10,
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   summaryValue: {
-    fontSize: 9,
-    color: '#1976d2',
+    fontSize: 10,
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   totalRow: {
@@ -192,67 +287,51 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 5,
     paddingTop: 5,
-    borderTop: '1px solid #E5E7EB',
+    borderTop: '1px solid #000000',
   },
   
   totalLabel: {
     fontSize: 10,
-    color: '#1976d2',
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   totalValue: {
     fontSize: 10,
-    color: '#1976d2',
+    color: '#000000',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   // Signature Section
-  signatureRow: {
+  signatures: {
+    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: 12,
+    position: 'relative',
+    zIndex: 1,
   },
   
   signatureBox: {
-    width: 120,
     textAlign: 'center',
   },
   
   signatureLine: {
-    borderBottom: '1px solid #374151',
-    marginBottom: 3,
-    height: 15,
+    borderBottom: '1px dotted #000000',
+    paddingBottom: 4,
+    minWidth: 200,
+    display: 'inline-block',
+    height: 10,
   },
   
   signatureLabel: {
-    fontSize: 7,
-    color: '#374151',
-  },
-  
-  // Watermark
-  watermark: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    fontSize: 80,
-    color: '#F3F4F6',
+    fontSize: 12,
+    color: '#000000',
     fontWeight: 'bold',
-    zIndex: -1,
-    opacity: 0.1,
-  },
-  
-  // Background Logo Watermark
-  backgroundLogo: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 200,
-    height: 200,
-    opacity: 0.05,
-    zIndex: -1,
+    marginTop: 4,
+    fontFamily: 'Montserrat',
   },
 });
 
@@ -311,168 +390,150 @@ const FeeCollectReceipt = ({ data }) => {
         
         {/* Header */}
         <View style={styles.header}>
-          <Image 
-            style={styles.logo} 
-            src="/logo.png" 
-          />
-          <Text style={styles.title}>TARGET BOARD</Text>
-          <Text style={styles.subtitle}>TARGET BOARD JEHANABAD 804408</Text>
-          <Text style={styles.subtitle}>Bihar Board NO-1 Educational Platform</Text>
-          <Text style={styles.contact}>P.H No. -7779855339</Text>
+          <View>
+            <Image 
+              style={styles.logo} 
+              src="/logo.png" 
+            />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>TARGET BOARD</Text>
+            <Text style={styles.subtitle}>TARGET BOARD JEHANABAD 804408</Text>
+            <Text style={styles.tagline}>Bihar Board NO-1 Educational Platform</Text>
+            <Text style={styles.phoneText}>+91 7779855339</Text>
+          </View>
         </View>
 
         {/* Receipt Title */}
-        <Text style={styles.receiptTitle}>Fee Collection Receipt</Text>
+        <View style={styles.receiptTitle}>
+          <Text style={styles.receiptTitleText}>FEE RECEIPT</Text>
+        </View>
 
         {/* Main Content */}
         <View style={styles.mainContent}>
-          {/* Left Column - Student Photo and Basic Info */}
+          {/* Left Column - Student Details */}
           <View style={styles.leftColumn}>
-            {/* Student Photo */}
-            <View style={styles.photoSection}>
-              {student?.image && student.image.trim() !== '' ? (
-                <Image 
-                  style={styles.studentPhoto} 
-                  src={student.image}
-                  cache={false}
-                />
-              ) : (
-                <View style={[styles.studentPhoto, { backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }]}>
-                  <Text style={{ fontSize: 16, color: '#1976d2', fontWeight: 'bold' }}>
-                    {student?.studentName?.charAt(0)?.toUpperCase() || 'S'}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Student Details */}
+            <Text style={styles.studentDetailsTitle}>Student Details:</Text>
+            
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Name :</Text>
-              <Text style={styles.detailValue}>{student?.studentName || 'N/A'}</Text>
+              <Text style={styles.detailText}>{student?.studentName || 'N/A'}</Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Father's Name :</Text>
-              <Text style={styles.detailValue}>{student?.fathersName || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>F. Name-</Text> {student?.fathersName || 'N/A'}
+              </Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Registration No. :</Text>
-              <Text style={styles.detailValue}>{student?.registrationNo || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Address :</Text> {student?.presentAddress?.fullAddress || 'N/A'}
+              </Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Class :</Text>
-              <Text style={styles.detailValue}>{student?.className || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Class :</Text> {student?.className || 'N/A'}
+              </Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mobile No. :</Text>
-              <Text style={styles.detailValue}>{student?.mobileNumber || 'N/A'}</Text>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Course :</Text> {feeGroup?.name || 'N/A'}
+              </Text>
+            </View>
+            
+            <View style={styles.detailRow}>
+              <Text style={styles.detailText}>
+                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {student?.batchName || 'N/A'}
+              </Text>
             </View>
           </View>
 
-          {/* Right Column - Fee Details */}
+          {/* Right Column - Receipt Details */}
           <View style={styles.rightColumn}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Receipt No. :</Text>
-              <Text style={styles.detailValue}>{receiptNo}</Text>
+            <View style={styles.infoBoxAlt}>
+              <Text style={styles.infoText}>Receipt No : {receiptNo}</Text>
             </View>
             
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Receipt Date :</Text>
-              <Text style={styles.detailValue}>{receiptDate}</Text>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>Date : {receiptDate}</Text>
             </View>
             
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Course :</Text>
-              <Text style={styles.detailValue}>{feeGroup?.name || 'N/A'}</Text>
+            <View style={styles.infoBoxAlt}>
+              <Text style={styles.infoText}>Admission No : {student?.registrationNo || 'N/A'}</Text>
             </View>
             
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Payment Mode :</Text>
-              <Text style={styles.detailValue}>{paymentData?.paymentMode || 'Cash'}</Text>
-            </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Transaction ID :</Text>
-              <Text style={styles.detailValue}>{paymentData?.transactionId || 'N/A'}</Text>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>Next Due Date : {receiptDate}</Text>
             </View>
           </View>
         </View>
 
-        {/* Fee Details Section */}
-        <View style={styles.feeDetailsSection}>
-          <Text style={styles.feeDetailsTitle}>Fee Details</Text>
-          
-          {/* Fee Table */}
-          <View style={styles.feeTable}>
-            {/* Table Header */}
-            <View style={styles.feeTableHeader}>
-              <Text style={[styles.feeTableHeaderText, { flex: 2 }]}>Description</Text>
-              <Text style={[styles.feeTableHeaderText, { flex: 1, textAlign: 'right' }]}>Amount</Text>
-            </View>
-            
-            {/* Fee Items */}
-            <View style={styles.feeTableRow}>
-              <Text style={[styles.feeTableCell, { flex: 2 }]}>Course Fee</Text>
-              <Text style={[styles.feeTableCellAmount, { flex: 1, textAlign: 'right' }]}>{formatCurrency(totalAmount)}</Text>
-            </View>
-            
-            {totalDiscount > 0 && (
-              <View style={styles.feeTableRow}>
-                <Text style={[styles.feeTableCell, { flex: 2 }]}>Discount</Text>
-                <Text style={[styles.feeTableCellAmount, { flex: 1, textAlign: 'right', color: '#4caf50' }]}>-{formatCurrency(totalDiscount)}</Text>
-              </View>
-            )}
-            
-            {totalFine > 0 && (
-              <View style={styles.feeTableRow}>
-                <Text style={[styles.feeTableCell, { flex: 2 }]}>Fine</Text>
-                <Text style={[styles.feeTableCellAmount, { flex: 1, textAlign: 'right', color: '#f44336' }]}>+{formatCurrency(totalFine)}</Text>
-              </View>
-            )}
+        {/* Fee Receipt Table */}
+        <Text style={styles.feeReceiptTitle}>FEE RECEIPT</Text>
+        
+        <View style={styles.feeTable}>
+          {/* Table Header */}
+          <View style={styles.feeTableHeader}>
+            <Text style={[styles.feeTableHeaderText, { flex: 1 }]}>Sl. no.</Text>
+            <Text style={[styles.feeTableHeaderText, { flex: 3 }]}>Particular</Text>
+            <Text style={[styles.feeTableHeaderText, { flex: 1 }]}>Amount</Text>
           </View>
+          
+          {/* Fee Items */}
+          <View style={styles.feeTableRow}>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}>1.</Text>
+            <Text style={[styles.feeTableCell, { flex: 3 }]}>Course Fee (CLASS 11TH BATCH 2025-26)</Text>
+            <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalAmount}</Text>
+          </View>
+          
+          <View style={styles.feeTableRow}>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}>2.</Text>
+            <Text style={[styles.feeTableCell, { flex: 3 }]}>Previous Recieved Amount</Text>
+            <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
+          </View>
+          
+          <View style={styles.feeTableRow}>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}>3.</Text>
+            <Text style={[styles.feeTableCell, { flex: 3 }]}>Amount Recieved</Text>
+            <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
+          </View>
+          
+          <View style={styles.feeTableRow}>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}>-</Text>
+            <Text style={[styles.feeTableCell, { flex: 3, fontWeight: 'bold' }]}>Total Received Amount</Text>
+            <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
+          </View>
+          
+          <View style={styles.feeTableRow}>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}>-</Text>
+            <Text style={[styles.feeTableCell, { flex: 3, fontWeight: 'bold' }]}>Dues Amount</Text>
+            <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{balance}</Text>
+          </View>
+        </View>
 
-          {/* Payment Summary */}
-          <View style={styles.paymentSummary}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total Fee:</Text>
-              <Text style={styles.summaryValue}>{formatCurrency(totalAmount)}</Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total Paid:</Text>
-              <Text style={styles.summaryValue}>{formatCurrency(totalPaid)}</Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total Discount:</Text>
-              <Text style={styles.summaryValue}>{formatCurrency(totalDiscount)}</Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total Fine:</Text>
-              <Text style={styles.summaryValue}>{formatCurrency(totalFine)}</Text>
-            </View>
-            
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Balance Amount:</Text>
-              <Text style={styles.totalValue}>{formatCurrency(balance)}</Text>
-            </View>
+        {/* Payment Information */}
+        <View style={styles.paymentSummary}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Received Amount in Word: (Two Thousand Rupees Only)</Text>
+          </View>
+          
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Mode of Payment: Cash</Text>
           </View>
         </View>
 
         {/* Signatures */}
-        <View style={styles.signatureRow}>
+        <View style={styles.signatures}>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Signature of Student/Parent</Text>
+            <Text style={styles.signatureLabel}>Signature of Authority</Text>
           </View>
           
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Signature of Authority</Text>
+            <Text style={styles.signatureLabel}>Signature of Student/Parent</Text>
           </View>
         </View>
       </Page>

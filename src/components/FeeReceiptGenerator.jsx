@@ -154,7 +154,8 @@ const FeeReceiptGenerator = ({
         PaperProps={{
           sx: {
             borderRadius: '8px',
-            minHeight: '500px'
+            minHeight: '500px',
+            fontFamily: 'Montserrat, Arial, sans-serif'
           }
         }}
       >

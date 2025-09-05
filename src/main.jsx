@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import { Buffer } from 'buffer'
+
+// Make Buffer available globally
+window.Buffer = Buffer
 
 const theme = createTheme({
   palette: {

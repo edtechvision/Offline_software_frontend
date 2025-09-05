@@ -1,5 +1,20 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+// Register Montserrat font from Google Fonts
+Font.register({
+  family: 'Montserrat',
+  fonts: [
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXpsog.woff2',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw3aXpsog.woff2',
+      fontWeight: 'bold',
+    },
+  ],
+});
 
 // Create styles for the PDF
 const styles = StyleSheet.create({
@@ -7,7 +22,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 20,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Montserrat',
     position: 'relative',
   },
   
@@ -18,6 +33,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderBottom: '2px solid #3B82F6',
     paddingBottom: 15,
+  },
+  subtitleText: {
+    fontSize: 14,
+    color: '#000000',
+    fontWeight: 100, // Using the thin font weight
+    fontFamily: 'Montserrat',
+    textAlign: 'center',
+    marginBottom: 4,
+    marginTop: 2,
   },
   
   logo: {

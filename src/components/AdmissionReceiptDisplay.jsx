@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography, Avatar, Divider } from '@mui/material';
+import { CallEnd, Phone, PhoneEnabled } from '@mui/icons-material';
 
 const AdmissionReceiptDisplay = ({ data }) => {
   const {
@@ -22,6 +23,9 @@ const AdmissionReceiptDisplay = ({ data }) => {
     registrationNo,
     image
   } = data;
+
+
+  console.log(data, "data");
 
   // Calculate admission date (current date)
   const admissionDate = new Date().toLocaleDateString('en-GB', {
@@ -52,13 +56,13 @@ const AdmissionReceiptDisplay = ({ data }) => {
   };
 
   return (
-    <Box sx={{ 
-      width: '100%', 
-      height: '100%', 
-      backgroundColor: 'white',
-      fontFamily: 'Arial, sans-serif',
+    <Box sx={{
+      width: '100%',
+      height: '100%',
+      fontFamily: 'Montserrat, Arial, sans-serif !important',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+
     }}>
       {/* Watermark */}
       <Box sx={{
@@ -66,286 +70,421 @@ const AdmissionReceiptDisplay = ({ data }) => {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        fontSize: '120px',
+        fontSize: '200px',
         color: '#f3f4f6',
         fontWeight: 'bold',
-        zIndex: -1,
-        opacity: 0.1,
+        zIndex: 0,
+        opacity: 0.05,
         pointerEvents: 'none'
       }}>
         TB
       </Box>
 
-      {/* Background Logo Watermark */}
-      <Box sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '300px',
-        height: '300px',
-        opacity: 0.05,
-        zIndex: -1,
-        pointerEvents: 'none',
-        backgroundImage: 'url(/logo.png)',
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center'
-      }} />
-
       {/* Header */}
-      <Box sx={{ 
-        textAlign: 'center', 
-        mb: 3, 
-        borderBottom: '2px solid #1976d2',
-        pb: 2
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 2,
+        borderBottom: '1px solid #000',
+        pb: 2,
+        position: 'relative',
+        zIndex: 1
       }}>
-        <Box sx={{ 
-          width: '60px', 
-          height: '60px', 
-          mx: 'auto', 
-          mb: 1,
+        {/* Logo */}
+        <Box sx={{
+          width: '80px',
+          height: '80px',
           borderRadius: '50%',
-          backgroundImage: 'url(/logo.png)',
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center'
-        }} />
-        <Typography sx={{ 
-          fontSize: '28px', 
-          fontWeight: 'bold', 
-          color: '#1976d2', 
-          mb: 0.5,
-          textTransform: 'uppercase',
-          letterSpacing: '2px'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#fff',
+          flexShrink: 0
         }}>
-          TARGET BOARD
-        </Typography>
-        <Typography sx={{ 
-          fontSize: '14px', 
-          color: '#374151', 
-          mb: 0.5,
-          fontWeight: 'bold'
+          <img
+            src="/logo.png"
+            alt="TB Logo"
+            style={{
+              width: '80px',
+              height: '80px',
+              objectFit: 'contain'
+            }}
+          />
+        </Box>
+
+        {/* Header Text - Centered */}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1,
+          mx: 4
         }}>
-          TARGET BOARD JEHANABAD 804408
-        </Typography>
-        <Typography sx={{ 
-          fontSize: '14px', 
-          color: '#374151', 
-          mb: 0.5,
-          fontWeight: 'bold'
-        }}>
-          Bihar Board NO-1 Educational Platform
-        </Typography>
-        <Typography sx={{ 
-          fontSize: '12px', 
-          color: '#6B7280'
-        }}>
-          P.H No. -7779855339
-        </Typography>
+          <Typography sx={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            color: '#000',
+            mb: 0,
+            letterSpacing: '1px',
+            fontFamily: 'Montserrat, Arial, sans-serif !important',
+            textAlign: 'center'
+          }}>
+            TARGET BOARD
+          </Typography>
+          <Typography sx={{
+            fontSize: '14px',
+            color: '#000',
+            fontWeight: 'normal',
+            fontFamily: 'Montserrat, Arial, sans-serif !important',
+            textAlign: 'center'
+          }}>
+            TARGET BOARD JEHANABAD 804408
+          </Typography>
+          <Typography sx={{
+            fontSize: '14px',
+            color: '#000',
+            fontWeight: 'bold',
+            fontFamily: 'Montserrat, Arial, sans-serif !important',
+            textAlign: 'center'
+          }}>
+            Bihar Board NO-1 Educational Platform
+          </Typography>
+          {/* Phone - Right Aligned */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexShrink: 0
+          }}>
+            <Box sx={{
+              width: '20px',
+              height: '20px',
+
+              borderRadius: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Phone />
+            </Box>
+            <Typography sx={{
+              fontSize: '14px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              +91 7779855339
+            </Typography>
+          </Box>
+        </Box>
+
+
       </Box>
 
       {/* Receipt Title */}
-      <Typography sx={{ 
-        fontSize: '20px', 
-        fontWeight: 'bold', 
-        textAlign: 'center', 
-        mb: 3, 
-        color: '#1976d2',
-        textTransform: 'uppercase'
+      <Box sx={{
+        backgroundColor: '#000',
+        color: '#fff',
+        textAlign: 'center',
+        py: 1,
+        mb: 2,
+        position: 'relative',
+        zIndex: 1
       }}>
-        Admission Receipt
-      </Typography>
+        <Typography sx={{
+          fontSize: '18px',
+          fontWeight: 'bold',
+          fontFamily: 'Montserrat, Arial, sans-serif !important'
+        }}>
+          Admission Receipt
+        </Typography>
+      </Box>
 
-      {/* Main Content */}
-      <Box sx={{ display: 'flex', mb: 3 }}>
-        {/* Left Column - Student Photo and Basic Info */}
-        <Box sx={{ flex: 1, pr: 2 }}>
-          {/* Student Photo */}
-          <Box sx={{ textAlign: 'center', mb: 2,paddingRight: '180px' }}>
-            <Avatar
-              src={image}
-              sx={{ 
-                width: 160, 
-                height: 160, 
-                mx: 'auto', 
-                overflow: 'hidden',
-                objectFit: 'contain',
-                border: '1px solid #1976d2',
-                borderRadius: 1,
-                
-              }}
-            >
-              {studentName?.charAt(0) || 'S'}
-            </Avatar>
-          </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2, width: '100%' }}>
+        <Avatar src={image} sx={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #000' }} />
 
-          {/* Student Details */}
+      </Box>
+
+      {/* Main Content Area */}
+      <Box sx={{ display: 'flex', border: '1px solid #000', position: 'relative', zIndex: 1 }}>
+        {/* Left Column - Student Details */}
+        <Box sx={{
+          flex: 1,
+          borderRight: '1px solid #000',
+          p: 2,
+          minHeight: '300px'
+        }}>
+          <Typography sx={{
+            fontSize: '14px',
+            fontWeight: 'bold',
+            color: '#000',
+            mb: 2,
+            textDecoration: 'underline',
+            fontFamily: 'Montserrat, Arial, sans-serif !important'
+          }}>
+            Student Details:
+          </Typography>
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Name :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
               {studentName || 'N/A'}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Father's Name :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {fathersName || 'N/A'}
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>F. Name-</span> {fathersName || 'N/A'}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Date of Birth :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {formatDate(dateOfBirth)}
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>Date of Birth :</span> {formatDate(dateOfBirth)}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Gender :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {gender || 'N/A'}
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>Address :</span> {formatAddress(presentAddress)}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Mobile No. :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {mobileNumber || 'N/A'}
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>Class :</span> {className || 'N/A'}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Permanent Address :
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>Course :</span> {courseDetails?.courseId?.name || 'N/A'}
             </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {formatAddress(presentAddress)}
+          </Box>
+
+          <Box sx={{ mb: 1 }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              <span style={{ fontWeight: 'bold' }}>Batch :</span> {courseDetails?.batchId?.batchName || 'N/A'}
             </Typography>
           </Box>
         </Box>
 
-        {/* Right Column - Admission Details */}
-        <Box sx={{ flex: 1, pl: 2 }}>
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Admission No. :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {admissionNo}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Admission Date :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {admissionDate}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Class :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {className || 'N/A'}
+        {/* Right Column - Admission Info */}
+        <Box sx={{
+          width: '250px',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {/* Date */}
+          <Box sx={{
+            borderBottom: '1px solid #000',
+            p: 1.5,
+            backgroundColor: '#f5f5f5'
+          }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              Date : {admissionDate}
             </Typography>
           </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Course :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {courseDetails?.courseId?.name || 'N/A'}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Batch :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {courseDetails?.batchId?.batchName || 'N/A'}
+
+          {/* Session */}
+          <Box sx={{
+            borderBottom: '1px solid #000',
+            p: 1.5
+          }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              Session : {courseDetails?.session || 'N/A'}
             </Typography>
           </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Session :
-            </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {courseDetails?.session || new Date().getFullYear() + 1}
+
+          {/* Admission No */}
+          <Box sx={{
+            borderBottom: '1px solid #000',
+            p: 1.5,
+            backgroundColor: '#f5f5f5'
+          }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              Admission No : {admissionNo}
             </Typography>
           </Box>
-          
-          <Box sx={{ mb: 1 }}>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#374151', fontWeight: 'bold', display: 'inline-block', width: '140px' }}>
-              Admission Received By :
+
+          {/* Admission Date */}
+          <Box sx={{
+            borderBottom: '1px solid #000',
+            p: 1.5
+          }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              Admission Date : {admissionDate}
             </Typography>
-            <Typography component="span" sx={{ fontSize: '11px', color: '#1976d2', fontWeight: 'bold' }}>
-              {inchargeName || 'N/A'}
+          </Box>
+
+          {/* Mobile Number */}
+          <Box sx={{
+            p: 1.5,
+            backgroundColor: '#f5f5f5',
+            flex: 1
+          }}>
+            <Typography sx={{
+              fontSize: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              Mobile Number : {mobileNumber || 'N/A'}
             </Typography>
           </Box>
         </Box>
       </Box>
 
-      {/* Declaration Section */}
-      <Box sx={{ 
-        mt: 4, 
-        p: 2, 
-        border: '1px solid #E5E7EB', 
-        borderRadius: 1 
-      }}>
-        <Typography sx={{ 
-          fontSize: '14px', 
-          fontWeight: 'bold', 
-          color: '#1976d2', 
-          mb: 1, 
-          textAlign: 'center' 
+      {/* Bottom Section */}
+      <Box sx={{ display: 'flex', border: '1px solid #000', borderTop: 'none', position: 'relative', zIndex: 1 }}>
+        {/* Declaration */}
+        <Box sx={{
+          flex: 1,
+          borderRight: '1px solid #000',
+          p: 2
         }}>
-          Declaration
-        </Typography>
-        <Typography sx={{ 
-          fontSize: '10px', 
-          color: '#374151', 
-          lineHeight: 1.4, 
-          mb: 2 
-        }}>
-          I, Mr/Mrs ________________________ S/o or D/O ________________________ hereby declare that the information provided above is true, complete and accurate to the best of my knowledge. I agree to obey the rules and regulations of the institution. I understand that any false information provided by me can lead to cancellation of my admission without any refund. I also understand that failure to abide by the rules and regulations may result in disciplinary action against me.
-        </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography sx={{
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: '#000',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              DECLARATION
+            </Typography>
+            <Typography sx={{
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: '#000',
+              fontFamily: 'Montserrat, Arial, sans-serif !important'
+            }}>
+              ADMISSION RECEIVED BY {inchargeName || 'N/A'}
+            </Typography>
+          </Box>
+
+          <Typography sx={{
+            fontSize: '10px',
+            color: '#000',
+            lineHeight: 1.4,
+            textAlign: 'justify',
+            fontWeight: 'bold',
+            fontFamily: 'Montserrat, Arial, sans-serif !important'
+          }}>
+            I Mr/Mrs.................................................................S/o or D/o....................................................hereby declare that
+            The information provided in this form and all supporting documents is true, complete,
+            and accurate to the best of my knowledge.
+            <br />I Will Obey all the Rules and Regulations Of the Institution and be fully responsible for
+            violating the rules.
+            <br />I understand that any false or misleading information may result in the cancellation of my
+            admission and after payble no any payment refunded by institution.
+            <br />I agree to abide by the rules and regulations of Target Board and understand that failure
+            to do so may result in disciplinary action.
+          </Typography>
+        </Box>
       </Box>
 
       {/* Signatures */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        mt: 3 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        mt: 3,
+        position: 'relative',
+        zIndex: 1
       }}>
-        <Box sx={{ width: '150px', textAlign: 'center' }}>
-          <Divider sx={{ mb: 1 }} />
-          <Typography sx={{ fontSize: '9px', color: '#374151' }}>
-            Signature of Student/Parent
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{
+            fontSize: '10px',
+            color: '#000',
+            borderBottom: '1px dotted #000',
+            pb: 1,
+            minWidth: '200px',
+            display: 'inline-block'
+          }}>
+          </Typography>
+          <Typography sx={{
+            fontSize: '12px',
+            color: '#000',
+            fontWeight: 'bold',
+            mt: 1,
+            fontFamily: 'Montserrat, Arial, sans-serif !important'
+          }}>
+            Signature of Authority
           </Typography>
         </Box>
-        
-        <Box sx={{ width: '150px', textAlign: 'center' }}>
-          <Divider sx={{ mb: 1 }} />
-          <Typography sx={{ fontSize: '9px', color: '#374151' }}>
-            Signature of Authority
+
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{
+            fontSize: '10px',
+            color: '#000',
+            borderBottom: '1px dotted #000',
+            pb: 1,
+            minWidth: '200px',
+            display: 'inline-block'
+          }}>
+          </Typography>
+          <Typography sx={{
+            fontSize: '12px',
+            color: '#000',
+            fontWeight: 'bold',
+            mt: 1,
+            fontFamily: 'Montserrat, Arial, sans-serif !important'
+          }}>
+            Signature of Student/Parent
           </Typography>
         </Box>
       </Box>
