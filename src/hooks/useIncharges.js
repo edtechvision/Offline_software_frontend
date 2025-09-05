@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inchargeService } from '../services/apiService';
 
-export const useIncharges = (params = {}) => {
+export const useIncharges = (params = {}, options = {}) => {
   return useQuery({
     queryKey: ['incharges', params],
     queryFn: () => inchargeService.getIncharges(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    ...options
   });
 };
 

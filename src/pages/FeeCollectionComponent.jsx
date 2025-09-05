@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useStudentFees, useFeeDiscounts, useCollectPayment, useRevertPayment } from '../hooks';
+import { useStudentFees, useFeeDiscounts, useCollectPayment, useRevertPayment, useIncharges } from '../hooks';
+
 import { pdf } from '@react-pdf/renderer';
 import FeeCollectReceipt from '../components/FeeCollectReceipt';
 import IndividualFeeReceipt from '../components/IndividualFeeReceipt';
@@ -58,11 +59,17 @@ import {
   CalendarToday as CalendarIcon,
   Receipt as ReceiptIcon
 } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useStudent } from '../hooks';
+import { useAuthContext } from '../contexts/AuthContext';
+
 
 const FeeCollectionComponent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { userRole } = useAuthContext();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,7 +83,10 @@ const FeeCollectionComponent = () => {
     discountCode: '',
     discountAmount: 0,
     fine: 0,
-    paymentDate: new Date().toISOString().split('T')[0]
+    paymentDate: new Date().toISOString().split('T')[0],
+    nextPaymentDueDate: null,
+    collectedBy: '',
+    inchargeCode: ''
   });
   const [calculatedDiscount, setCalculatedDiscount] = useState(0);
   const [discountDetails, setDiscountDetails] = useState(null);
@@ -85,6 +95,8 @@ const FeeCollectionComponent = () => {
   const [revertDialog, setRevertDialog] = useState({ open: false, feeId: null, receiptNo: null });
   const [pdfLoading, setPdfLoading] = useState(false);
   const [individualPdfLoading, setIndividualPdfLoading] = useState({});
+  const [validationErrors, setValidationErrors] = useState({});
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, action: null });
 
   // Fetch student data
   const { data: studentData, isLoading, error: studentError } = useStudent(id);
@@ -94,6 +106,11 @@ const FeeCollectionComponent = () => {
   
   // Fetch discount codes
   const { data: discountsData } = useFeeDiscounts();
+  
+  // Fetch incharges for center users
+  const { data: inchargesData } = useIncharges({}, { enabled: userRole !== 'admin' });
+
+  console.log("inchargesData:", inchargesData)
   
   // Fee collection mutation
   const collectPaymentMutation = useCollectPayment();
@@ -114,6 +131,16 @@ const FeeCollectionComponent = () => {
       setLoading(false);
     }
   }, [studentData, studentError, feesData, feesError, isLoading, feesLoading]);
+
+  // Set collectedBy based on user role
+  useEffect(() => {
+    if (userRole === 'admin') {
+      setPaymentData(prev => ({ ...prev, collectedBy: 'Admin' }));
+    } else {
+      setPaymentData(prev => ({ ...prev, collectedBy: '' }));
+    }
+  }, [userRole]);
+
 
   // Map API data to fee groups structure
   const feeGroups = React.useMemo(() => {
@@ -163,6 +190,24 @@ const FeeCollectionComponent = () => {
     });
   }, [feesData]);
 
+  // Clear validation errors when form becomes valid
+  useEffect(() => {
+    // Check if form is valid and clear errors
+    const hasAmount = paymentData.amount && parseFloat(paymentData.amount) > 0;
+    const hasValidAmount = hasAmount && (() => {
+      const selectedFeeGroups = feeGroups.filter(fee => selectedFees.includes(fee.id));
+      const totalPendingAmount = selectedFeeGroups.reduce((sum, fee) => sum + fee.balance, 0);
+      const paymentAmount = parseFloat(paymentData.amount);
+      return paymentAmount <= totalPendingAmount;
+    })();
+    const hasIncharge = userRole === 'admin' || paymentData.inchargeCode;
+    
+    // If all validations pass, clear errors
+    if (hasValidAmount && hasIncharge && Object.keys(validationErrors).length > 0) {
+      setValidationErrors({});
+    }
+  }, [paymentData.amount, paymentData.inchargeCode, selectedFees, userRole, feeGroups, validationErrors]);
+
   const handleBack = () => {
     navigate('/fee/collect');
   };
@@ -192,6 +237,8 @@ const FeeCollectionComponent = () => {
       });
       return;
     }
+    // Clear validation errors when opening dialog
+    setValidationErrors({});
     setOpenPaymentDialog(true);
   };
 
@@ -233,18 +280,69 @@ const FeeCollectionComponent = () => {
 
   // Handle amount change
   const handleAmountChange = (amount) => {
-    setPaymentData({ ...paymentData, amount });
+    // Only allow numeric input and prevent negative values
+    const numericValue = amount.replace(/[^0-9.]/g, '');
+    const parsedAmount = parseFloat(numericValue);
+    
+    // Set the amount first, then validate
+    setPaymentData({ ...paymentData, amount: numericValue });
+    
+    // Check if amount exceeds pending amount for validation display
+    if (numericValue && selectedFees.length > 0) {
+      const selectedFeeGroups = feeGroups.filter(fee => selectedFees.includes(fee.id));
+      const totalPendingAmount = selectedFeeGroups.reduce((sum, fee) => sum + fee.balance, 0);
+      
+      if (parsedAmount > totalPendingAmount) {
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          amount: `Payment amount (₹${parsedAmount}) cannot exceed pending amount (₹${totalPendingAmount})` 
+        }));
+      } else {
+        setValidationErrors(prev => ({ ...prev, amount: '' }));
+      }
+    } else {
+      setValidationErrors(prev => ({ ...prev, amount: '' }));
+    }
+    
     if (paymentData.discountCode) {
-      const discountAmount = calculateDiscount(paymentData.discountCode, parseFloat(amount));
+      const discountAmount = calculateDiscount(paymentData.discountCode, parsedAmount);
       setPaymentData(prev => ({ ...prev, discountAmount }));
     }
   };
 
-  const handlePaymentSubmit = async () => {
+  // Validate payment form
+  const validatePaymentForm = () => {
+    const errors = {};
+    
+    // Amount validation
     if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
+      errors.amount = 'Please enter a valid payment amount';
+    } else {
+      // Check if amount exceeds pending amount for selected fees
+      const selectedFeeGroups = feeGroups.filter(fee => selectedFees.includes(fee.id));
+      const totalPendingAmount = selectedFeeGroups.reduce((sum, fee) => sum + fee.balance, 0);
+      const paymentAmount = parseFloat(paymentData.amount);
+      
+      if (paymentAmount > totalPendingAmount) {
+        errors.amount = `Payment amount (₹${paymentAmount}) cannot exceed pending amount (₹${totalPendingAmount})`;
+      }
+    }
+    
+    // Incharge validation for non-admin users
+    if (userRole !== 'admin' && !paymentData.inchargeCode) {
+      errors.inchargeCode = 'Please select an incharge';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handlePaymentSubmit = async () => {
+    // Validate form first
+    if (!validatePaymentForm()) {
       setSnackbar({
         open: true,
-        message: 'Please enter a valid payment amount',
+        message: 'Please fix validation errors before submitting',
         severity: 'error'
       });
       return;
@@ -258,6 +356,23 @@ const FeeCollectionComponent = () => {
       });
       return;
     }
+
+    // Show confirmation dialog before API call
+    setConfirmDialog({ 
+      open: true, 
+      action: 'submit' 
+    });
+  };
+
+  const confirmPaymentSubmit = async () => {
+    setConfirmDialog({ open: false, action: null });
+    
+    // Show processing toast
+    setSnackbar({
+      open: true,
+      message: `Processing payment of ₹${paymentData.amount}...`,
+      severity: 'info'
+    });
 
     try {
       // For now, collect payment for the first selected fee
@@ -284,8 +399,15 @@ const FeeCollectionComponent = () => {
         discountCode: paymentData.discountCode,
         discountAmount: paymentData.discountAmount,
         fine: paymentData.fine,
-        discountFile: discountFile
+        discountFile: discountFile,
+        inchargeCode: paymentData.inchargeCode,
+        nextPaymentDueDate: paymentData.nextPaymentDueDate ? paymentData.nextPaymentDueDate.toISOString().split('T')[0] : ''
       };
+
+      // Only include collectedBy field when user role is 'admin'
+      if (userRole === 'admin') {
+        paymentPayload.collectedBy = paymentData.collectedBy;
+      }
 
       await collectPaymentMutation.mutateAsync(paymentPayload);
 
@@ -298,6 +420,7 @@ const FeeCollectionComponent = () => {
       // Reset form and close dialog
     setOpenPaymentDialog(false);
     setSelectedFees([]);
+    setValidationErrors({});
       setPaymentData({
         amount: '',
         paymentMode: 'Cash',
@@ -306,7 +429,10 @@ const FeeCollectionComponent = () => {
         discountCode: '',
         discountAmount: 0,
         fine: 0,
-        paymentDate: new Date().toISOString().split('T')[0]
+        paymentDate: new Date().toISOString().split('T')[0],
+        nextPaymentDueDate: null,
+        collectedBy: userRole === 'admin' ? 'Admin' : '',
+        inchargeCode: ''
       });
       setCalculatedDiscount(0);
       setDiscountDetails(null);
@@ -958,7 +1084,10 @@ const FeeCollectionComponent = () => {
       {/* Payment Dialog */}
       <Dialog
         open={openPaymentDialog}
-        onClose={() => setOpenPaymentDialog(false)}
+        onClose={() => {
+          setOpenPaymentDialog(false);
+          setValidationErrors({});
+        }}
         maxWidth="sm"
         fullWidth
         PaperProps={{ sx: { borderRadius: 1 } }}
@@ -991,13 +1120,93 @@ const FeeCollectionComponent = () => {
             <TextField
               fullWidth
               label="Amount (₹)"
-                value={paymentData.amount}
+              value={paymentData.amount}
               onChange={(e) => handleAmountChange(e.target.value)}
-                size="small"
-                sx={{ borderRadius: 1 }}
+              size="small"
+              sx={{ 
+                borderRadius: 1,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: validationErrors.amount ? '#ffebee' : 'transparent',
+                  '& fieldset': {
+                    borderColor: validationErrors.amount ? '#d32f2f' : '#d1d5db',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: validationErrors.amount ? '#d32f2f' : '#9ca3af',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: validationErrors.amount ? '#d32f2f' : '#1976d2',
+                  },
+                },
+              }}
               type="number"
               required
+              error={!!validationErrors.amount}
+              helperText={validationErrors.amount || (selectedFees.length > 0 ? `Max: ₹${feeGroups.filter(fee => selectedFees.includes(fee.id)).reduce((sum, fee) => sum + fee.balance, 0).toFixed(2)}` : '')}
+            />
+
+            {/* Incharge Selection - Only for non-admin users */}
+            {userRole !== 'admin' && (
+              <FormControl fullWidth size="small" error={!!validationErrors.inchargeCode}>
+                <InputLabel>Select Incharge *</InputLabel>
+                <Select
+                  value={paymentData.inchargeCode}
+                  onChange={(e) => {
+                    setPaymentData({ ...paymentData, inchargeCode: e.target.value });
+                    if (validationErrors.inchargeCode) {
+                      setValidationErrors(prev => ({ ...prev, inchargeCode: '' }));
+                    }
+                  }}
+                  label="Select Incharge *"
+                  sx={{ 
+                    borderRadius: 1,
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: validationErrors.inchargeCode ? '#ffebee' : 'transparent',
+                      '& fieldset': {
+                        borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#d1d5db',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#9ca3af',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#1976d2',
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">Select Incharge</MenuItem>
+                  {inchargesData?.success && inchargesData?.incharges?.map((incharge) => (
+                    <MenuItem key={incharge._id} value={incharge.incharge_code}>
+                      {incharge.incharge_name} ({incharge.incharge_code})
+                    </MenuItem>
+                  ))}
+                  {inchargesData?.success && inchargesData?.incharges?.length === 0 && (
+                    <MenuItem disabled>No incharges available</MenuItem>
+                  )}
+                  {!inchargesData?.success && (
+                    <MenuItem disabled>Loading incharges...</MenuItem>
+                  )}
+                </Select>
+                {validationErrors.inchargeCode && (
+                  <FormHelperText error>{validationErrors.inchargeCode}</FormHelperText>
+                )}
+              </FormControl>
+            )}
+
+            {/* Next Payment Due Date */}
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Next Payment Due Date"
+                value={paymentData.nextPaymentDueDate}
+                onChange={(newValue) => setPaymentData({ ...paymentData, nextPaymentDueDate: newValue })}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: 'small',
+                    sx: { borderRadius: 1 }
+                  },
+                }}
               />
+            </LocalizationProvider>
             
             {/* Discount Group */}
               <FormControl fullWidth size="small">
@@ -1021,9 +1230,26 @@ const FeeCollectionComponent = () => {
                 fullWidth
               label="Discount (₹)"
               value={paymentData.discountAmount}
-              onChange={(e) => setPaymentData({ ...paymentData, discountAmount: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9.]/g, '');
+                setPaymentData({ ...paymentData, discountAmount: parseFloat(value) || 0 });
+              }}
                 size="small"
-              sx={{ borderRadius: 0.5 }}
+              sx={{ 
+                borderRadius: 0.5,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#f5f5f5',
+                  '& fieldset': {
+                    borderColor: '#d1d5db',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#9ca3af',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  },
+                },
+              }}
               type="number"
               required
             />
@@ -1076,9 +1302,26 @@ const FeeCollectionComponent = () => {
                 fullWidth
               label="Fine (₹)"
               value={paymentData.fine}
-              onChange={(e) => setPaymentData({ ...paymentData, fine: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9.]/g, '');
+                setPaymentData({ ...paymentData, fine: parseFloat(value) || 0 });
+              }}
               size="small"
-              sx={{ borderRadius: 0.5 }}
+              sx={{ 
+                borderRadius: 0.5,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#f5f5f5',
+                  '& fieldset': {
+                    borderColor: '#d1d5db',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#9ca3af',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  },
+                },
+              }}
               type="number"
               required
             />
@@ -1094,11 +1337,7 @@ const FeeCollectionComponent = () => {
                 row
               >
                 <FormControlLabel value="Cash" control={<Radio size="small" />} label="Cash" />
-                <FormControlLabel value="Cheque" control={<Radio size="small" />} label="Cheque" />
-                <FormControlLabel value="DD" control={<Radio size="small" />} label="DD" />
-                <FormControlLabel value="Bank Transfer" control={<Radio size="small" />} label="Bank Transfer" />
                 <FormControlLabel value="UPI" control={<Radio size="small" />} label="UPI" />
-                <FormControlLabel value="Card" control={<Radio size="small" />} label="Card" />
               </RadioGroup>
             </FormControl>
             
@@ -1131,11 +1370,11 @@ const FeeCollectionComponent = () => {
             variant="contained"
               startIcon={collectPaymentMutation.isPending ? <CircularProgress size={16} /> : <MoneyIcon />}
             size="small"
-              disabled={collectPaymentMutation.isPending}
+              disabled={collectPaymentMutation.isPending || Object.keys(validationErrors).length > 0}
               sx={{ 
                 borderRadius: 1,
-                backgroundColor: '#4caf50',
-                '&:hover': { backgroundColor: '#45a049' }
+                backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#4caf50',
+                '&:hover': { backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#45a049' }
               }}
             >
               {collectPaymentMutation.isPending ? 'Processing...' : '₹ Collect Fees'}
@@ -1150,11 +1389,11 @@ const FeeCollectionComponent = () => {
               variant="contained"
               startIcon={<PrintIcon />}
               size="small"
-              disabled={collectPaymentMutation.isPending}
+              disabled={collectPaymentMutation.isPending || Object.keys(validationErrors).length > 0}
               sx={{ 
                 borderRadius: 1,
-                backgroundColor: '#4caf50',
-                '&:hover': { backgroundColor: '#45a049' }
+                backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#4caf50',
+                '&:hover': { backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#45a049' }
               }}
             >
               ₹ Collect & Print
@@ -1207,6 +1446,53 @@ const FeeCollectionComponent = () => {
             sx={{ borderRadius: 1 }}
           >
             {revertPaymentMutation.isPending ? 'Reverting...' : 'Revert Payment'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Payment Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={() => setConfirmDialog({ open: false, action: null })}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 1 } }}
+      >
+        <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
+            Confirm Payment
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
+          <Typography variant="body1" sx={{ textAlign: 'center', mb: 2 }}>
+            Are you sure you want to process payment of <strong>₹{paymentData.amount}</strong>?
+          </Typography>
+          <Typography variant="body2" sx={{ textAlign: 'center', color: 'text.secondary' }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, pt: 1, justifyContent: 'center', gap: 2 }}>
+          <Button
+            onClick={() => setConfirmDialog({ open: false, action: null })}
+            variant="outlined"
+            size="small"
+            sx={{ borderRadius: 1 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmPaymentSubmit}
+            variant="contained"
+            size="small"
+            sx={{ 
+              borderRadius: 1,
+              backgroundColor: '#4caf50',
+              '&:hover': { backgroundColor: '#45a049' }
+            }}
+          >
+            Confirm Payment
           </Button>
         </DialogActions>
       </Dialog>

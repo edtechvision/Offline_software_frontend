@@ -493,6 +493,15 @@ export const collectFeesService = {
     if (paymentData.discountFile) {
       formData.append('discountFile', paymentData.discountFile);
     }
+    if (paymentData.inchargeCode) {
+      formData.append('inchargeCode', paymentData.inchargeCode);
+    }
+    if (paymentData.collectedBy) {
+      formData.append('collectedBy', paymentData.collectedBy);
+    }
+    if (paymentData.nextPaymentDueDate) {
+      formData.append('nextPaymentDueDate', paymentData.nextPaymentDueDate);
+    }
     
     return apiRequest('/fees/collect-payment', {
       method: 'POST',
