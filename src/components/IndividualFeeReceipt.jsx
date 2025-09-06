@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontFamily: 'Montserrat',
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'left',
     paddingHorizontal: 2,
   },
   
@@ -484,7 +484,7 @@ const IndividualFeeReceipt = ({ data }) => {
           </View>
           
           <View style={styles.feeTableRow}>
-            <Text style={[styles.feeTableCell, { flex: 1 }]}>-</Text>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}></Text>
             <Text style={[styles.feeTableCell, { flex: 3, fontWeight: 'bold' }]}>Total Amount</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{formatCurrency(payment?.amount || 0)}</Text>
           </View>

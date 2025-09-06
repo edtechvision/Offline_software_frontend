@@ -550,7 +550,8 @@ const FeeCollectionComponent = () => {
     try {
       const feeRecord = feeGroups.find(f => f.id === feeGroupId);
       const payment = feeRecord?.payments?.find(p => p.id === paymentId);
-      
+      const collectedBy = paymentData.collectedBy;
+      console.log("collectedBy:", collectedBy)
       if (!feeRecord || !payment) {
         setSnackbar({
           open: true,
@@ -564,7 +565,7 @@ const FeeCollectionComponent = () => {
         student: student,
         payment: payment,
         feeGroup: feeRecord,
-        collectedBy: 'Super Admin(9000)' // You can make this dynamic
+        collectedBy: collectedBy // You can make this dynamic
       };
 
       const blob = await pdf(<IndividualFeeReceipt data={receiptData} />).toBlob();
