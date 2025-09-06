@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#000000',
-    fontWeight: 'normal',
+    fontWeight: 'bold',
     fontFamily: 'Montserrat',
     textAlign: 'center',
     marginBottom: 4,

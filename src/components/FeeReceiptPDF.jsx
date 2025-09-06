@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   subtitleText: {
     fontSize: 14,
     color: '#000000',
-    fontWeight: 100, // Using the thin font weight
+    fontWeight: 'bold', // Using the thin font weight
     fontFamily: 'Montserrat',
     textAlign: 'center',
     marginBottom: 4,
@@ -66,8 +66,10 @@ const styles = StyleSheet.create({
   
   subtitle: {
     fontSize: 12,
-    color: '#374151',
+    color: '#000000',
     marginBottom: 2,
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
   },
   
   contact: {
@@ -458,13 +460,13 @@ const FeeReceiptPDF = ({ data }) => {
             
             {/* Summary Rows */}
             <View style={[styles.tableRow, { backgroundColor: '#F9FAFB' }]}>
-              <Text style={[styles.tableCell, styles.tableCellCenter, styles.tableCellBold, { flex: 0.3 }]}>-</Text>
+              <Text style={[styles.tableCell, styles.tableCellCenter, styles.tableCellBold, { flex: 0.3 }]}></Text>
               <Text style={[styles.tableCell, styles.tableCellBold, { flex: 3.5 }]}>Total Received Amount</Text>
               <Text style={[styles.tableCell, styles.tableCellRight, styles.tableCellBold, { flex: 1.2 }]}>{totalReceivedAmount.toLocaleString()}</Text>
             </View>
             
             <View style={[styles.tableRow, { backgroundColor: '#FEF2F2' }]}>
-              <Text style={[styles.tableCell, styles.tableCellCenter, styles.tableCellBold, { flex: 0.3 }]}>-</Text>
+              <Text style={[styles.tableCell, styles.tableCellCenter, styles.tableCellBold, { flex: 0.3 }]}></Text>
               <Text style={[styles.tableCell, styles.tableCellBold, { flex: 3.5 }]}>Dues Amount</Text>
               <Text style={[styles.tableCell, styles.tableCellRight, styles.tableCellBold, { flex: 1.2 }]}>{duesAmount.toLocaleString()}</Text>
             </View>
