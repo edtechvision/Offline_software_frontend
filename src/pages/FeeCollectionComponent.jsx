@@ -823,7 +823,7 @@ const FeeCollectionComponent = () => {
         <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8rem' }}>
           Date: {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
+       {/* <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title="Delete">
             <IconButton size="small" sx={{ p: 0.5 }}>
               <DeleteIcon fontSize="small" />
@@ -854,7 +854,7 @@ const FeeCollectionComponent = () => {
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* Fee Details UI Boxes */}
