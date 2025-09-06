@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 20,
     paddingTop: 15,
-    borderTop: '1px solid #E5E7EB',
+    // borderTop: '1px solid #E5E7EB',
   },
   
   footerRow: {

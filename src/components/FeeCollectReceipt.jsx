@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   feeTableRow: {
     flexDirection: 'row',
     borderBottom: '1px solid #000000',
-    paddingVertical: 4,
+    // paddingVertical: 4,
     minHeight: 20,
   },
   
@@ -243,7 +243,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingHorizontal: 2,
+    borderRight: '1px solid #000000',
+    paddingVertical: 2,
   },
+  feeTableCellLeft: {
+    fontSize: 10,
+    color: '#000000',
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+    textAlign: 'left',
+    paddingHorizontal: 2,
+    borderRight: '1px solid #000000',
+    paddingVertical: 2,
+  },
+  feeTableCellRight: {
+    fontSize: 10,
+    color: '#000000',
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    paddingHorizontal: 2,
+    borderRight: '1px solid #000000',
+    paddingVertical: 2,
+  },
+  
   
   feeTableCellAmount: {
     fontSize: 10,
@@ -258,8 +281,6 @@ const styles = StyleSheet.create({
   paymentSummary: {
     marginTop: 8,
     padding: 8,
-    border: '1px solid #000000',
-    borderTop: 'none',
   },
   
   summaryRow: {
@@ -484,31 +505,31 @@ const FeeCollectReceipt = ({ data }) => {
           {/* Fee Items */}
           <View style={styles.feeTableRow}>
             <Text style={[styles.feeTableCell, { flex: 1 }]}>1.</Text>
-            <Text style={[styles.feeTableCell, { flex: 3 }]}>Course Fee (CLASS 11TH BATCH 2025-26)</Text>
+            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>Course Fee (CLASS 11TH BATCH 2025-26)</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalAmount}</Text>
           </View>
           
           <View style={styles.feeTableRow}>
             <Text style={[styles.feeTableCell, { flex: 1 }]}>2.</Text>
-            <Text style={[styles.feeTableCell, { flex: 3 }]}>Previous Recieved Amount</Text>
+            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>Previous Recieved Amount</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
           </View>
           
           <View style={styles.feeTableRow}>
             <Text style={[styles.feeTableCell, { flex: 1 }]}>3.</Text>
-            <Text style={[styles.feeTableCell, { flex: 3 }]}>Amount Recieved</Text>
+            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>Amount Recieved</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
           </View>
           
           <View style={styles.feeTableRow}>
-            <Text style={[styles.feeTableCell, { flex: 1 }]}>-</Text>
-            <Text style={[styles.feeTableCell, { flex: 3, fontWeight: 'bold' }]}>Total Received Amount</Text>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}></Text>
+            <Text style={[styles.feeTableCellRight, { flex: 3, fontWeight: 'bold' }]}>Total Received Amount</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalPaid}</Text>
           </View>
           
           <View style={styles.feeTableRow}>
-            <Text style={[styles.feeTableCell, { flex: 1 }]}>-</Text>
-            <Text style={[styles.feeTableCell, { flex: 3, fontWeight: 'bold' }]}>Dues Amount</Text>
+            <Text style={[styles.feeTableCell, { flex: 1 }]}></Text>
+            <Text style={[styles.feeTableCellRight, { flex: 3, fontWeight: 'bold' }]}>Dues Amount</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{balance}</Text>
           </View>
         </View>
