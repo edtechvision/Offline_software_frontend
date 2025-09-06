@@ -201,14 +201,14 @@ const styles = StyleSheet.create({
   bottomSection: {
     display: 'flex',
     flexDirection: 'row',
-    border: '1px solid #000000',
-    borderTop: 'none',
+    // border: '1px solid #000000',
+    // borderTop: 'none',
     position: 'relative',
     zIndex: 1,
   },
   declaration: {
     flex: 1,
-    borderRight: '1px solid #000000',
+    // borderRight: '1px solid #000000',
     padding: 8,
   },
   declarationHeader: {
@@ -225,13 +225,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
   },
   receivedBy: {
-    fontSize: 14,
+    fontSize: 8,
     fontWeight: 'bold',
     color: '#000000',
     fontFamily: 'Montserrat',
   },
   declarationText: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#000000',
     lineHeight: 1.4,
     textAlign: 'justify',

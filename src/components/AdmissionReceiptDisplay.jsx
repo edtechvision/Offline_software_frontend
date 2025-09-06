@@ -391,11 +391,11 @@ const AdmissionReceiptDisplay = ({ data }) => {
       </Box>
 
       {/* Bottom Section */}
-      <Box sx={{ display: 'flex', border: '1px solid #000', borderTop: 'none', position: 'relative', zIndex: 1 }}>
+      <Box sx={{ display: 'flex', position: 'relative', zIndex: 1 }}>
         {/* Declaration */}
         <Box sx={{
           flex: 1,
-          borderRight: '1px solid #000',
+        
           p: 2
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
