@@ -405,8 +405,8 @@ const IndividualFeeReceipt = ({ data }) => {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>TARGET BOARD</Text>
-            <Text style={styles.subtitle}>TARGET BOARD JEHANABAD 804408</Text>
             <Text style={styles.tagline}>Bihar Board NO-1 Educational Platform</Text>
+            <Text style={styles.subtitle}>Near Hp Petrol Pump, Main Road, Jehanabad, 804408</Text>
             <Text style={styles.phoneText}>+91 7779855339</Text>
           </View>
         </View>

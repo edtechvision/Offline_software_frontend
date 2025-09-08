@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   subtitleText: {
     fontSize: 14,
     color: '#000000',
-    fontWeight: 100, // Using the thin font weight
+    fontWeight: 'bold',
     fontFamily: 'Montserrat',
     textAlign: 'center',
     marginBottom: 4,
@@ -325,8 +325,8 @@ const AdmissionReceiptPDF = ({ data }) => {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>TARGET BOARD</Text>
-            <Text style={styles.subtitleText}>TARGET BOARD JEHANABAD 804408</Text>
             <Text style={styles.tagline}>Bihar Board NO-1 Educational Platform</Text>
+            <Text style={styles.subtitleText}>Near Hp Petrol Pump, Main Road, Jehanabad, 804408</Text>
             <Text style={styles.phoneText}>+91 7779855339</Text>
           </View>
         </View>
