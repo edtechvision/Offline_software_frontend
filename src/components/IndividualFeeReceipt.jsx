@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     color: '#f3f4f6',
     fontWeight: 'bold',
     zIndex: 0,
-    opacity: 0.05,
+    opacity: 0.01,
   },
   
   // Background Logo Watermark
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     transform: 'translate(-50%, -50%)',
     width: 300,
     height: 300,
-    opacity: 0.3,
+    opacity: 0.1,
     zIndex: 0,
   },
   
@@ -369,7 +369,8 @@ const IndividualFeeReceipt = ({ data }) => {
     student,
     payment,
     feeGroup,
-    collectedBy
+    collectedBy,
+    courseName
   } = data;
 
   // Calculate current date
@@ -490,7 +491,7 @@ const IndividualFeeReceipt = ({ data }) => {
           {/* Fee Items */}
           <View style={styles.feeTableRow}>
             <Text style={[styles.feeTableCell, { flex: 1 }]}>1.</Text>
-            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>Course Fee ({feeGroup?.name || 'N/A'})</Text>
+            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>({courseName || 'N/A'})</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{formatCurrency(payment?.amount || 0)}</Text>
           </View>
           

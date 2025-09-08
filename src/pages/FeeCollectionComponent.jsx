@@ -514,7 +514,8 @@ const FeeCollectionComponent = () => {
       const receiptData = {
         student: student,
         feeGroup: feeRecord,
-        paymentData: paymentData
+        paymentData: paymentData,
+        courseName: student?.courseDetails?.courseId?.name
       };
 
       const blob = await pdf(<FeeCollectReceipt data={receiptData} />).toBlob();
@@ -560,13 +561,15 @@ const FeeCollectionComponent = () => {
         });
         return;
       }
-
       const receiptData = {
         student: student,
         payment: payment,
         feeGroup: feeRecord,
+        courseName: student?.courseDetails?.courseId?.name,
         collectedBy: collectedBy // You can make this dynamic
       };
+
+      console.log("receiptData:", receiptData)
 
       const blob = await pdf(<IndividualFeeReceipt data={receiptData} />).toBlob();
       const url = URL.createObjectURL(blob);
@@ -920,8 +923,17 @@ const FeeCollectionComponent = () => {
                   <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', mr: 1 }}>
                     ₹{feeGroup.amount.toFixed(2)}
                   </Typography>
-                  <IconButton size="small" color="primary">
-                    <PrintIcon fontSize="small" />
+                  <IconButton 
+                    size="small" 
+                    color="primary"
+                    onClick={() => {
+                      setSelectedFees([feeGroup.id]);
+                      setTimeout(() => handleGenerateFeeReceipt(), 100);
+                    }}
+                    disabled={pdfLoading}
+                    title="Print Receipt"
+                  >
+                    {pdfLoading ? <CircularProgress size={16} /> : <PrintIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>

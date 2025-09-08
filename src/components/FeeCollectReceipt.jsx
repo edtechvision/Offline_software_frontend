@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     color: '#f3f4f6',
     fontWeight: 700,
     zIndex: 0,
-    opacity: 0.05,
+    opacity: 0.01,
   },
   
   // Background Logo Watermark
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     transform: 'translate(-50%, -50%)',
     width: 300,
     height: 300,
-    opacity: 0.3,
+    opacity: 0.1,
     zIndex: 0,
   },
   
@@ -377,6 +377,7 @@ const FeeCollectReceipt = ({ data }) => {
   const {
     student,
     feeGroup,
+    courseName,
     paymentData
   } = data;
 
@@ -505,7 +506,7 @@ const FeeCollectReceipt = ({ data }) => {
           {/* Fee Items */}
           <View style={styles.feeTableRow}>
             <Text style={[styles.feeTableCell, { flex: 1 }]}>1.</Text>
-            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>Course Fee (CLASS 11TH BATCH 2025-26)</Text>
+            <Text style={[styles.feeTableCellLeft, { flex: 3 }]}>{courseName}</Text>
             <Text style={[styles.feeTableCellAmount, { flex: 1 }]}>₹{totalAmount}</Text>
           </View>
           

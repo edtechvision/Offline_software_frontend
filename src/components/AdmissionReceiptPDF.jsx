@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     color: '#f3f4f6',
     fontWeight: 'bold',
     zIndex: 0,
-    opacity: 0.05,
+    opacity: 0.01,
   },
   backgroundLogo: {
     position: 'absolute',
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     transform: 'translate(-50%, -50%)',
     width: 300,
     height: 300,
-    opacity: 0.3,
+    opacity: 0.1,
     zIndex: 0,
   },
   header: {
