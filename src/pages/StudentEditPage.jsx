@@ -490,6 +490,11 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         setFormData(prev => ({ ...prev, discountAmount: '' }));
       }
     }
+    
+    // Clear discount code when manually entering discount amount
+    if (field === 'discountAmount' && value && formData.discountCode) {
+      setFormData(prev => ({ ...prev, discountCode: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -1875,13 +1880,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                     placeholder="Auto-calculated or enter manually"
                     size="small"
                     type="number"
-                    InputProps={{
-                      readOnly: true,
-                    }}
+                    helperText="Auto-calculated when discount code is selected, or enter manually"
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '4px',
-                        backgroundColor: '#f5f5f5',
                         '& fieldset': {
                           borderColor: '#d1d5db',
                         },
