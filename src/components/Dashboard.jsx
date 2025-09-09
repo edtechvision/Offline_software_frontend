@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaUsers,
   FaUserPlus,
@@ -32,6 +32,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
+import { API_BASE_URL, getDefaultHeaders } from '../utils/apiConfig';
 
 // Register Chart.js components
 ChartJS.register(
@@ -50,16 +51,47 @@ ChartJS.register(
 const Dashboard = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await fetch(`${API_BASE_URL}/get-dashboard`, {
+          headers: getDefaultHeaders(),
+        });
+        const json = await response.json();
+        if (!response.ok || json?.success === false) {
+          throw new Error(json?.message || 'Failed to fetch dashboard');
+        }
+        setDashboardData(json?.data || {});
+      } catch (err) {
+        setError(err.message || 'Failed to load dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
+
+  const formatCurrency = (value) => {
+    const amount = Number(value || 0);
+    return amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+  };
+
+  const currentMonth = dashboardData?.currentMonth || '';
   const kpiData = [
-    { title: 'Students', value: '1317', color: 'accent', icon: FaUsers, change: '+12%', changeType: 'up' },
-    { title: "Today's Admission", value: '1', color: 'teal', icon: FaUserPlus, change: '+100%', changeType: 'up' },
-    { title: 'Fee Collection', value: '₹ 6606400', color: 'accent-green', icon: FaMoneyBillWave, change: '+8%', changeType: 'up' },
-    { title: "Today's Fee", value: '₹ 10400', color: 'red', icon: FaCreditCard, change: '+15%', changeType: 'up' },
-    { title: 'Pending Fee', value: '₹ 1037950', color: 'yellow', icon: FaClock, change: '-5%', changeType: 'down' },
-    { title: 'August Fee', value: '₹ 63300', color: 'gray', icon: FaCalendarAlt, change: '+22%', changeType: 'up' },
-    { title: 'August Admission', value: 'Status', color: 'accent-green', icon: FaSearch, change: 'View Details', changeType: 'neutral' },
-    { title: 'Centers', value: '2', color: 'accent', icon: FaBuilding, change: '+0%', changeType: 'neutral' },
+    { title: 'Students', value: String(dashboardData?.totalStudents ?? 0), color: 'accent', icon: FaUsers, change: '', changeType: 'neutral' },
+    { title: "Today's Admission", value: String(dashboardData?.todaysAdmissions ?? 0), color: 'teal', icon: FaUserPlus, change: '', changeType: 'neutral' },
+    { title: 'Fee Collection', value: formatCurrency(dashboardData?.totalCollectedFees), color: 'accent-green', icon: FaMoneyBillWave, change: '', changeType: 'neutral' },
+    { title: "Today's Fee", value: formatCurrency(dashboardData?.todaysCollectedFees), color: 'red', icon: FaCreditCard, change: '', changeType: 'neutral' },
+    { title: 'Pending Fee', value: formatCurrency(dashboardData?.totalPendingFees), color: 'yellow', icon: FaClock, change: '', changeType: 'neutral' },
+    { title: `${currentMonth || 'This Month'} Fee`, value: formatCurrency(dashboardData?.currentMonthCollectedFees), color: 'gray', icon: FaCalendarAlt, change: '', changeType: 'neutral' },
+    { title: `${currentMonth || 'This Month'} Admission`, value: String(dashboardData?.currentMonthAdmissions ?? 0), color: 'accent-green', icon: FaSearch, change: '', changeType: 'neutral' },
+    { title: 'Centers', value: String(dashboardData?.totalCenters ?? 0), color: 'accent', icon: FaBuilding, change: '', changeType: 'neutral' },
   ];
 
   const courseData = [
@@ -214,9 +246,12 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-
-
-
+      {loading && (
+        <div className="text-sm text-gray-500">Loading dashboard...</div>
+      )}
+      {!!error && (
+        <div className="text-sm text-red-600">{error}</div>
+      )}
 
       {/* Enhanced KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -231,7 +266,7 @@ const Dashboard = () => {
                         kpi.color === 'gray' ? 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800' :
                           'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700'} 
                            text-white rounded-3xl p-8 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-500 relative overflow-hidden`}>
-              
+
               {/* Enhanced background pattern */}
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/30 via-transparent to-white/30"></div>
@@ -264,7 +299,7 @@ const Dashboard = () => {
                     </div>
                   )}
                   <span className={`text-lg font-semibold ${kpi.changeType === 'up' ? 'text-green-200' :
-                      kpi.changeType === 'down' ? 'text-red-200' : 'text-gray-200'
+                    kpi.changeType === 'down' ? 'text-red-200' : 'text-gray-200'
                     } tracking-wide`}>
                     {kpi.change}
                   </span>
