@@ -74,7 +74,7 @@ const StudentViewPage = ({ student: propStudent, onBack }) => {
     <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', pb: 4 }}>
       {/* Header */}
       <Box sx={{
-        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+        background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
         color: 'white',
         p: 4,
         mb: 4,
@@ -166,7 +166,7 @@ const StudentViewPage = ({ student: propStudent, onBack }) => {
             borderRadius: '8px',
             overflow: 'hidden',
             position: 'relative',
-            border: '0px solid #1976d2',
+            border: '0px solid #033398',
             display: 'flex',
             px: 2,
             flexDirection: 'column'
@@ -192,7 +192,7 @@ const StudentViewPage = ({ student: propStudent, onBack }) => {
                   borderRadius: '8px',
                   px: 4,
                   py: 1.5,
-                  background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
                   }

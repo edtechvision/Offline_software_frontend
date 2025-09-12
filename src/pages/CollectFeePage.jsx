@@ -122,7 +122,7 @@ const CollectFeePage = () => {
     <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1976d2', mb: 1 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#033398', mb: 1 }}>
           Collect Fee
         </Typography>
         <Typography variant="body1" color="text.secondary">

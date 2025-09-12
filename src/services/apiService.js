@@ -574,3 +574,79 @@ export const feeDiscountService = {
     });
   },
 };
+
+// Expense Services
+export const expenseService = {
+  createExpense: async (expenseData) => {
+    // Check if we have a file to upload
+    const hasFile = expenseData instanceof FormData && expenseData.has('file');
+    
+    if (hasFile) {
+      // FormData already prepared, use as is
+      return apiRequest('/expenses', {
+        method: 'POST',
+        body: expenseData,
+      });
+    } else {
+      // No file, use regular JSON request
+      return apiRequest('/expenses', {
+        method: 'POST',
+        body: JSON.stringify(expenseData),
+      });
+    }
+  },
+
+  getExpenses: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/expenses?${queryString}` : '/expenses';
+    return apiRequest(endpoint);
+  },
+
+  getExpenseById: async (id) => {
+    return apiRequest(`/expenses/${id}`);
+  },
+
+  updateExpense: async (id, expenseData) => {
+    return apiRequest(`/expenses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(expenseData),
+    });
+  },
+
+  deleteExpense: async (id) => {
+    return apiRequest(`/expenses/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  updateExpenseStatus: async (id, status, paidDate = null) => {
+    const body = { status };
+    if (paidDate) {
+      body.paidDate = paidDate;
+    }
+    
+    return apiRequest(`/expenses/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  },
+
+  toggleExpenseApproval: async (id) => {
+    return apiRequest(`/expenses/${id}/toggle-approval`, {
+      method: 'PUT',
+    });
+  },
+};
+
+// Logs Services
+export const logsService = {
+  getLogs: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/get-logs?${queryString}` : '/get-logs';
+    return apiRequest(endpoint);
+  },
+
+  getLogById: async (id) => {
+    return apiRequest(`/get-logs/${id}`);
+  },
+};

@@ -203,7 +203,7 @@ const FeeHistoryPage = () => {
       <Box sx={{ p: 3, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1976d2', mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#033398', mb: 1 }}>
             Fee History
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -239,7 +239,7 @@ const FeeHistoryPage = () => {
           </Card>
 
           <Card sx={{ 
-            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+            background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
             color: 'white',
             borderRadius: '4px'
           }}>
@@ -600,7 +600,7 @@ const FeeHistoryPage = () => {
           fullWidth
         >
           <DialogTitle sx={{ 
-            backgroundColor: '#1976d2', 
+            backgroundColor: '#033398', 
             color: 'white', 
             display: 'flex', 
             alignItems: 'center', 
@@ -614,7 +614,7 @@ const FeeHistoryPage = () => {
               <Box>
                 {/* Student Information */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#033398', fontWeight: 600 }}>
                     Student Information
                   </Typography>
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -655,7 +655,7 @@ const FeeHistoryPage = () => {
 
                 {/* Payment Information */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#033398', fontWeight: 600 }}>
                     Payment Information
                   </Typography>
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -690,7 +690,7 @@ const FeeHistoryPage = () => {
 
                 {/* Amount Information */}
                 <Box>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#033398', fontWeight: 600 }}>
                     Amount Details
                   </Typography>
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>

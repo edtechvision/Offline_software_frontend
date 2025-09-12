@@ -22,6 +22,7 @@ import PendingFeePage from './pages/PendingFeePage';
 import FeeHistoryPage from './pages/FeeHistoryPage';
 import FeeDiscountPage from './pages/FeeDiscountPage';
 import ExpensesPage from './pages/ExpensesPage';
+import LogsPage from './pages/LogsPage';
 import EnquiryPage from './pages/EnquiryPage';
 import StockManagementPage from './pages/StockManagementPage';
 import JobApplicationsPage from './pages/JobApplicationsPage';
@@ -315,6 +316,15 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles="admin">
             <ExpensesPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/logs"
+        element={
+          <ProtectedLayout requiredRoles="admin">
+            <LogsPage />
           </ProtectedLayout>
         }
       />

@@ -66,9 +66,10 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
     { id: 5, label: 'Center', icon: Business, path: '/center', color: '#06b6d4' },
     { id: 6, label: 'Admission Incharge', icon: AccountCircle, path: '/admission-incharge', color: '#8b5cf6' },
     { id: 7, label: 'Center Expenses', icon: Payments, path: '/center-expenses', color: '#f59e0b' },
-    { id: 8, label: 'All Icard', icon: Badge, path: '/icard', color: '#ef4444' },
+    { id: 8, label: 'System Logs', icon: ListAlt, path: '/logs', color: '#8b5cf6' },
+    { id: 9, label: 'All Icard', icon: Badge, path: '/icard', color: '#ef4444' },
     {
-      id: 9,
+      id: 10,
       label: 'Fee',
       icon: CurrencyRupee,
       path: '/fee',
@@ -81,7 +82,7 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
       ],
       color: '#16a34a'
     },
-    { id: 10, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
+    { id: 11, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
     // { id: 11, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
     // {
     //   id: 12,

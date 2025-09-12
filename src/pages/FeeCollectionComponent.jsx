@@ -644,7 +644,7 @@ const FeeCollectionComponent = () => {
     <Box sx={{ p: 2, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2', fontSize: '1.2rem' }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: '#033398', fontSize: '1.2rem' }}>
           Student Fees
         </Typography>
         <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -1055,7 +1055,7 @@ const FeeCollectionComponent = () => {
         {/* Grand Total Box */}
         <Card sx={{
           borderRadius: 1,
-          border: '2px solid #1976d2',
+          border: '2px solid #033398',
           backgroundColor: '#e3f2fd',
           mt: 1
         }}>
@@ -1147,7 +1147,7 @@ const FeeCollectionComponent = () => {
                     borderColor: validationErrors.amount ? '#d32f2f' : '#9ca3af',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: validationErrors.amount ? '#d32f2f' : '#1976d2',
+                    borderColor: validationErrors.amount ? '#d32f2f' : '#033398',
                   },
                 },
               }}
@@ -1181,7 +1181,7 @@ const FeeCollectionComponent = () => {
                         borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#9ca3af',
                       },
                       '&.Mui-focused fieldset': {
-                        borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#1976d2',
+                        borderColor: validationErrors.inchargeCode ? '#d32f2f' : '#033398',
                       },
                     },
                   }}
@@ -1259,7 +1259,7 @@ const FeeCollectionComponent = () => {
                     borderColor: '#9ca3af',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#1976d2',
+                    borderColor: '#033398',
                   },
                 },
               }}
@@ -1331,7 +1331,7 @@ const FeeCollectionComponent = () => {
                     borderColor: '#9ca3af',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#1976d2',
+                    borderColor: '#033398',
                   },
                 },
               }}

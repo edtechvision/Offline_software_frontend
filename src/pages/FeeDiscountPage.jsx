@@ -208,7 +208,7 @@ const FeeDiscountPage = () => {
       <Box sx={{ p: 3, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1976d2', mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#033398', mb: 1 }}>
             Fee Discount
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -244,7 +244,7 @@ const FeeDiscountPage = () => {
             </Card>
 
             <Card sx={{ 
-              background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
               color: 'white',
             borderRadius: '4px'
             }}>

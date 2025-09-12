@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Khand:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -28,6 +28,10 @@
   
   .font-montserrat {
     font-family: 'Montserrat', 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  
+  .font-khand {
+    font-family: 'Khand', 'Montserrat', 'Mona Sans', 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   
   /* Typography scale with both fonts */
@@ -86,4 +90,33 @@
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.8);
+}
+
+/* PDF Generation Styles - Ensure proper background rendering */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .MuiCard-root {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Force background colors to render in PDF */
+  .id-card-container {
+    background: #FFD700 !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+
+/* Ensure all elements have proper color rendering */
+.id-card-pdf-safe {
+  -webkit-print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }

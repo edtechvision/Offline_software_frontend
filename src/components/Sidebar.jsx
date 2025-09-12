@@ -35,7 +35,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { id: 'center', label: 'Center', icon: FaBuilding, path: '/center' },
     { id: 'admission-incharge', label: 'Admission Incharge', icon: FaUserTie, path: '/admission-incharge' },
     { id: 'center-expenses', label: 'Center Expenses', icon: FaMoneyBillWave, path: '/center-expenses' },
-    { id: 'all-icard', label: 'All Icard', icon: FaIdCard, path: '/all-icard' },
+    // { id: 'all-icard', label: 'All Icard', icon: FaIdCard, path: '/all-icard' },
     { 
       id: 'fee', 
       label: 'Fee', 

@@ -594,7 +594,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       </style>
       {/* Header */}
       <Box sx={{ 
-        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+        background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
         color: 'white',
         p: 4,
         mb: 4,
@@ -678,10 +678,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                   justifyContent: 'center',
                   boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)'
                 }}>
-                  <PersonIcon sx={{ color: '#1976d2', fontSize: 28 }} />
+                  <PersonIcon sx={{ color: '#033398', fontSize: 28 }} />
                 </Box>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2', mb: 0.5 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#033398', mb: 0.5 }}>
                     Incharge Details
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#5c6bc0', fontWeight: 500 }}>
@@ -708,7 +708,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               width: 16,
                               height: 16,
                               border: '2px solid #e3e3e3',
-                              borderTop: '2px solid #1976d2',
+                              borderTop: '2px solid #033398',
                               borderRadius: '50%',
                               animation: 'spin 1s linear infinite',
                             }}
@@ -726,7 +726,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           borderColor: errors.inchargeCode ? '#d32f2f' : '#9ca3af',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: errors.inchargeCode ? '#d32f2f' : '#1976d2',
+                          borderColor: errors.inchargeCode ? '#d32f2f' : '#033398',
                         },
                       },
                     }}
@@ -791,7 +791,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           borderColor: '#9ca3af',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: '#1976d2',
+                          borderColor: '#033398',
                         },
                       },
                     }}
@@ -860,7 +860,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.studentName ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.studentName ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.studentName ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -887,7 +887,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.fathersName ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.fathersName ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.fathersName ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -914,7 +914,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.mothersName ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.mothersName ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.mothersName ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -943,7 +943,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                     borderColor: errors.dateOfBirth ? '#d32f2f' : '#9ca3af',
                                   },
                                   '&.Mui-focused fieldset': {
-                                    borderColor: errors.dateOfBirth ? '#d32f2f' : '#1976d2',
+                                    borderColor: errors.dateOfBirth ? '#d32f2f' : '#033398',
                                   },
                                 },
                               },
@@ -959,7 +959,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -983,7 +983,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1008,7 +1008,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1031,7 +1031,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                           }}
@@ -1056,17 +1056,17 @@ const StudentRegistrationPage = ({ onBack }) => {
                         >
                           <FormControlLabel 
                             value="Male" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#1976d2' } }} />} 
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
                             label="Male" 
                           />
                           <FormControlLabel 
                             value="Female" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#1976d2' } }} />} 
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
                             label="Female" 
                           />
                           <FormControlLabel 
                             value="Other" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#1976d2' } }} />} 
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
                             label="Other" 
                           />
                         </RadioGroup>
@@ -1093,7 +1093,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.email ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.email ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.email ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -1127,7 +1127,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.mobileNumber ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.mobileNumber ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.mobileNumber ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -1159,7 +1159,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                           },
                         }}
@@ -1192,7 +1192,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.adharNumber ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.adharNumber ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.adharNumber ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -1252,7 +1252,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                           },
                         }}
@@ -1265,7 +1265,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1289,7 +1289,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1316,7 +1316,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1340,7 +1340,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1367,7 +1367,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1391,7 +1391,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1437,7 +1437,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.presentPincode ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.presentPincode ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.presentPincode ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -1485,7 +1485,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           onChange={(e) => handleInputChange('isPermanentSameAsPresent', e.target.checked)}
                             sx={{ 
                               '&.Mui-checked': { 
-                                color: '#1976d2' 
+                                color: '#033398' 
                               } 
                             }}
                           />
@@ -1518,7 +1518,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -1545,7 +1545,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -1572,7 +1572,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -1599,7 +1599,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -1637,7 +1637,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.permanentPincode ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.permanentPincode ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.permanentPincode ? '#d32f2f' : '#033398',
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
@@ -1701,7 +1701,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.collegeName ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.collegeName ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.collegeName ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -1714,7 +1714,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: errors.className ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
-                              color: errors.className ? '#d32f2f' : '#1976d2',
+                              color: errors.className ? '#d32f2f' : '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: errors.className ? '#d32f2f' : '#374151',
@@ -1738,7 +1738,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: errors.className ? '#d32f2f' : '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: errors.className ? '#d32f2f' : '#1976d2',
+                                borderColor: errors.className ? '#d32f2f' : '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1800,7 +1800,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: errors.courseId ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
-                              color: errors.courseId ? '#d32f2f' : '#1976d2',
+                              color: errors.courseId ? '#d32f2f' : '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: errors.courseId ? '#d32f2f' : '#374151',
@@ -1824,7 +1824,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: errors.courseName ? '#d32f2f' : '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: errors.courseName ? '#d32f2f' : '#1976d2',
+                                borderColor: errors.courseName ? '#d32f2f' : '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1864,7 +1864,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1888,7 +1888,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1929,7 +1929,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -1953,7 +1953,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -1991,7 +1991,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                           },
                         }}
@@ -2005,7 +2005,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -2029,7 +2029,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -2083,7 +2083,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: errors.session ? '#d32f2f' : '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: errors.session ? '#d32f2f' : '#1976d2',
+                              borderColor: errors.session ? '#d32f2f' : '#033398',
                             },
                           },
                         }}
@@ -2112,7 +2112,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                   borderColor: errors.downPayment ? '#d32f2f' : '#9ca3af',
                                 },
                                 '&.Mui-focused fieldset': {
-                                  borderColor: errors.downPayment ? '#d32f2f' : '#1976d2',
+                                  borderColor: errors.downPayment ? '#d32f2f' : '#033398',
                                 },
                               },
                             }}
@@ -2138,7 +2138,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                         borderColor: '#9ca3af',
                                       },
                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#1976d2',
+                                        borderColor: '#033398',
                                       },
                                     },
                                   },
@@ -2161,12 +2161,12 @@ const StudentRegistrationPage = ({ onBack }) => {
                         >
                           <FormControlLabel 
                             value="Cash" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#1976d2' } }} />} 
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
                             label="Cash" 
                           />
                           <FormControlLabel 
                             value="UPI" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#1976d2' } }} />} 
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
                             label="UPI" 
                           />
                         </RadioGroup>
@@ -2191,7 +2191,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                           },
                         }}
@@ -2204,7 +2204,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
-                              color: '#1976d2',
+                              color: '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
                               color: '#374151',
@@ -2228,7 +2228,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
@@ -2282,7 +2282,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               borderColor: '#9ca3af',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
+                              borderColor: '#033398',
                             },
                           },
                         }}
@@ -2337,14 +2337,14 @@ const StudentRegistrationPage = ({ onBack }) => {
                           p: 4, 
                           textAlign: 'center',
                           backgroundColor: formData.imageFile ? '#f0f9ff' : '#fafafa',
-                          borderColor: formData.imageFile ? '#1976d2' : '#d1d5db',
+                          borderColor: formData.imageFile ? '#033398' : '#d1d5db',
                           transition: 'all 0.3s ease',
                           minHeight: '200px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           '&:hover': {
-                            borderColor: '#1976d2',
+                            borderColor: '#033398',
                             backgroundColor: '#f0f9ff'
                           }
                         }}>
@@ -2355,7 +2355,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 height: 80, 
                                 borderRadius: '50%', 
                                 overflow: 'hidden',
-                                border: '3px solid #1976d2',
+                                border: '3px solid #033398',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -2367,7 +2367,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                               </Box>
-                              <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 500 }}>
+                              <Typography variant="body2" sx={{ color: '#033398', fontWeight: 500 }}>
                                 {formData.imageFile.name}
                               </Typography>
                               <Button
@@ -2397,9 +2397,9 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                border: '2px dashed #1976d2'
+                                border: '2px dashed #033398'
                               }}>
-                                <UploadIcon sx={{ fontSize: 40, color: '#1976d2' }} />
+                                <UploadIcon sx={{ fontSize: 40, color: '#033398' }} />
                               </Box>
                               <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
                                 Click to upload student photo
@@ -2410,8 +2410,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 startIcon={<UploadIcon />}
                                 sx={{ 
                                   textTransform: 'none',
-                                  borderColor: '#1976d2',
-                                  color: '#1976d2',
+                                  borderColor: '#033398',
+                                  color: '#033398',
                                   px: 3,
                                   py: 1,
                                   '&:hover': {
@@ -2472,7 +2472,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 borderColor: '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#1976d2',
+                                borderColor: '#033398',
                               },
                             },
                           }}
@@ -2542,7 +2542,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                 disabled={isSubmitting || createStudentMutation.isPending}
                 onClick={() => console.log('Submit button clicked via onClick')}
                 sx={{
-                  background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
                   color: 'white',
                   px: 8,
                   py: 2.5,
