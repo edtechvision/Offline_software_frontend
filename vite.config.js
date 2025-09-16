@@ -18,7 +18,8 @@ export default defineConfig({
   preview: {
     allowedHosts: [
       'whale-app-3mhy8.ondigitalocean.app',
-      'seashell-app-vgu3a.ondigitalocean.app'
+      'seashell-app-vgu3a.ondigitalocean.app',
+'targetboard.schoolense.com'
     ]
   }
 })
