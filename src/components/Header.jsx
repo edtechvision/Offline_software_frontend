@@ -15,10 +15,14 @@ const Header = ({ onToggleSidebar }) => {
             <FaBars className="w-5 h-5" />
           </button>
           
-          <div className="w-8 h-8 bg-primary-900 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-sm">TB</span>
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="TB Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-text-primary">TB Admin Panel</h1>
+          <h1 className="text-2xl font-bold text-text-primary">TARGET BOARD Admin Panel</h1>
         </div>
         
         {/* Right side - User Profile and Settings */}

@@ -33,6 +33,7 @@ import JobsPage from './pages/JobsPage';
 import JobApplicationsListPage from './pages/JobApplicationsListPage';
 import AdmissionInchargePage from './pages/AdmissionInchargePage';
 import FeeReceiptDemo from './pages/FeeReceiptDemo';
+import StaffDashboard from './pages/StaffDashboard';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -87,25 +88,42 @@ const AppRoutes = () => {
             onLogout={handleLogout}
           />
         );
+      case 'staff':
+        // Staff doesn't need a sidebar - they use the mobile-optimized interface
+        return null;
       default:
         return null;
     }
   };
 
   // Layout wrapper for protected routes
-  const ProtectedLayout = ({ children, requiredRoles = null }) => (
-    <ProtectedRoute requiredRoles={requiredRoles}>
-      <div className="flex h-screen bg-bg-secondary font-mona overflow-hidden">
-        {getSidebar()}
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header onToggleSidebar={toggleSidebar} />
-          <main className="flex-1 overflow-auto p-6">
+  const ProtectedLayout = ({ children, requiredRoles = null }) => {
+    // Special layout for staff - no sidebar, no header, full screen
+    if (userRole === 'staff') {
+      return (
+        <ProtectedRoute requiredRoles={requiredRoles}>
+          <div className="h-screen overflow-hidden">
             {children}
-          </main>
+          </div>
+        </ProtectedRoute>
+      );
+    }
+
+    // Default layout for other roles
+    return (
+      <ProtectedRoute requiredRoles={requiredRoles}>
+        <div className="flex h-screen bg-bg-secondary font-mona overflow-hidden">
+          {getSidebar()}
+          <div className="flex-1 flex flex-col min-w-0">
+            <Header onToggleSidebar={toggleSidebar} />
+            <main className="flex-1 overflow-auto p-6">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </ProtectedRoute>
-  );
+      </ProtectedRoute>
+    );
+  };
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -126,7 +144,9 @@ const AppRoutes = () => {
           path="/login" 
           element={
             isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
+              userRole === 'staff' ? 
+                <Navigate to="/staff-dashboard" replace /> : 
+                <Navigate to="/dashboard" replace />
             ) : (
               <LoginPage />
             )
@@ -138,7 +158,10 @@ const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <Navigate to="/dashboard" replace />
+            {userRole === 'staff' ? 
+              <Navigate to="/staff-dashboard" replace /> : 
+              <Navigate to="/dashboard" replace />
+            }
           </ProtectedRoute>
         }
       />
@@ -395,8 +418,25 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Catch all route - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Staff Dashboard Route */}
+      <Route
+        path="/staff-dashboard"
+        element={
+          <ProtectedLayout requiredRoles="staff">
+            <StaffDashboard />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Catch all route - redirect to appropriate dashboard */}
+      <Route 
+        path="*" 
+        element={
+          (userRole === 'staff' || localStorage.getItem('userRole') === 'staff') ? 
+            <Navigate to="/staff-dashboard" replace /> : 
+            <Navigate to="/dashboard" replace />
+        } 
+      />
     </Routes>
   );
 };

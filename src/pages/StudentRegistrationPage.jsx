@@ -125,29 +125,9 @@ const StudentRegistrationPage = ({ onBack }) => {
   
 
 
-  // Auto-populate when TBINC29819 is entered and validate incharge code
+  // Validate incharge code using API
   useEffect(() => {
-    if (formData.inchargeCode === 'TBINC29819') {
-      setFormData(prev => ({
-        ...prev,
-        inchargeName: 'GAURI SHANKAR',
-        nationality: 'Indian',
-        gender: 'Male',
-        presentState: 'Bihar',
-        presentDistrict: 'Araria',
-        presentCountry: 'India',
-        permanentState: 'Bihar',
-        permanentDistrict: 'Araria',
-        permanentCountry: 'India'
-      }));
-      // Set validation result for hardcoded code
-      setInchargeValidationResult({
-        success: true,
-        incharge_name: 'GAURI SHANKAR',
-        incharge_code: 'TBINC29819',
-        email: ''
-      });
-    } else if (formData.inchargeCode.length >= 6) {
+    if (formData.inchargeCode.length >= 6) {
       // Debounce API validation to avoid too many calls
       const timeoutId = setTimeout(() => {
         validateInchargeCode(formData.inchargeCode);

@@ -114,8 +114,13 @@ const LoginPage = () => {
         }
         break;
       case 1: // Staff
-        showSnackbar('Staff login is not available yet. Please contact your administrator.', 'info');
-        return;
+        credentials = formData.staff;
+        loginType = 'staff';
+        if (!credentials.email || !credentials.password) {
+          showSnackbar('Please fill in all fields', 'error');
+          return;
+        }
+        break;
       case 2: // Center
         credentials = formData.center;
         loginType = 'center';
@@ -151,6 +156,38 @@ const LoginPage = () => {
             }
           });
           break;
+        case 'staff':
+          // Staff login with static credentials
+          const staticCredentials = {
+            email: 'staff@targetboard.com',
+            password: 'staff123'
+          };
+          
+          // Check static credentials
+          if (credentials.email === staticCredentials.email && credentials.password === staticCredentials.password) {
+            const staffUser = {
+              id: 'staff_001',
+              name: 'Staff Member',
+              email: credentials.email,
+              role: 'staff'
+            };
+            
+            // Store in localStorage
+            localStorage.setItem('authToken', 'staff_token_static');
+            localStorage.setItem('userData', JSON.stringify(staffUser));
+            localStorage.setItem('userRole', 'staff');
+            
+            // Update auth context
+            authLogin(staffUser, 'staff_token', 'staff');
+            showSnackbar('Staff login successful!', 'success');
+            
+            // Redirect to staff dashboard
+            navigate('/staff-dashboard', { replace: true });
+          } else {
+            showSnackbar('Invalid staff credentials! Use: staff@targetboard.com / staff123', 'error');
+          }
+          break;
+
         case 'center':
 
           response = await login(credentials, {
@@ -465,39 +502,121 @@ const LoginPage = () => {
 
                 {/* Staff Login Tab */}
                 <TabPanel value={activeTab} index={1}>
+                  {/* Demo Credentials Info */}
                   <Box sx={{ 
-                    textAlign: 'center', 
-                    py: 4,
-                    px: 2
+                    mb: 2, 
+                    p: 2, 
+                    backgroundColor: '#f0f9ff', 
+                    borderRadius: 2, 
+                    border: '1px solid #0ea5e9' 
                   }}>
-                    <GroupIcon sx={{ 
-                      fontSize: 64, 
-                      color: '#9ca3af', 
-                      mb: 2,
-                      opacity: 0.6
-                    }} />
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: '#6b7280', 
-                        mb: 2,
-                        fontWeight: 600
-                      }}
-                    >
-                      Staff Login Coming Soon
+                    <Typography variant="body2" sx={{ color: '#0c4a6e', fontWeight: 600, mb: 1 }}>
+                      Demo Credentials:
                     </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#9ca3af',
-                        lineHeight: 1.6,
-                        maxWidth: 280,
-                        mx: 'auto'
-                      }}
-                    >
-                      The staff login system is currently under development. 
-                      Please contact your administrator for access or use the Admin or Center login options.
+                    <Typography variant="body2" sx={{ color: '#0c4a6e', fontSize: '0.875rem' }}>
+                      Email: <strong>staff@targetboard.com</strong>
                     </Typography>
+                    <Typography variant="body2" sx={{ color: '#0c4a6e', fontSize: '0.875rem' }}>
+                      Password: <strong>staff123</strong>
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 2.5 }}>
+                    <TextField
+                      fullWidth
+                      label="Email Address"
+                      type="email"
+                      value={formData.staff.email}
+                      onChange={(e) => handleInputChange('staff', 'email', e.target.value)}
+                      placeholder="staff@targetboard.com"
+                      size="small"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GroupIcon sx={{ color: '#667eea', fontSize: 20 }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          fontSize: '0.875rem',
+                          '& fieldset': {
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1.5,
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                            borderWidth: 1.5,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#6b7280',
+                          fontSize: '0.875rem',
+                          '&.Mui-focused': {
+                            color: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ mb: 3 }}>
+                    <TextField
+                      fullWidth
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.staff.password}
+                      onChange={(e) => handleInputChange('staff', 'password', e.target.value)}
+                      placeholder="staff123"
+                      size="small"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon sx={{ color: '#667eea', fontSize: 20 }} />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={handleTogglePasswordVisibility}
+                              edge="end"
+                              size="small"
+                              sx={{ color: '#667eea' }}
+                            >
+                              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          fontSize: '0.875rem',
+                          '& fieldset': {
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1.5,
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                            borderWidth: 1.5,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#6b7280',
+                          fontSize: '0.875rem',
+                          '&.Mui-focused': {
+                            color: '#667eea',
+                          },
+                        },
+                      }}
+                    />
                   </Box>
                 </TabPanel>
 
@@ -605,7 +724,7 @@ const LoginPage = () => {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  disabled={isLoggingIn || activeTab === 1}
+                  disabled={isLoggingIn}
                   sx={{
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     color: 'white',
@@ -627,7 +746,7 @@ const LoginPage = () => {
                     },
                   }}
                 >
-                  {activeTab === 1 ? 'Coming Soon' : (isLoggingIn ? 'Signing in...' : 'Sign in to Portal')}
+                  {isLoggingIn ? 'Signing in...' : 'Sign in to Portal'}
                 </Button>
               </form>
 
