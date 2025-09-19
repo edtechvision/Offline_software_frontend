@@ -38,6 +38,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { useAuthContext } from '../contexts/AuthContext';
+import { getAllStates, getDistrictsByState } from '../utils/stateDistrictData';
 
 const StudentRegistrationPage = ({ onBack }) => {
   const { currentUser } = useAuthContext();
@@ -109,6 +110,11 @@ const StudentRegistrationPage = ({ onBack }) => {
   const [isValidatingIncharge, setIsValidatingIncharge] = useState(false);
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
   const [apiError, setApiError] = useState(null);
+  
+  // State and District management
+  const [presentDistricts, setPresentDistricts] = useState([]);
+  const [permanentDistricts, setPermanentDistricts] = useState([]);
+  const [allStates] = useState(getAllStates());
 
   // API hooks for courses, batches, additional courses, and fee discounts
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
@@ -209,6 +215,48 @@ const StudentRegistrationPage = ({ onBack }) => {
       }));
     }
   }, [formData.isPermanentSameAsPresent, formData.presentAddress]);
+
+  // Update present districts when present state changes
+  useEffect(() => {
+    if (formData.presentAddress.state) {
+      const districts = getDistrictsByState(formData.presentAddress.state);
+      setPresentDistricts(districts);
+      
+      // Reset district if current district is not in the new state
+      if (formData.presentAddress.district && !districts.includes(formData.presentAddress.district)) {
+        setFormData(prev => ({
+          ...prev,
+          presentAddress: {
+            ...prev.presentAddress,
+            district: ''
+          }
+        }));
+      }
+    } else {
+      setPresentDistricts([]);
+    }
+  }, [formData.presentAddress.state]);
+
+  // Update permanent districts when permanent state changes
+  useEffect(() => {
+    if (formData.permanentAddress.state) {
+      const districts = getDistrictsByState(formData.permanentAddress.state);
+      setPermanentDistricts(districts);
+      
+      // Reset district if current district is not in the new state
+      if (formData.permanentAddress.district && !districts.includes(formData.permanentAddress.district)) {
+        setFormData(prev => ({
+          ...prev,
+          permanentAddress: {
+            ...prev.permanentAddress,
+            district: ''
+          }
+        }));
+      }
+    } else {
+      setPermanentDistricts([]);
+    }
+  }, [formData.permanentAddress.state]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -1239,41 +1287,41 @@ const StudentRegistrationPage = ({ onBack }) => {
                       />
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" error={!!errors.presentState}>
                         <InputLabel 
                           sx={{ 
                             fontSize: '0.875rem',
-                            color: '#374151',
+                            color: errors.presentState ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
-                              color: '#033398',
+                              color: errors.presentState ? '#d32f2f' : '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
-                              color: '#374151',
+                              color: errors.presentState ? '#d32f2f' : '#374151',
                             },
                           }}
                         >
-                          State
+                          State *
                         </InputLabel>
                         <Select
                           value={formData.presentAddress.state}
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, state: e.target.value })}
-                          label="State"
+                          label="State *"
                           sx={{
                             minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
-                                borderColor: '#d1d5db',
+                                borderColor: errors.presentState ? '#d32f2f' : '#d1d5db',
                               },
                               '&:hover fieldset': {
-                                borderColor: '#9ca3af',
+                                borderColor: errors.presentState ? '#d32f2f' : '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#033398',
+                                borderColor: errors.presentState ? '#d32f2f' : '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
-                              color: '#6b7280',
+                              color: errors.presentState ? '#d32f2f' : '#6b7280',
                             },
                             '& .MuiInputLabel-root': {
                               backgroundColor: 'white',
@@ -1281,50 +1329,56 @@ const StudentRegistrationPage = ({ onBack }) => {
                             },
                           }}
                         >
-                          <MenuItem value="Bihar">Bihar</MenuItem>
-                          <MenuItem value="Jharkhand">Jharkhand</MenuItem>
-                          <MenuItem value="West Bengal">West Bengal</MenuItem>
-                          <MenuItem value="Uttar Pradesh">Uttar Pradesh</MenuItem>
-                          <MenuItem value="Madhya Pradesh">Madhya Pradesh</MenuItem>
+                          {allStates.map((state) => (
+                            <MenuItem key={state} value={state}>
+                              {state}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
+                      {errors.presentState && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.presentState}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" error={!!errors.presentDistrict}>
                         <InputLabel 
                           sx={{ 
                             fontSize: '0.875rem',
-                            color: '#374151',
+                            color: errors.presentDistrict ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
-                              color: '#033398',
+                              color: errors.presentDistrict ? '#d32f2f' : '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
-                              color: '#374151',
+                              color: errors.presentDistrict ? '#d32f2f' : '#374151',
                             },
                           }}
                         >
-                          District
+                          District *
                         </InputLabel>
                         <Select
                           value={formData.presentAddress.district}
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, district: e.target.value })}
-                          label="District"
+                          label="District *"
+                          disabled={!formData.presentAddress.state || presentDistricts.length === 0}
                           sx={{
                             minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
-                                borderColor: '#d1d5db',
+                                borderColor: errors.presentDistrict ? '#d32f2f' : '#d1d5db',
                               },
                               '&:hover fieldset': {
-                                borderColor: '#9ca3af',
+                                borderColor: errors.presentDistrict ? '#d32f2f' : '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#033398',
+                                borderColor: errors.presentDistrict ? '#d32f2f' : '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
-                              color: '#6b7280',
+                              color: errors.presentDistrict ? '#d32f2f' : '#6b7280',
                             },
                             '& .MuiInputLabel-root': {
                               backgroundColor: 'white',
@@ -1332,50 +1386,61 @@ const StudentRegistrationPage = ({ onBack }) => {
                             },
                           }}
                         >
-                          <MenuItem value="Araria">Araria</MenuItem>
-                          <MenuItem value="Purnia">Purnia</MenuItem>
-                          <MenuItem value="Kishanganj">Kishanganj</MenuItem>
-                          <MenuItem value="Katihar">Katihar</MenuItem>
-                          <MenuItem value="Madhepura">Madhepura</MenuItem>
+                          {presentDistricts.length === 0 ? (
+                            <MenuItem disabled>
+                              {formData.presentAddress.state ? 'Loading districts...' : 'Please select a state first'}
+                            </MenuItem>
+                          ) : (
+                            presentDistricts.map((district) => (
+                              <MenuItem key={district} value={district}>
+                                {district}
+                              </MenuItem>
+                            ))
+                          )}
                         </Select>
                       </FormControl>
+                      {errors.presentDistrict && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.presentDistrict}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" error={!!errors.presentCountry}>
                         <InputLabel 
                           sx={{ 
                             fontSize: '0.875rem',
-                            color: '#374151',
+                            color: errors.presentCountry ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
-                              color: '#033398',
+                              color: errors.presentCountry ? '#d32f2f' : '#033398',
                             },
                             '&.MuiInputLabel-shrink': {
-                              color: '#374151',
+                              color: errors.presentCountry ? '#d32f2f' : '#374151',
                             },
                           }}
                         >
-                          Country
+                          Country *
                         </InputLabel>
                         <Select
                           value={formData.presentAddress.country}
                           onChange={(e) => handleInputChange('presentAddress', { ...formData.presentAddress, country: e.target.value })}
-                          label="Country"
+                          label="Country *"
                           sx={{
                             minWidth: '250px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '4px',
                               '& fieldset': {
-                                borderColor: '#d1d5db',
+                                borderColor: errors.presentCountry ? '#d32f2f' : '#d1d5db',
                               },
                               '&:hover fieldset': {
-                                borderColor: '#9ca3af',
+                                borderColor: errors.presentCountry ? '#d32f2f' : '#9ca3af',
                               },
                               '&.Mui-focused fieldset': {
-                                borderColor: '#033398',
+                                borderColor: errors.presentCountry ? '#d32f2f' : '#033398',
                               },
                             },
                             '& .MuiSelect-icon': {
-                              color: '#6b7280',
+                              color: errors.presentCountry ? '#d32f2f' : '#6b7280',
                             },
                             '& .MuiInputLabel-root': {
                               backgroundColor: 'white',
@@ -1386,8 +1451,14 @@ const StudentRegistrationPage = ({ onBack }) => {
                           <MenuItem value="India">India</MenuItem>
                           <MenuItem value="Nepal">Nepal</MenuItem>
                           <MenuItem value="Bangladesh">Bangladesh</MenuItem>
+                          <MenuItem value="Other">Other</MenuItem>
                         </Select>
                       </FormControl>
+                      {errors.presentCountry && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.presentCountry}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <TextField
@@ -1508,85 +1579,189 @@ const StudentRegistrationPage = ({ onBack }) => {
                       />
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <TextField
-                        fullWidth
-                        label="State"
-                        value={formData.permanentAddress.state}
-                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, state: e.target.value })}
-                        size="small"
-                        disabled={formData.isPermanentSameAsPresent}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: '4px',
-                            '& fieldset': {
-                              borderColor: '#d1d5db',
+                      <FormControl fullWidth size="small" error={!!errors.permanentState}>
+                        <InputLabel 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: errors.permanentState ? '#d32f2f' : '#374151',
+                            '&.Mui-focused': {
+                              color: errors.permanentState ? '#d32f2f' : '#033398',
                             },
-                            '&:hover fieldset': {
-                              borderColor: '#9ca3af',
+                            '&.MuiInputLabel-shrink': {
+                              color: errors.permanentState ? '#d32f2f' : '#374151',
                             },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#033398',
+                          }}
+                        >
+                          State *
+                        </InputLabel>
+                        <Select
+                          value={formData.permanentAddress.state}
+                          onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, state: e.target.value })}
+                          label="State *"
+                          disabled={formData.isPermanentSameAsPresent}
+                          sx={{
+                            minWidth: '250px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '4px',
+                              '& fieldset': {
+                                borderColor: errors.permanentState ? '#d32f2f' : '#d1d5db',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: errors.permanentState ? '#d32f2f' : '#9ca3af',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: errors.permanentState ? '#d32f2f' : '#033398',
+                              },
+                            },
+                            '& .MuiSelect-icon': {
+                              color: errors.permanentState ? '#d32f2f' : '#6b7280',
+                            },
+                            '& .MuiInputLabel-root': {
+                              backgroundColor: 'white',
+                              paddingRight: 1,
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
                             },
-                          },
-                        }}
-                      />
+                          }}
+                        >
+                          {allStates.map((state) => (
+                            <MenuItem key={state} value={state}>
+                              {state}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      {errors.permanentState && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.permanentState}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <TextField
-                        fullWidth
-                        label="District"
-                        value={formData.permanentAddress.district}
-                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, district: e.target.value })}
-                        size="small"
-                        disabled={formData.isPermanentSameAsPresent}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: '4px',
-                            '& fieldset': {
-                              borderColor: '#d1d5db',
+                      <FormControl fullWidth size="small" error={!!errors.permanentDistrict}>
+                        <InputLabel 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: errors.permanentDistrict ? '#d32f2f' : '#374151',
+                            '&.Mui-focused': {
+                              color: errors.permanentDistrict ? '#d32f2f' : '#033398',
                             },
-                            '&:hover fieldset': {
-                              borderColor: '#9ca3af',
+                            '&.MuiInputLabel-shrink': {
+                              color: errors.permanentDistrict ? '#d32f2f' : '#374151',
                             },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#033398',
+                          }}
+                        >
+                          District *
+                        </InputLabel>
+                        <Select
+                          value={formData.permanentAddress.district}
+                          onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, district: e.target.value })}
+                          label="District *"
+                          disabled={formData.isPermanentSameAsPresent || !formData.permanentAddress.state || permanentDistricts.length === 0}
+                          sx={{
+                            minWidth: '250px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '4px',
+                              '& fieldset': {
+                                borderColor: errors.permanentDistrict ? '#d32f2f' : '#d1d5db',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: errors.permanentDistrict ? '#d32f2f' : '#9ca3af',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: errors.permanentDistrict ? '#d32f2f' : '#033398',
+                              },
+                            },
+                            '& .MuiSelect-icon': {
+                              color: errors.permanentDistrict ? '#d32f2f' : '#6b7280',
+                            },
+                            '& .MuiInputLabel-root': {
+                              backgroundColor: 'white',
+                              paddingRight: 1,
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
                             },
-                          },
-                        }}
-                      />
+                          }}
+                        >
+                          {permanentDistricts.length === 0 ? (
+                            <MenuItem disabled>
+                              {formData.permanentAddress.state ? 'Loading districts...' : 'Please select a state first'}
+                            </MenuItem>
+                          ) : (
+                            permanentDistricts.map((district) => (
+                              <MenuItem key={district} value={district}>
+                                {district}
+                              </MenuItem>
+                            ))
+                          )}
+                        </Select>
+                      </FormControl>
+                      {errors.permanentDistrict && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.permanentDistrict}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                      <TextField
-                        fullWidth
-                        label="Country"
-                        value={formData.permanentAddress.country}
-                        onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, country: e.target.value })}
-                        size="small"
-                        disabled={formData.isPermanentSameAsPresent}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: '4px',
-                            '& fieldset': {
-                              borderColor: '#d1d5db',
+                      <FormControl fullWidth size="small" error={!!errors.permanentCountry}>
+                        <InputLabel 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: errors.permanentCountry ? '#d32f2f' : '#374151',
+                            '&.Mui-focused': {
+                              color: errors.permanentCountry ? '#d32f2f' : '#033398',
                             },
-                            '&:hover fieldset': {
-                              borderColor: '#9ca3af',
+                            '&.MuiInputLabel-shrink': {
+                              color: errors.permanentCountry ? '#d32f2f' : '#374151',
                             },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#033398',
+                          }}
+                        >
+                          Country *
+                        </InputLabel>
+                        <Select
+                          value={formData.permanentAddress.country}
+                          onChange={(e) => handleInputChange('permanentAddress', { ...formData.permanentAddress, country: e.target.value })}
+                          label="Country *"
+                          disabled={formData.isPermanentSameAsPresent}
+                          sx={{
+                            minWidth: '250px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '4px',
+                              '& fieldset': {
+                                borderColor: errors.permanentCountry ? '#d32f2f' : '#d1d5db',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: errors.permanentCountry ? '#d32f2f' : '#9ca3af',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: errors.permanentCountry ? '#d32f2f' : '#033398',
+                              },
+                            },
+                            '& .MuiSelect-icon': {
+                              color: errors.permanentCountry ? '#d32f2f' : '#6b7280',
+                            },
+                            '& .MuiInputLabel-root': {
+                              backgroundColor: 'white',
+                              paddingRight: 1,
                             },
                             '&.Mui-disabled': {
                               backgroundColor: '#f5f5f5',
                             },
-                          },
-                        }}
-                      />
+                          }}
+                        >
+                          <MenuItem value="India">India</MenuItem>
+                          <MenuItem value="Nepal">Nepal</MenuItem>
+                          <MenuItem value="Bangladesh">Bangladesh</MenuItem>
+                          <MenuItem value="Other">Other</MenuItem>
+                        </Select>
+                      </FormControl>
+                      {errors.permanentCountry && (
+                        <Typography variant="body2" color="error" sx={{ mt: 0.5, fontSize: '0.75rem' }}>
+                          {errors.permanentCountry}
+                        </Typography>
+                      )}
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <TextField
