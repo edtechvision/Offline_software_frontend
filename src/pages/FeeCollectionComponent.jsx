@@ -171,7 +171,9 @@ const FeeCollectionComponent = () => {
         discount: payment.discountAmount || 0,
         fine: payment.fine || 0,
         transactionId: payment.transactionId || "",
-        remarks: payment.remarks || ""
+        remarks: payment.remarks || "",
+        inchargeName: payment.inchargeName || null,
+        collectedBy: payment.collectedBy || null
       })) || [];
 
       return {
@@ -179,6 +181,7 @@ const FeeCollectionComponent = () => {
         name: `${studentInfo.className} - ${courseInfo.name} (${batchInfo.batchName})`,
         code: courseInfo.fee?.toString() || "0",
         dueDate: feeRecord.nextPaymentDueDate || new Date().toISOString(),
+        nextPaymentDueDate: feeRecord.nextPaymentDueDate,
         status: status,
         amount: feeRecord.totalFee || 0,
         paid: feeRecord.paidAmount || 0,
@@ -515,7 +518,8 @@ const FeeCollectionComponent = () => {
         student: student,
         feeGroup: feeRecord,
         paymentData: paymentData,
-        courseName: student?.courseDetails?.courseId?.name
+        courseName: student?.courseDetails?.courseId?.name,
+        nextPaymentDueDate: feeRecord.nextPaymentDueDate
       };
 
       const blob = await pdf(<FeeCollectReceipt data={receiptData} />).toBlob();
@@ -566,7 +570,8 @@ const FeeCollectionComponent = () => {
         payment: payment,
         feeGroup: feeRecord,
         courseName: student?.courseDetails?.courseId?.name,
-        collectedBy: collectedBy // You can make this dynamic
+        collectedBy: collectedBy, // You can make this dynamic
+        nextPaymentDueDate: feeRecord.nextPaymentDueDate
       };
 
       console.log("receiptData:", receiptData)
@@ -1211,11 +1216,13 @@ const FeeCollectionComponent = () => {
                 label="Next Payment Due Date"
                 value={paymentData.nextPaymentDueDate}
                 onChange={(newValue) => setPaymentData({ ...paymentData, nextPaymentDueDate: newValue })}
+                format="dd/MM/yyyy"
                 slotProps={{
                   textField: {
                     fullWidth: true,
                     size: 'small',
-                    sx: { borderRadius: 1 }
+                    sx: { borderRadius: 1 },
+                    placeholder: "DD/MM/YYYY"
                   },
                 }}
               />

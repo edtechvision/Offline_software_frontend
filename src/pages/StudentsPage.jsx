@@ -768,7 +768,7 @@ const StudentsPage = () => {
                         </td>
                         <td style={{ padding: '8px' }}>
                           <Chip
-                            label={student.inchargeCode || 'N/A'}
+                            label={student.registrationNo || 'N/A'}
                             size="small"
                             sx={{
                               backgroundColor: theme.palette.grey[700],
@@ -786,7 +786,7 @@ const StudentsPage = () => {
                         </td>
                         <td style={{ padding: '8px' }}>
                           <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                            {student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('en-GB') : 'N/A'}
+                            {student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-GB') : 'N/A'}
                           </Typography>
                         </td>
                         <td style={{ padding: '8px' }}>

@@ -388,6 +388,15 @@ const FeeCollectReceipt = ({ data }) => {
     year: 'numeric'
   });
 
+  // Format next payment due date
+  const nextDueDate = data.nextPaymentDueDate 
+    ? new Date(data.nextPaymentDueDate).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    : 'Not Set';
+
   // Generate receipt number
   const receiptNo = `TBREC${Date.now().toString().slice(-6)}`;
 
@@ -487,7 +496,7 @@ const FeeCollectReceipt = ({ data }) => {
             </View>
             
             <View style={styles.infoBox}>
-              <Text style={styles.infoText}>Next Due Date : {receiptDate}</Text>
+              <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
             </View>
           </View>
         </View>

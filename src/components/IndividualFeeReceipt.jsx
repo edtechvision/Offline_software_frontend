@@ -380,8 +380,37 @@ const IndividualFeeReceipt = ({ data }) => {
     year: 'numeric'
   });
 
+  // Format next payment due date
+  const nextDueDate = data.nextPaymentDueDate 
+    ? new Date(data.nextPaymentDueDate).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    : 'Not Set';
+
   // Generate payment ID
   const paymentId = payment?.receiptNo || `442/${Math.floor(Math.random() * 10) + 1}`;
+
+  // Determine collected by information
+  const getCollectedBy = () => {
+    // First priority: inchargeName from payment
+    if (payment?.inchargeName) {
+      return payment.inchargeName;
+    }
+    // Second priority: collectedBy from payment
+    if (payment?.collectedBy) {
+      return payment.collectedBy;
+    }
+    // Third priority: collectedBy from data
+    if (collectedBy) {
+      return collectedBy;
+    }
+    // Fallback
+    return 'Super Admin(9000)';
+  };
+
+  const collectedByName = getCollectedBy();
 
   return (
     <Document>
@@ -472,7 +501,11 @@ const IndividualFeeReceipt = ({ data }) => {
             </View>
             
             <View style={styles.infoBox}>
-              <Text style={styles.infoText}>Collected By : {collectedBy || 'Super Admin(9000)'}</Text>
+              <Text style={styles.infoText}>Collected By : {collectedByName}</Text>
+            </View>
+            
+            <View style={styles.infoBoxAlt}>
+              <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
             </View>
           </View>
         </View>
