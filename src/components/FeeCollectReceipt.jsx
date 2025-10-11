@@ -395,7 +395,7 @@ const FeeCollectReceipt = ({ data }) => {
         month: '2-digit',
         year: 'numeric'
       })
-    : 'Not Set';
+    : 'Not Applicable';
 
   // Generate receipt number
   const receiptNo = `TBREC${Date.now().toString().slice(-6)}`;
@@ -495,9 +495,11 @@ const FeeCollectReceipt = ({ data }) => {
               <Text style={styles.infoText}>Admission No : {student?.registrationNo || 'N/A'}</Text>
             </View>
             
-            <View style={styles.infoBox}>
-              <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
-            </View>
+            {data.nextPaymentDueDate && (
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
+              </View>
+            )}
           </View>
         </View>
 

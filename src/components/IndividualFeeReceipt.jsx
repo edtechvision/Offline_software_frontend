@@ -387,7 +387,7 @@ const IndividualFeeReceipt = ({ data }) => {
         month: '2-digit',
         year: 'numeric'
       })
-    : 'Not Set';
+    : 'Not Applicable';
 
   // Generate payment ID
   const paymentId = payment?.receiptNo || `442/${Math.floor(Math.random() * 10) + 1}`;
@@ -504,9 +504,11 @@ const IndividualFeeReceipt = ({ data }) => {
               <Text style={styles.infoText}>Collected By : {collectedByName}</Text>
             </View>
             
-            <View style={styles.infoBoxAlt}>
-              <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
-            </View>
+            {data.nextPaymentDueDate && (
+              <View style={styles.infoBoxAlt}>
+                <Text style={styles.infoText}>Next Due Date : {nextDueDate}</Text>
+              </View>
+            )}
           </View>
         </View>
 

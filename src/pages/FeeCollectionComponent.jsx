@@ -519,7 +519,7 @@ const FeeCollectionComponent = () => {
         feeGroup: feeRecord,
         paymentData: paymentData,
         courseName: student?.courseDetails?.courseId?.name,
-        nextPaymentDueDate: feeRecord.nextPaymentDueDate
+        nextPaymentDueDate: feeRecord.balance > 0 ? feeRecord.nextPaymentDueDate : null
       };
 
       const blob = await pdf(<FeeCollectReceipt data={receiptData} />).toBlob();
@@ -571,7 +571,7 @@ const FeeCollectionComponent = () => {
         feeGroup: feeRecord,
         courseName: student?.courseDetails?.courseId?.name,
         collectedBy: collectedBy, // You can make this dynamic
-        nextPaymentDueDate: feeRecord.nextPaymentDueDate
+        nextPaymentDueDate: feeRecord.balance > 0 ? feeRecord.nextPaymentDueDate : null
       };
 
       console.log("receiptData:", receiptData)
