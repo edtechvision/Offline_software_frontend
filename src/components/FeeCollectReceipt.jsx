@@ -476,7 +476,7 @@ const FeeCollectReceipt = ({ data }) => {
             
             <View style={styles.detailRow}>
               <Text style={styles.detailText}>
-                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {student?.batchName || 'N/A'}
+                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {student?.courseDetails?.batchId?.batchName || 'N/A'}
               </Text>
             </View>
           </View>
@@ -547,7 +547,7 @@ const FeeCollectReceipt = ({ data }) => {
         </View>
 
         {/* Payment Information */}
-        <View style={styles.paymentSummary}>
+        {/* <View style={styles.paymentSummary}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Received Amount in Word: (Two Thousand Rupees Only)</Text>
           </View>
@@ -555,7 +555,7 @@ const FeeCollectReceipt = ({ data }) => {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Mode of Payment: Cash</Text>
           </View>
-        </View>
+        </View> */}
 
         {/* Signatures */}
         <View style={styles.signatures}>

@@ -481,7 +481,7 @@ const IndividualFeeReceipt = ({ data }) => {
             
             <View style={styles.detailRow}>
               <Text style={styles.detailText}>
-                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {student?.batchName || 'N/A'}
+                <Text style={{ fontWeight: 'bold' }}>Batch :</Text> {student?.courseDetails?.batchId?.batchName || 'N/A'}
               </Text>
             </View>
           </View>
