@@ -94,78 +94,137 @@ const Dashboard = () => {
     { title: 'Centers', value: String(dashboardData?.totalCenters ?? 0), color: 'accent', icon: FaBuilding, change: '', changeType: 'neutral' },
   ];
 
-  const courseData = [
-    { courseName: 'CRASH COURSE 10TH 2024-25', studentCount: '260', trend: '+15%', color: 'from-green-400 to-green-600' },
-    { courseName: 'CRASH COURSE 12TH 2024-25', studentCount: '189', trend: '+8%', color: 'from-blue-400 to-blue-600' },
-    { courseName: 'CLASS 12TH BIOLOGY', studentCount: '13', trend: '+25%', color: 'from-purple-400 to-purple-600' },
-    { courseName: 'CLASS 12TH PHYSICS', studentCount: '1', trend: '+100%', color: 'from-red-400 to-red-600' },
-    { courseName: 'CLASS 12TH HINDI + ENGLISH', studentCount: '2', trend: '+50%', color: 'from-pink-400 to-pink-600' },
-    { courseName: 'CLASS 12TH CHEMISTRY', studentCount: '4', trend: '+33%', color: 'from-indigo-400 to-indigo-600' },
-    { courseName: 'CLASS 12TH BATCH 2025-26', studentCount: '12', trend: '+20%', color: 'from-yellow-400 to-yellow-600' },
-    { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '24', trend: '+14%', color: 'from-teal-400 to-teal-600' },
-    { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '213', trend: '+18%', color: 'from-orange-400 to-orange-600' },
+  // Build course cards list from API data (fallback to sample if absent)
+  const colorPalette = [
+    'from-green-400 to-green-600',
+    'from-blue-400 to-blue-600',
+    'from-purple-400 to-purple-600',
+    'from-red-400 to-red-600',
+    'from-pink-400 to-pink-600',
+    'from-indigo-400 to-indigo-600',
+    'from-yellow-400 to-yellow-600',
+    'from-teal-400 to-teal-600',
+    'from-orange-400 to-orange-600',
+    'from-emerald-400 to-emerald-600',
+    'from-sky-400 to-sky-600',
+    'from-violet-400 to-violet-600'
   ];
 
-  // Chart data for fee collection trend
-  const feeChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Fee Collection (₹)',
-        data: [650000, 780000, 820000, 750000, 900000, 850000, 880000, 920000, 870000, 950000, 890000, 930000],
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 3,
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#3b82f6',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 8
-      }
-    ]
-  };
+  const coursesList = (dashboardData?.courseData && Array.isArray(dashboardData.courseData) && dashboardData.courseData.length > 0)
+    ? dashboardData.courseData.map((course, index) => ({
+        courseName: course.courseName || 'Course',
+        studentCount: String(course.count ?? 0),
+        trend: `${Math.round(course.percentage ?? 0)}%`,
+        color: colorPalette[index % colorPalette.length]
+      }))
+    : [
+        { courseName: 'CRASH COURSE 10TH 2024-25', studentCount: '260', trend: '+15%', color: 'from-green-400 to-green-600' },
+        { courseName: 'CRASH COURSE 12TH 2024-25', studentCount: '189', trend: '+8%', color: 'from-blue-400 to-blue-600' },
+        { courseName: 'CLASS 12TH BIOLOGY', studentCount: '13', trend: '+25%', color: 'from-purple-400 to-purple-600' },
+        { courseName: 'CLASS 12TH PHYSICS', studentCount: '1', trend: '+100%', color: 'from-red-400 to-red-600' },
+        { courseName: 'CLASS 12TH HINDI + ENGLISH', studentCount: '2', trend: '+50%', color: 'from-pink-400 to-pink-600' },
+        { courseName: 'CLASS 12TH CHEMISTRY', studentCount: '4', trend: '+33%', color: 'from-indigo-400 to-indigo-600' },
+        { courseName: 'CLASS 12TH BATCH 2025-26', studentCount: '12', trend: '+20%', color: 'from-yellow-400 to-yellow-600' },
+        { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '24', trend: '+14%', color: 'from-teal-400 to-teal-600' },
+        { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '213', trend: '+18%', color: 'from-orange-400 to-orange-600' },
+      ];
 
-  // Student enrollment trend
-  const enrollmentData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Students Enrolled',
-        data: [120, 135, 142, 158, 165, 178, 185, 192, 198, 205, 212, 220],
-        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-        borderColor: '#10b981',
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false,
-      }
-    ]
-  };
+  // Chart data for fee collection trend from API (fallback to sample)
+  const feeChartData = (() => {
+    const hasApiData = Array.isArray(dashboardData?.monthlyFeesData) && dashboardData.monthlyFeesData.length > 0;
+    const labels = hasApiData
+      ? dashboardData.monthlyFeesData.map((m) => m.month)
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const data = hasApiData
+      ? dashboardData.monthlyFeesData.map((m) => Number(m.totalCollected || 0))
+      : [650000, 780000, 820000, 750000, 900000, 850000, 880000, 920000, 870000, 950000, 890000, 930000];
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Fee Collection (₹)',
+          data,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#3b82f6',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }
+      ]
+    };
+  })();
 
-  // Course distribution doughnut chart
-  const courseDistributionData = {
-    labels: ['10th Foundation', '12th Science', 'Crash Course', 'Other Courses'],
-    datasets: [
-      {
-        data: [237, 20, 449, 611],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(239, 68, 68, 0.8)'
-        ],
-        borderColor: [
-          '#3b82f6',
-          '#10b981',
-          '#f59e0b',
-          '#ef4444'
-        ],
-        borderWidth: 2,
-        hoverOffset: 4
-      }
-    ]
-  };
+  // Student enrollment trend from API (fallback to sample)
+  const enrollmentData = (() => {
+    const hasApiData = Array.isArray(dashboardData?.studentEnrollment) && dashboardData.studentEnrollment.length > 0;
+    const labels = hasApiData
+      ? dashboardData.studentEnrollment.map((m) => m.month)
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const data = hasApiData
+      ? dashboardData.studentEnrollment.map((m) => Number(m.totalEnrollments || 0))
+      : [120, 135, 142, 158, 165, 178, 185, 192, 198, 205, 212, 220];
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Students Enrolled',
+          data,
+          backgroundColor: 'rgba(16, 185, 129, 0.8)',
+          borderColor: '#10b981',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }
+      ]
+    };
+  })();
+
+  // Course distribution doughnut chart from API (fallback to sample)
+  const courseDistributionData = (() => {
+    const hasApiData = Array.isArray(dashboardData?.courseData) && dashboardData.courseData.length > 0;
+    const labels = hasApiData
+      ? dashboardData.courseData.map((c) => c.courseName || 'Course')
+      : ['10th Foundation', '12th Science', 'Crash Course', 'Other Courses'];
+    const data = hasApiData
+      ? dashboardData.courseData.map((c) => Number(c.count || 0))
+      : [237, 20, 449, 611];
+    const bgColors = [
+      'rgba(59, 130, 246, 0.8)', // blue
+      'rgba(16, 185, 129, 0.8)', // green
+      'rgba(245, 158, 11, 0.8)', // amber
+      'rgba(239, 68, 68, 0.8)',  // red
+      'rgba(99, 102, 241, 0.8)', // indigo
+      'rgba(14, 165, 233, 0.8)', // sky
+      'rgba(236, 72, 153, 0.8)', // pink
+      'rgba(5, 150, 105, 0.8)',  // emerald
+      'rgba(234, 88, 12, 0.8)',  // orange
+      'rgba(132, 204, 22, 0.8)', // lime
+      'rgba(168, 85, 247, 0.8)', // violet
+      'rgba(250, 204, 21, 0.8)'  // yellow
+    ];
+    const borderColors = [
+      '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+      '#6366f1', '#0ea5e9', '#ec4899', '#059669',
+      '#ea580c', '#84cc16', '#a855f7', '#facc15'
+    ];
+    return {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: data.map((_, i) => bgColors[i % bgColors.length]),
+          borderColor: data.map((_, i) => borderColors[i % borderColors.length]),
+          borderWidth: 2,
+          hoverOffset: 4
+        }
+      ]
+    };
+  })();
 
   const chartOptions = {
     responsive: true,
@@ -221,14 +280,17 @@ const Dashboard = () => {
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    cutout: '60%',
     plugins: {
       legend: {
-        position: 'bottom',
+        position: 'right',
+        align: 'start',
         labels: {
           usePointStyle: true,
-          padding: 20,
+          boxWidth: 10,
+          padding: 12,
           font: {
-            size: 11,
+            size: 10,
             weight: '500'
           }
         }
@@ -351,8 +413,8 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-text-primary">Course Distribution</h2>
           <FaBookOpen className="text-accent text-2xl" />
         </div>
-        <div className="h-64 flex items-center justify-center">
-          <div className="w-64 h-64">
+        <div className="h-96">
+          <div className="w-full h-full">
             <Doughnut data={courseDistributionData} options={doughnutOptions} />
           </div>
         </div>
@@ -371,7 +433,7 @@ const Dashboard = () => {
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {courseData.map((course, index) => (
+            {coursesList.map((course, index) => (
               <div key={index} className={`bg-gradient-to-r ${course.color} text-white rounded-xl p-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium leading-tight flex-1 pr-2">{course.courseName}</h3>
