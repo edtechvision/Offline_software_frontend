@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -62,6 +62,44 @@ const IDCardAdminForm = ({ initialStudentData = null, isCustomizing = false }) =
 
   const [cardSize, setCardSize] = useState('medium');
   const [exportStatus, setExportStatus] = useState('');
+
+  // Load global styles on component mount
+  useEffect(() => {
+    const savedStyles = localStorage.getItem('globalIDCardStyles');
+    const savedCardSize = localStorage.getItem('globalCardSize');
+    
+    if (savedStyles) {
+      try {
+        const globalStyles = JSON.parse(savedStyles);
+        setCustomStyles(prev => ({
+          ...prev,
+          ...globalStyles
+        }));
+      } catch (error) {
+        console.error('Error loading global styles:', error);
+      }
+    }
+    
+    if (savedCardSize) {
+      setCardSize(savedCardSize);
+    }
+
+    // Listen for global style updates
+    const handleGlobalStyleUpdate = (event) => {
+      const { globalStyles, cardSize: newCardSize } = event.detail;
+      setCustomStyles(prev => ({
+        ...prev,
+        ...globalStyles
+      }));
+      setCardSize(newCardSize);
+    };
+
+    window.addEventListener('globalIDCardStylesUpdated', handleGlobalStyleUpdate);
+
+    return () => {
+      window.removeEventListener('globalIDCardStylesUpdated', handleGlobalStyleUpdate);
+    };
+  }, []);
 
   // Color picker options with initialization
   const colorOptions = [

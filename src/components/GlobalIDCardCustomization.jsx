@@ -18,7 +18,8 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import {
   Palette as PaletteIcon,
@@ -34,6 +35,8 @@ const GlobalIDCardCustomization = () => {
   const [showColorPicker, setShowColorPicker] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [isApplying, setIsApplying] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Global style settings
   const [globalStyles, setGlobalStyles] = useState({
@@ -44,7 +47,18 @@ const GlobalIDCardCustomization = () => {
     labelTextColor: '#033398',
     valueTextColor: '#333333',
     borderRadius: '16px',
-    waveColor: '#4CAF50'
+    waveColor: '#4CAF50',
+    // Font customization
+    headerFontSize: '33px',
+    headerFontWeight: 'bold',
+    subHeaderFontSize: '13px',
+    subHeaderFontWeight: '500',
+    nameFontSize: '24px',
+    nameFontWeight: 'bold',
+    labelFontSize: '12px',
+    labelFontWeight: 'bold',
+    valueFontSize: '11px',
+    valueFontWeight: 'bold'
   });
 
   const [cardSize, setCardSize] = useState('medium');
@@ -52,12 +66,18 @@ const GlobalIDCardCustomization = () => {
   // Load saved global styles on component mount
   useEffect(() => {
     const savedStyles = localStorage.getItem('globalIDCardStyles');
+    const savedCardSize = localStorage.getItem('globalCardSize');
+    
     if (savedStyles) {
       try {
         setGlobalStyles(JSON.parse(savedStyles));
       } catch (error) {
         console.error('Error loading saved styles:', error);
       }
+    }
+    
+    if (savedCardSize) {
+      setCardSize(savedCardSize);
     }
   }, []);
 
@@ -119,29 +139,101 @@ const GlobalIDCardCustomization = () => {
     }
   };
 
-  const resetToDefaults = () => {
-    const defaultStyles = {
-      backgroundGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
-      headerTextColor: '#033398',
-      subHeaderTextColor: '#333333',
-      nameTextColor: '#2E7D32',
-      labelTextColor: '#033398',
-      valueTextColor: '#333333',
-      borderRadius: '16px',
-      waveColor: '#4CAF50'
-    };
-    setGlobalStyles(defaultStyles);
-    setCardSize('medium');
-    showSnackbar('Reset to default styles', 'info');
+  const resetToDefaults = async () => {
+    setIsResetting(true);
+    
+    try {
+      // Show initial toast
+      showSnackbar('Resetting all styles to defaults...', 'info');
+      
+      const defaultStyles = {
+        backgroundGradient: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+        headerTextColor: '#033398',
+        subHeaderTextColor: '#333333',
+        nameTextColor: '#2E7D32',
+        labelTextColor: '#033398',
+        valueTextColor: '#333333',
+        borderRadius: '16px',
+        waveColor: '#4CAF50',
+        // Font customization defaults
+        headerFontSize: '33px',
+        headerFontWeight: 'bold',
+        subHeaderFontSize: '13px',
+        subHeaderFontWeight: '500',
+        nameFontSize: '24px',
+        nameFontWeight: 'bold',
+        labelFontSize: '12px',
+        labelFontWeight: 'bold',
+        valueFontSize: '11px',
+        valueFontWeight: 'bold'
+      };
+      
+      setGlobalStyles(defaultStyles);
+      setCardSize('medium');
+      
+      // Save the reset styles to localStorage
+      localStorage.setItem('globalIDCardStyles', JSON.stringify(defaultStyles));
+      localStorage.setItem('globalCardSize', 'medium');
+      
+      // Simulate processing time for better UX
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('globalIDCardStylesUpdated', {
+        detail: { globalStyles: defaultStyles, cardSize: 'medium' }
+      }));
+      
+      // Success toast
+      showSnackbar('🔄 All styles reset to defaults! Font settings, colors, and card size have been restored to original values. All ID cards will now use default styling.', 'success');
+      
+    } catch (error) {
+      console.error('Error saving reset styles:', error);
+      showSnackbar('❌ Error resetting styles. Please try again.', 'error');
+    } finally {
+      setIsResetting(false);
+    }
   };
 
-  const applyToAllCards = () => {
-    // This would trigger a global update to all student cards
-    saveGlobalStyles();
-    showSnackbar('Global styles applied to all ID cards!', 'success');
+  const applyToAllCards = async () => {
+    setIsApplying(true);
+    
+    try {
+      // Show initial toast
+      showSnackbar('Applying global styles to all ID cards...', 'info');
+      
+      // Save current styles to localStorage first
+      localStorage.setItem('globalIDCardStyles', JSON.stringify(globalStyles));
+      localStorage.setItem('globalCardSize', cardSize);
+      
+      // Dispatch a custom event to notify other components about the style update
+      window.dispatchEvent(new CustomEvent('globalIDCardStylesUpdated', {
+        detail: { globalStyles, cardSize }
+      }));
+      
+      // Simulate processing time for better UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force a small delay to ensure all components have processed the event
+      setTimeout(() => {
+        // Dispatch another event to ensure all components are updated
+        window.dispatchEvent(new CustomEvent('globalIDCardStylesUpdated', {
+          detail: { globalStyles, cardSize }
+        }));
+      }, 100);
+      
+      // Success toast with detailed information
+      showSnackbar('✅ Global styles successfully applied to all ID cards! Font settings, colors, and customizations have been saved. All ID cards in gallery, table, and preview will now use these settings.', 'success');
+      
+    } catch (error) {
+      console.error('Error applying global styles:', error);
+      showSnackbar('❌ Error applying global styles. Please try again.', 'error');
+    } finally {
+      setIsApplying(false);
+    }
   };
 
-  const showSnackbarMessage = (message, severity = 'success') => {
+  const showSnackbar = (message, severity = 'success') => {
+    console.log('Showing snackbar:', { message, severity }); // Debug log
     setSnackbar({
       open: true,
       message,
@@ -150,7 +242,7 @@ const GlobalIDCardCustomization = () => {
   };
 
   const closeSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -363,6 +455,256 @@ const GlobalIDCardCustomization = () => {
                 </Grid>
               </Box>
 
+              {/* Font Customization */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                  Font Settings
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  {/* Header Font */}
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: 2,
+                    minWidth: '300px',
+                    flex: '1 1 300px',
+                    '&:hover': {
+                      borderColor: '#2196f3',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                    }
+                  }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                      Header Text (TARGET BOARD)
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Size</InputLabel>
+                        <Select
+                          value={globalStyles.headerFontSize}
+                          onChange={(e) => handleStyleChange('headerFontSize', e.target.value)}
+                          label="Font Size"
+                        >
+                          <MenuItem value="24px">24px</MenuItem>
+                          <MenuItem value="28px">28px</MenuItem>
+                          <MenuItem value="33px">33px</MenuItem>
+                          <MenuItem value="36px">36px</MenuItem>
+                          <MenuItem value="40px">40px</MenuItem>
+                          <MenuItem value="44px">44px</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Weight</InputLabel>
+                        <Select
+                          value={globalStyles.headerFontWeight}
+                          onChange={(e) => handleStyleChange('headerFontWeight', e.target.value)}
+                          label="Font Weight"
+                        >
+                          <MenuItem value="300">Light (300)</MenuItem>
+                          <MenuItem value="400">Normal (400)</MenuItem>
+                          <MenuItem value="500">Medium (500)</MenuItem>
+                          <MenuItem value="600">Semi Bold (600)</MenuItem>
+                          <MenuItem value="700">Bold (700)</MenuItem>
+                          <MenuItem value="800">Extra Bold (800)</MenuItem>
+                          <MenuItem value="900">Black (900)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+
+                  {/* Sub Header Font */}
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: 2,
+                    minWidth: '300px',
+                    flex: '1 1 300px',
+                    '&:hover': {
+                      borderColor: '#2196f3',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                    }
+                  }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                      Sub Header (Address/Contact)
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Size</InputLabel>
+                        <Select
+                          value={globalStyles.subHeaderFontSize}
+                          onChange={(e) => handleStyleChange('subHeaderFontSize', e.target.value)}
+                          label="Font Size"
+                        >
+                          <MenuItem value="10px">10px</MenuItem>
+                          <MenuItem value="11px">11px</MenuItem>
+                          <MenuItem value="12px">12px</MenuItem>
+                          <MenuItem value="13px">13px</MenuItem>
+                          <MenuItem value="14px">14px</MenuItem>
+                          <MenuItem value="15px">15px</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Weight</InputLabel>
+                        <Select
+                          value={globalStyles.subHeaderFontWeight}
+                          onChange={(e) => handleStyleChange('subHeaderFontWeight', e.target.value)}
+                          label="Font Weight"
+                        >
+                          <MenuItem value="300">Light (300)</MenuItem>
+                          <MenuItem value="400">Normal (400)</MenuItem>
+                          <MenuItem value="500">Medium (500)</MenuItem>
+                          <MenuItem value="600">Semi Bold (600)</MenuItem>
+                          <MenuItem value="700">Bold (700)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+
+                  {/* Name Font */}
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: 2,
+                    minWidth: '300px',
+                    flex: '1 1 300px',
+                    '&:hover': {
+                      borderColor: '#2196f3',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                    }
+                  }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                      Student Name
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Size</InputLabel>
+                        <Select
+                          value={globalStyles.nameFontSize}
+                          onChange={(e) => handleStyleChange('nameFontSize', e.target.value)}
+                          label="Font Size"
+                        >
+                          <MenuItem value="18px">18px</MenuItem>
+                          <MenuItem value="20px">20px</MenuItem>
+                          <MenuItem value="22px">22px</MenuItem>
+                          <MenuItem value="24px">24px</MenuItem>
+                          <MenuItem value="26px">26px</MenuItem>
+                          <MenuItem value="28px">28px</MenuItem>
+                          <MenuItem value="30px">30px</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Weight</InputLabel>
+                        <Select
+                          value={globalStyles.nameFontWeight}
+                          onChange={(e) => handleStyleChange('nameFontWeight', e.target.value)}
+                          label="Font Weight"
+                        >
+                          <MenuItem value="400">Normal (400)</MenuItem>
+                          <MenuItem value="500">Medium (500)</MenuItem>
+                          <MenuItem value="600">Semi Bold (600)</MenuItem>
+                          <MenuItem value="700">Bold (700)</MenuItem>
+                          <MenuItem value="800">Extra Bold (800)</MenuItem>
+                          <MenuItem value="900">Black (900)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+
+                  {/* Label Font */}
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: 2,
+                    minWidth: '300px',
+                    flex: '1 1 300px',
+                    '&:hover': {
+                      borderColor: '#2196f3',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                    }
+                  }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                      Field Labels (Father's Name, etc.)
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Size</InputLabel>
+                        <Select
+                          value={globalStyles.labelFontSize}
+                          onChange={(e) => handleStyleChange('labelFontSize', e.target.value)}
+                          label="Font Size"
+                        >
+                          <MenuItem value="9px">9px</MenuItem>
+                          <MenuItem value="10px">10px</MenuItem>
+                          <MenuItem value="11px">11px</MenuItem>
+                          <MenuItem value="12px">12px</MenuItem>
+                          <MenuItem value="13px">13px</MenuItem>
+                          <MenuItem value="14px">14px</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Weight</InputLabel>
+                        <Select
+                          value={globalStyles.labelFontWeight}
+                          onChange={(e) => handleStyleChange('labelFontWeight', e.target.value)}
+                          label="Font Weight"
+                        >
+                          <MenuItem value="400">Normal (400)</MenuItem>
+                          <MenuItem value="500">Medium (500)</MenuItem>
+                          <MenuItem value="600">Semi Bold (600)</MenuItem>
+                          <MenuItem value="700">Bold (700)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+
+                  {/* Value Font */}
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '1px solid #e0e0e0', 
+                    borderRadius: 2,
+                    minWidth: '300px',
+                    flex: '1 1 300px',
+                    '&:hover': {
+                      borderColor: '#2196f3',
+                      boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                    }
+                  }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                      Field Values (Student Data)
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Size</InputLabel>
+                        <Select
+                          value={globalStyles.valueFontSize}
+                          onChange={(e) => handleStyleChange('valueFontSize', e.target.value)}
+                          label="Font Size"
+                        >
+                          <MenuItem value="8px">8px</MenuItem>
+                          <MenuItem value="9px">9px</MenuItem>
+                          <MenuItem value="10px">10px</MenuItem>
+                          <MenuItem value="11px">11px</MenuItem>
+                          <MenuItem value="12px">12px</MenuItem>
+                          <MenuItem value="13px">13px</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <FormControl size="small" sx={{ flex: 1 }}>
+                        <InputLabel>Font Weight</InputLabel>
+                        <Select
+                          value={globalStyles.valueFontWeight}
+                          onChange={(e) => handleStyleChange('valueFontWeight', e.target.value)}
+                          label="Font Weight"
+                        >
+                          <MenuItem value="400">Normal (400)</MenuItem>
+                          <MenuItem value="500">Medium (500)</MenuItem>
+                          <MenuItem value="600">Semi Bold (600)</MenuItem>
+                          <MenuItem value="700">Bold (700)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+
               {/* Quick Color Presets */}
               <Box sx={{ mb: 4 }}>
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
@@ -420,7 +762,7 @@ const GlobalIDCardCustomization = () => {
                             ...prev,
                             ...preset.colors
                           }));
-                          showSnackbarMessage(`Applied ${preset.name} color scheme`, 'success');
+                          showSnackbar(`Applied ${preset.name} color scheme`, 'success');
                         }}
                         sx={{
                           p: 2,
@@ -467,13 +809,29 @@ const GlobalIDCardCustomization = () => {
                 </Button>
                 
                 <Button
+                  variant="outlined"
+                  onClick={() => showSnackbar('Test notification working!', 'info')}
+                  size="large"
+                  sx={{ ml: 1 }}
+                >
+                  Test Notification
+                </Button>
+                
+                <Button
                   variant="contained"
-                  startIcon={<PaletteIcon />}
+                  startIcon={isApplying ? <CircularProgress size={20} color="inherit" /> : <PaletteIcon />}
                   onClick={applyToAllCards}
                   color="secondary"
                   size="large"
+                  disabled={isApplying || isResetting}
+                  sx={{
+                    background: isApplying ? 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' : undefined,
+                    '&:hover': {
+                      background: isApplying ? 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)' : undefined,
+                    }
+                  }}
                 >
-                  Apply to All Cards
+                  {isApplying ? 'Applying...' : 'Apply to All Cards'}
                 </Button>
                 
                 <Button
@@ -481,18 +839,28 @@ const GlobalIDCardCustomization = () => {
                   startIcon={<PreviewIcon />}
                   onClick={() => setShowPreview(true)}
                   size="large"
+                  disabled={isApplying || isResetting}
                 >
                   Preview
                 </Button>
                 
                 <Button
                   variant="outlined"
-                  startIcon={<RefreshIcon />}
+                  startIcon={isResetting ? <CircularProgress size={20} color="inherit" /> : <RefreshIcon />}
                   onClick={resetToDefaults}
                   color="warning"
                   size="large"
+                  disabled={isApplying || isResetting}
+                  sx={{
+                    borderColor: isResetting ? '#ff9800' : undefined,
+                    color: isResetting ? '#ff9800' : undefined,
+                    '&:hover': {
+                      borderColor: isResetting ? '#f57c00' : undefined,
+                      backgroundColor: isResetting ? 'rgba(255, 152, 0, 0.04)' : undefined,
+                    }
+                  }}
                 >
-                  Reset to Defaults
+                  {isResetting ? 'Resetting...' : 'Reset to Defaults'}
                 </Button>
               </Box>
             </CardContent>
@@ -553,11 +921,15 @@ const GlobalIDCardCustomization = () => {
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={snackbar.severity === 'success' ? 6000 : 4000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={closeSnackbar} severity={snackbar.severity}>
+        <Alert 
+          onClose={closeSnackbar} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

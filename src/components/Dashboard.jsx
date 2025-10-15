@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FaUsers,
   FaUserPlus,
@@ -49,6 +50,7 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [dashboardData, setDashboardData] = useState(null);
@@ -82,16 +84,31 @@ const Dashboard = () => {
     return amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
   };
 
+  // Handle KPI card clicks
+  const handleKPIClick = (kpi) => {
+    // Check if it's admin-only and user is not admin
+    if (kpi.adminOnly) {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole !== 'admin') {
+        return; // Don't navigate if not admin
+      }
+    }
+    
+    if (kpi.route) {
+      navigate(kpi.route);
+    }
+  };
+
   const currentMonth = dashboardData?.currentMonth || '';
   const kpiData = [
-    { title: 'Students', value: String(dashboardData?.totalStudents ?? 0), color: 'accent', icon: FaUsers, change: '', changeType: 'neutral' },
-    { title: "Today's Admission", value: String(dashboardData?.todaysAdmissions ?? 0), color: 'teal', icon: FaUserPlus, change: '', changeType: 'neutral' },
-    { title: 'Fee Collection', value: formatCurrency(dashboardData?.totalCollectedFees), color: 'accent-green', icon: FaMoneyBillWave, change: '', changeType: 'neutral' },
-    { title: "Today's Fee", value: formatCurrency(dashboardData?.todaysCollectedFees), color: 'red', icon: FaCreditCard, change: '', changeType: 'neutral' },
-    { title: 'Pending Fee', value: formatCurrency(dashboardData?.totalPendingFees), color: 'yellow', icon: FaClock, change: '', changeType: 'neutral' },
-    { title: `${currentMonth || 'This Month'} Fee`, value: formatCurrency(dashboardData?.currentMonthCollectedFees), color: 'gray', icon: FaCalendarAlt, change: '', changeType: 'neutral' },
-    { title: `${currentMonth || 'This Month'} Admission`, value: String(dashboardData?.currentMonthAdmissions ?? 0), color: 'accent-green', icon: FaSearch, change: '', changeType: 'neutral' },
-    { title: 'Centers', value: String(dashboardData?.totalCenters ?? 0), color: 'accent', icon: FaBuilding, change: '', changeType: 'neutral' },
+    { title: 'Students', value: String(dashboardData?.totalStudents ?? 0), color: 'accent', icon: FaUsers, change: '', changeType: 'neutral', route: '/students' },
+    { title: "Today's Admission", value: String(dashboardData?.todaysAdmissions ?? 0), color: 'teal', icon: FaUserPlus, change: '', changeType: 'neutral', route: '/students' },
+    { title: 'Fee Collection', value: formatCurrency(dashboardData?.totalCollectedFees), color: 'accent-green', icon: FaMoneyBillWave, change: '', changeType: 'neutral', route: '/fee/collect' },
+    { title: "Today's Fee", value: formatCurrency(dashboardData?.todaysCollectedFees), color: 'red', icon: FaCreditCard, change: '', changeType: 'neutral', route: '/fee/collect' },
+    { title: 'Pending Fee', value: formatCurrency(dashboardData?.totalPendingFees), color: 'yellow', icon: FaClock, change: '', changeType: 'neutral', route: '/fee/pending' },
+    { title: `${currentMonth || 'This Month'} Fee`, value: formatCurrency(dashboardData?.currentMonthCollectedFees), color: 'gray', icon: FaCalendarAlt, change: '', changeType: 'neutral', route: '/fee/history' },
+    { title: `${currentMonth || 'This Month'} Admission`, value: String(dashboardData?.currentMonthAdmissions ?? 0), color: 'accent-green', icon: FaSearch, change: '', changeType: 'neutral', route: '/students' },
+    { title: 'Centers', value: String(dashboardData?.totalCenters ?? 0), color: 'accent', icon: FaBuilding, change: '', changeType: 'neutral', route: '/center', adminOnly: true },
   ];
 
   // Build course cards list from API data (fallback to sample if absent)
@@ -118,16 +135,16 @@ const Dashboard = () => {
         color: colorPalette[index % colorPalette.length]
       }))
     : [
-        { courseName: 'CRASH COURSE 10TH 2024-25', studentCount: '260', trend: '+15%', color: 'from-green-400 to-green-600' },
-        { courseName: 'CRASH COURSE 12TH 2024-25', studentCount: '189', trend: '+8%', color: 'from-blue-400 to-blue-600' },
-        { courseName: 'CLASS 12TH BIOLOGY', studentCount: '13', trend: '+25%', color: 'from-purple-400 to-purple-600' },
-        { courseName: 'CLASS 12TH PHYSICS', studentCount: '1', trend: '+100%', color: 'from-red-400 to-red-600' },
-        { courseName: 'CLASS 12TH HINDI + ENGLISH', studentCount: '2', trend: '+50%', color: 'from-pink-400 to-pink-600' },
-        { courseName: 'CLASS 12TH CHEMISTRY', studentCount: '4', trend: '+33%', color: 'from-indigo-400 to-indigo-600' },
-        { courseName: 'CLASS 12TH BATCH 2025-26', studentCount: '12', trend: '+20%', color: 'from-yellow-400 to-yellow-600' },
-        { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '24', trend: '+14%', color: 'from-teal-400 to-teal-600' },
-        { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '213', trend: '+18%', color: 'from-orange-400 to-orange-600' },
-      ];
+    { courseName: 'CRASH COURSE 10TH 2024-25', studentCount: '260', trend: '+15%', color: 'from-green-400 to-green-600' },
+    { courseName: 'CRASH COURSE 12TH 2024-25', studentCount: '189', trend: '+8%', color: 'from-blue-400 to-blue-600' },
+    { courseName: 'CLASS 12TH BIOLOGY', studentCount: '13', trend: '+25%', color: 'from-purple-400 to-purple-600' },
+    { courseName: 'CLASS 12TH PHYSICS', studentCount: '1', trend: '+100%', color: 'from-red-400 to-red-600' },
+    { courseName: 'CLASS 12TH HINDI + ENGLISH', studentCount: '2', trend: '+50%', color: 'from-pink-400 to-pink-600' },
+    { courseName: 'CLASS 12TH CHEMISTRY', studentCount: '4', trend: '+33%', color: 'from-indigo-400 to-indigo-600' },
+    { courseName: 'CLASS 12TH BATCH 2025-26', studentCount: '12', trend: '+20%', color: 'from-yellow-400 to-yellow-600' },
+    { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '24', trend: '+14%', color: 'from-teal-400 to-teal-600' },
+    { courseName: 'CLASS 10TH FOUNDATION BATCH', studentCount: '213', trend: '+18%', color: 'from-orange-400 to-orange-600' },
+  ];
 
   // Chart data for fee collection trend from API (fallback to sample)
   const feeChartData = (() => {
@@ -140,23 +157,23 @@ const Dashboard = () => {
       : [650000, 780000, 820000, 750000, 900000, 850000, 880000, 920000, 870000, 950000, 890000, 930000];
     return {
       labels,
-      datasets: [
-        {
-          label: 'Fee Collection (₹)',
+    datasets: [
+      {
+        label: 'Fee Collection (₹)',
           data,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#3b82f6',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
-          pointHoverRadius: 8
-        }
-      ]
-    };
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }
+    ]
+  };
   })();
 
   // Student enrollment trend from API (fallback to sample)
@@ -170,18 +187,18 @@ const Dashboard = () => {
       : [120, 135, 142, 158, 165, 178, 185, 192, 198, 205, 212, 220];
     return {
       labels,
-      datasets: [
-        {
-          label: 'Students Enrolled',
+    datasets: [
+      {
+        label: 'Students Enrolled',
           data,
-          backgroundColor: 'rgba(16, 185, 129, 0.8)',
-          borderColor: '#10b981',
-          borderWidth: 2,
-          borderRadius: 8,
-          borderSkipped: false,
-        }
-      ]
-    };
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: '#10b981',
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+      }
+    ]
+  };
   })();
 
   // Course distribution doughnut chart from API (fallback to sample)
@@ -214,16 +231,16 @@ const Dashboard = () => {
     ];
     return {
       labels,
-      datasets: [
-        {
+    datasets: [
+      {
           data,
           backgroundColor: data.map((_, i) => bgColors[i % bgColors.length]),
           borderColor: data.map((_, i) => borderColors[i % borderColors.length]),
-          borderWidth: 2,
-          hoverOffset: 4
-        }
-      ]
-    };
+        borderWidth: 2,
+        hoverOffset: 4
+      }
+    ]
+  };
   })();
 
   const chartOptions = {
@@ -319,7 +336,8 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {kpiData.map((kpi, index) => (
           <div key={index} className="group">
-            <div className={`${kpi.color === 'accent' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700' :
+            <div 
+              className={`${kpi.color === 'accent' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700' :
               kpi.color === 'accent-green' ? 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700' :
                 kpi.color === 'teal' ? 'bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700' :
                   kpi.color === 'green' ? 'bg-gradient-to-br from-green-500 via-green-600 to-green-700' :
@@ -327,7 +345,9 @@ const Dashboard = () => {
                       kpi.color === 'yellow' ? 'bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700' :
                         kpi.color === 'gray' ? 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800' :
                           'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700'} 
-                           text-white rounded-3xl p-8 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-500 relative overflow-hidden`}>
+                             text-white rounded-3xl p-8 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-500 relative overflow-hidden cursor-pointer`}
+              onClick={() => handleKPIClick(kpi)}
+            >
 
               {/* Enhanced background pattern */}
               <div className="absolute inset-0 opacity-20">
@@ -343,6 +363,11 @@ const Dashboard = () => {
                   <div className="text-3xl opacity-90 bg-white/25 p-3 rounded-2xl backdrop-blur-sm shadow-lg">
                     <kpi.icon />
                   </div>
+                </div>
+                
+                {/* Click indicator */}
+                <div className="absolute top-4 right-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="w-2 h-2 bg-white/60 rounded-full"></div>
                 </div>
 
                 {/* Main value with enhanced typography */}
@@ -367,12 +392,12 @@ const Dashboard = () => {
                   </span>
                 </div>
 
-                {/* Status indicator for Find Fees card */}
-                {kpi.title === 'Find Fees' && (
-                  <div className="mt-4 p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                    <div className="text-sm font-medium opacity-90 text-center">Status</div>
+                {/* Click to view indicator */}
+                <div className="mt-4 p-2 bg-white/10 rounded-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="text-xs font-medium opacity-90 text-center">
+                    Click to view {kpi.title.toLowerCase()}
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Hover effect overlay */}

@@ -32,7 +32,18 @@ const IDCard = ({
     labelTextColor: '#120600', // Blue
     valueTextColor: '#072E82',
     borderRadius: '16px',
-    waveColor: '#4CAF50'
+    waveColor: '#4CAF50',
+    // Font customization defaults
+    headerFontSize: '33px',
+    headerFontWeight: 'bold',
+    subHeaderFontSize: '13px',
+    subHeaderFontWeight: '500',
+    nameFontSize: '24px',
+    nameFontWeight: 'bold',
+    labelFontSize: '12px',
+    labelFontWeight: 'bold',
+    valueFontSize: '11px',
+    valueFontWeight: 'bold'
   };
 
   // Size configurations - Standard ID Card dimensions (791 × 1256 pixels at 300 DPI)
@@ -183,8 +194,8 @@ const IDCard = ({
           <Box sx={{ flex: 1, pt: 0.5 }}>
             <Typography
               sx={{
-                fontSize: config.fontSize.header,
-                fontWeight: 'bold',
+                fontSize: styles.headerFontSize || config.fontSize.header,
+                fontWeight: styles.headerFontWeight || 'bold',
                 fontFamily: 'Montserrat, sans-serif',
                 color: styles.headerTextColor,
                 lineHeight: 1.1,
@@ -197,10 +208,10 @@ const IDCard = ({
             </Typography>
             <Typography
               sx={{
-                fontSize: config.fontSize.subHeader,
+                fontSize: styles.subHeaderFontSize || config.fontSize.subHeader,
+                fontWeight: styles.subHeaderFontWeight || 500,
                 color: styles.subHeaderTextColor,
                 lineHeight: 1.2,
-                fontWeight: 500,
                 textAlign: 'center',
                 mb: 0.2
               }}
@@ -209,10 +220,10 @@ const IDCard = ({
             </Typography>
             <Typography
               sx={{
-                fontSize: config.fontSize.subHeader,
+                fontSize: styles.subHeaderFontSize || config.fontSize.subHeader,
+                fontWeight: styles.subHeaderFontWeight || 500,
                 color: styles.subHeaderTextColor,
                 lineHeight: 1.2,
-                fontWeight: 500,
                 textAlign: 'center'
               }}
             >
@@ -268,8 +279,8 @@ const IDCard = ({
       <Box sx={{ px: config.spacing, mb: config.spacing, position: 'relative', zIndex: 2 }}>
         <Typography
           sx={{
-            fontSize: config.fontSize.name,
-            fontWeight: 'bold',
+            fontSize: styles.nameFontSize || config.fontSize.name,
+            fontWeight: styles.nameFontWeight || 'bold',
             fontFamily: 'Montserrat, sans-serif',
             color: styles.nameTextColor,
             textAlign: 'center',
@@ -298,8 +309,8 @@ const IDCard = ({
               <Typography
                 component="span"
                 sx={{
-                  fontSize: config.fontSize.label,
-                  fontWeight: 'bold',
+                  fontSize: styles.labelFontSize || config.fontSize.label,
+                  fontWeight: styles.labelFontWeight || 'bold',
                   fontFamily: 'Khand, sans-serif',
                   color: styles.labelTextColor,
                   minWidth: '90px',
@@ -313,8 +324,8 @@ const IDCard = ({
               <Typography
                 component="span"
                 sx={{
-                  fontSize: config.fontSize.value,
-                  fontWeight: 'bold',
+                  fontSize: styles.valueFontSize || config.fontSize.value,
+                  fontWeight: styles.valueFontWeight || 'bold',
                   fontFamily: 'Khand, sans-serif',
                   color: styles.valueTextColor,
                   flex: 1,

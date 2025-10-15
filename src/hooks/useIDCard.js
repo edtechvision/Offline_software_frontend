@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export const useIDCard = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -12,9 +12,72 @@ export const useIDCard = () => {
       labelTextColor: '#033398',
       valueTextColor: '#333333',
       borderRadius: '16px',
-      waveColor: '#4CAF50'
+      waveColor: '#4CAF50',
+      // Font customization defaults
+      headerFontSize: '33px',
+      headerFontWeight: 'bold',
+      subHeaderFontSize: '13px',
+      subHeaderFontWeight: '500',
+      nameFontSize: '24px',
+      nameFontWeight: 'bold',
+      labelFontSize: '12px',
+      labelFontWeight: 'bold',
+      valueFontSize: '11px',
+      valueFontWeight: 'bold'
     }
   });
+
+  // Load global styles from localStorage on hook initialization
+  useEffect(() => {
+    const loadGlobalStyles = () => {
+      const savedStyles = localStorage.getItem('globalIDCardStyles');
+      const savedCardSize = localStorage.getItem('globalCardSize');
+      
+      if (savedStyles) {
+        try {
+          const globalStyles = JSON.parse(savedStyles);
+          setBulkCardSettings(prev => ({
+            ...prev,
+            customStyles: {
+              ...prev.customStyles,
+              ...globalStyles
+            }
+          }));
+        } catch (error) {
+          console.error('Error loading global ID card styles:', error);
+        }
+      }
+      
+      if (savedCardSize) {
+        setBulkCardSettings(prev => ({
+          ...prev,
+          size: savedCardSize
+        }));
+      }
+    };
+
+    // Load styles on mount
+    loadGlobalStyles();
+
+    // Listen for global style updates
+    const handleGlobalStyleUpdate = (event) => {
+      const { globalStyles, cardSize } = event.detail;
+      setBulkCardSettings(prev => ({
+        ...prev,
+        customStyles: {
+          ...prev.customStyles,
+          ...globalStyles
+        },
+        size: cardSize
+      }));
+    };
+
+    window.addEventListener('globalIDCardStylesUpdated', handleGlobalStyleUpdate);
+
+    return () => {
+      window.removeEventListener('globalIDCardStylesUpdated', handleGlobalStyleUpdate);
+    };
+  }, []);
 
   const generateBulkCards = useCallback((students, settings = bulkCardSettings) => {
     return students.map(student => ({
@@ -117,6 +180,33 @@ export const useIDCard = () => {
     }
   }, []);
 
+  const refreshGlobalStyles = useCallback(() => {
+    const savedStyles = localStorage.getItem('globalIDCardStyles');
+    const savedCardSize = localStorage.getItem('globalCardSize');
+    
+    if (savedStyles) {
+      try {
+        const globalStyles = JSON.parse(savedStyles);
+        setBulkCardSettings(prev => ({
+          ...prev,
+          customStyles: {
+            ...prev.customStyles,
+            ...globalStyles
+          }
+        }));
+      } catch (error) {
+        console.error('Error refreshing global ID card styles:', error);
+      }
+    }
+    
+    if (savedCardSize) {
+      setBulkCardSettings(prev => ({
+        ...prev,
+        size: savedCardSize
+      }));
+    }
+  }, []);
+
   return {
     selectedStudents,
     setSelectedStudents,
@@ -127,6 +217,7 @@ export const useIDCard = () => {
     saveCardTemplate,
     loadCardTemplate,
     getCardTemplates,
-    deleteCardTemplate
+    deleteCardTemplate,
+    refreshGlobalStyles
   };
 };

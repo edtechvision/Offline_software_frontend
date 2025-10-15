@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -33,6 +33,7 @@ import {
   FilterList as FilterIcon
 } from '@mui/icons-material';
 import { useStudents } from '../hooks/useStudents';
+import { useIDCard } from '../hooks/useIDCard';
 import IDCard from './IDCard';
 import IDCardAdminForm from './IDCardAdminForm';
 
@@ -43,7 +44,11 @@ const IDCardGallery = () => {
   const [cardsPerPage] = useState(12);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showCustomization, setShowCustomization] = useState(false);
-  const [cardSize, setCardSize] = useState('medium');
+  
+  // Use global ID card settings
+  const { bulkCardSettings } = useIDCard();
+  const cardSize = bulkCardSettings.size;
+  const globalStyles = bulkCardSettings.customStyles;
 
   // Fetch students data
   const { data: studentsResponse, isLoading, error } = useStudents({
@@ -247,6 +252,7 @@ const IDCardGallery = () => {
                     }}>
                       <IDCard
                         studentData={formatStudentData(student)}
+                        customStyles={globalStyles}
                         size={cardSize}
                       />
                     </Box>
