@@ -290,7 +290,10 @@ export const studentService = {
   getStudents: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString ? `${API_ENDPOINTS.STUDENT.GET_ALL}?${queryString}` : API_ENDPOINTS.STUDENT.GET_ALL;
+    console.log('studentService.getStudents: Making request to:', endpoint);
+    console.log('studentService.getStudents: Params:', params);
     const result = await apiRequest(endpoint);
+    console.log('studentService.getStudents: Response:', result);
     return result;
   },
 

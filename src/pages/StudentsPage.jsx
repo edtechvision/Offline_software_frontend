@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -51,7 +51,7 @@ import {
   Visibility as ViewIcon,
   CheckCircle as ActivateIcon
 } from '@mui/icons-material';
-import { useStudents, useDeleteStudent, useCourses, useBatches, useActivateStudent, useDeactivateStudent } from '../hooks';
+import { useStudents, useDeleteStudent, useCourses, useBatches, useActivateStudent, useDeactivateStudent, useDebounce } from '../hooks';
 import { useAuthContext } from '../contexts/AuthContext';
 import StudentRegistrationPage from './StudentRegistrationPage';
 
@@ -59,12 +59,17 @@ const StudentsPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
+  // Local state for UI
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
   const [selectedClassName, setSelectedClassName] = useState('');
   const [pageSize, setPageSize] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Debounced search term for API calls (500ms delay)
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const isSearching = searchTerm !== debouncedSearchTerm;
 
   const [showFilters, setShowFilters] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
@@ -80,15 +85,22 @@ const StudentsPage = () => {
   // Get user role from auth context
   const { userRole } = useAuthContext();
 
-  // API hooks
-  const { data: studentsData, isLoading, error, refetch } = useStudents({
+  // API hooks - using debounced search and URL parameters
+  const apiParams = {
     page: currentPage,
     limit: pageSize,
-    search: searchTerm,
+    search: debouncedSearchTerm,
     courseId: selectedCourse || '',
     batchId: selectedBatch || '',
     className: selectedClassName || ''
-  });
+  };
+  
+  // Debug logging
+  console.log('API Params:', apiParams);
+  console.log('Search term:', searchTerm);
+  console.log('Debounced search term:', debouncedSearchTerm);
+  
+  const { data: studentsData, isLoading, error, refetch } = useStudents(apiParams);
   const { data: coursesData, isLoading: coursesLoading } = useCourses();
   const { data: batchesData, isLoading: batchesLoading } = useBatches();
   const deleteStudentMutation = useDeleteStudent();
@@ -105,18 +117,14 @@ const StudentsPage = () => {
   const totalStudents = pagination.total || students.length;
   const totalPages = pagination.totalPages || Math.ceil(totalStudents / pageSize);
 
-  // Filter students based on search term, course, and batch
+  // Since API handles search, we only need to filter by course, batch, and class
+  // The search is handled by the API with debouncedSearchTerm
   const filteredStudents = students.filter(student => {
-    const matchesSearch = 
-      student.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.inchargeCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.mobileNumber?.includes(searchTerm);
-    
     const matchesCourse = !selectedCourse || student.courseDetails?.courseId?._id === selectedCourse;
     const matchesBatch = !selectedBatch || student.courseDetails?.batchId?._id === selectedBatch;
     const matchesClass = !selectedClassName || student.className === selectedClassName;
     
-    return matchesSearch && matchesCourse && matchesBatch && matchesClass;
+    return matchesCourse && matchesBatch && matchesClass;
   });
 
   // Role-based permissions
@@ -139,6 +147,14 @@ const StudentsPage = () => {
 
   const handlePageChange = (event, page) => {
     setCurrentPage(page);
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCourse('');
+    setSelectedBatch('');
+    setSelectedClassName('');
+    setCurrentPage(1);
   };
 
   const handleDelete = (studentId) => {
@@ -329,6 +345,11 @@ const StudentsPage = () => {
                       <SearchIcon sx={{ color: theme.palette.text.secondary }} />
                     </InputAdornment>
                   ),
+                  endAdornment: isSearching && (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  ),
                 }}
                 sx={{ borderRadius: '4px' }}
               />
@@ -352,13 +373,7 @@ const StudentsPage = () => {
             <Grid item xs={12} md={2}>
               <Button
                 variant="outlined"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCourse('');
-                  setSelectedBatch('');
-                  setSelectedClassName('');
-                  setCurrentPage(1);
-                }}
+                onClick={handleClearFilters}
                 sx={{ borderRadius: '4px', width: '100%' }}
               >
                 Clear
@@ -562,13 +577,7 @@ const StudentsPage = () => {
                       <Button
                         variant="outlined"
                         size="small"
-                        onClick={() => {
-                          setSearchTerm('');
-                          setSelectedCourse('');
-                          setSelectedBatch('');
-                          setSelectedClassName('');
-                          setCurrentPage(1);
-                        }}
+                        onClick={handleClearFilters}
                         sx={{ 
                           borderRadius: '4px',
                           flex: 1,
