@@ -65,11 +65,25 @@ const PendingFeePage = () => {
   // Fetch pending fees data from API
   const { data: pendingFeesData, isLoading, error, refetch } = usePendingFees(apiParams);
 
-  // Extract data from API response
-  const pendingFees = pendingFeesData?.data || [];
-  const totalStudents = pendingFeesData?.totalStudents || 0;
-  const pagination = pendingFeesData?.pagination || {};
-  const totalPages = pagination.totalPages || 1;
+  // Extract data from API response (robust to varying shapes)
+  const raw = pendingFeesData || {};
+  const pendingFees =
+    raw?.data?.items ||
+    raw?.data?.pendingFees ||
+    raw?.data?.students ||
+    raw?.items ||
+    raw?.pendingFees ||
+    raw?.students ||
+    raw?.data ||
+    [];
+
+  const pagination = raw?.data?.pagination || raw?.pagination || {};
+  const totalStudents =
+    pagination.total ||
+    raw?.total ||
+    raw?.totalStudents ||
+    pendingFees.length || 0;
+  const totalPages = pagination.totalPages || Math.ceil((totalStudents || 0) / pageSize) || 1;
 
   // Pagination handlers
   const handlePageChange = (event, page) => {
@@ -193,7 +207,7 @@ Target Board Team`;
                 fullWidth
                 placeholder="Search by student name or ID..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -207,7 +221,7 @@ Target Board Team`;
                 <InputLabel>Filter by Status</InputLabel>
                 <Select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
                   label="Filter by Status"
                 sx={{ borderRadius: '4px' }}
                 >
