@@ -369,19 +369,21 @@ const ExpensesPage = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-4">
-                          {/* Payment Status Toggle */}
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-500">Paid:</span>
-                            <Tooltip title={expense.status === 'paid' ? 'Mark as Unpaid' : 'Mark as Paid'}>
-                              <Switch
-                                checked={expense.status === 'paid'}
-                                onChange={() => handleStatusUpdateClick(expense._id, expense.status)}
-                                disabled={statusLoading}
-                                color="success"
-                                size="small"
-                              />
-                            </Tooltip>
-                          </div>
+                          {/* Payment Status Toggle (Admin only) */}
+                          {userRole === 'admin' && (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs text-gray-500">Paid:</span>
+                              <Tooltip title={expense.status === 'paid' ? 'Mark as Unpaid' : 'Mark as Paid'}>
+                                <Switch
+                                  checked={expense.status === 'paid'}
+                                  onChange={() => handleStatusUpdateClick(expense._id, expense.status)}
+                                  disabled={statusLoading}
+                                  color="success"
+                                  size="small"
+                                />
+                              </Tooltip>
+                            </div>
+                          )}
                           
                           {/* Approval Status Toggle (Admin only) */}
                           {userRole === 'admin' && (

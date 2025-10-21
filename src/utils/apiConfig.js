@@ -79,6 +79,13 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/students/${id}`,
     DELETE: (id) => `/students/${id}`,
   },
+  
+  // Inquiry management
+  INQUIRIES: {
+    CREATE: '/inquiries',
+    GET_ALL: '/inquiries',
+    DELETE: (id) => `/inquiries/${id}`,
+  },
 };
 
 // Error handling utility

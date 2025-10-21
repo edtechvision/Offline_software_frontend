@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FaPhone, FaUser, FaEnvelope, FaCalendarAlt, FaClock, FaSearch, FaFilter } from 'react-icons/fa';
+import useInquiries from '../hooks/useInquiries';
 
 const EnquiryPage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
-  
-  const enquiriesData = [
-    { id: 1, name: 'Rahul Kumar', phone: '+91 98765 43210', email: 'rahul@email.com', course: '12th Physics', status: 'New', date: '2025-08-19', time: '10:30 AM' },
-    { id: 2, name: 'Priya Singh', phone: '+91 87654 32109', email: 'priya@email.com', course: '10th Foundation', status: 'Contacted', date: '2025-08-18', time: '2:15 PM' },
-    { id: 3, name: 'Amit Patel', phone: '+91 76543 21098', email: 'amit@email.com', course: 'Crash Course 12th', status: 'Converted', date: '2025-08-17', time: '11:45 AM' },
-    { id: 4, name: 'Neha Sharma', phone: '+91 65432 10987', email: 'neha@email.com', course: '12th Chemistry', status: 'Follow Up', date: '2025-08-16', time: '4:20 PM' },
-    { id: 5, name: 'Vikram Verma', phone: '+91 54321 09876', email: 'vikram@email.com', course: '10th Foundation', status: 'New', date: '2025-08-15', time: '9:00 AM' },
-  ];
 
-  const filteredEnquiries = filterStatus === 'all' 
-    ? enquiriesData 
-    : enquiriesData.filter(enquiry => enquiry.status === filterStatus);
+  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, deleteInquiry } = useInquiries({ page: 1, limit: 10, search: '' });
+
+  const enquiries = useMemo(() => data || [], [data]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -90,6 +83,12 @@ const EnquiryPage = () => {
         </div>
       </div>
 
+      {/* Create Inquiry */}
+      <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Create Inquiry</h2>
+        <InquiryCreateForm onCreate={createInquiry} />
+      </div>
+
       {/* Filters and Search */}
       <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
@@ -116,6 +115,8 @@ const EnquiryPage = () => {
             <input 
               type="text" 
               placeholder="Search enquiries..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -125,7 +126,11 @@ const EnquiryPage = () => {
       {/* Enquiries Table */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800">Recent Enquiries</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-800">Recent Inquiries</h2>
+            <div className="text-sm text-gray-500">{loading ? 'Loading...' : `${total} results`}</div>
+          </div>
+          {error && <div className="text-sm text-red-600 mt-2">{error}</div>}
         </div>
         
         <div className="overflow-x-auto">
@@ -133,16 +138,16 @@ const EnquiryPage = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Center</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enquiry Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredEnquiries.map((enquiry) => (
-                <tr key={enquiry.id} className="hover:bg-gray-50">
+              {enquiries.map((enquiry) => (
+                <tr key={enquiry._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -151,47 +156,67 @@ const EnquiryPage = () => {
                       <span className="text-sm font-medium text-gray-900">{enquiry.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm text-gray-900">
-                        <FaPhone className="text-gray-400 mr-2" />
-                        {enquiry.phone}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FaEnvelope className="text-gray-400 mr-2" />
-                        {enquiry.email}
-                      </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex items-center">
+                      <FaPhone className="text-gray-400 mr-2" />
+                      {enquiry.mobile}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900">{enquiry.course}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(enquiry.status)}`}>
-                      {enquiry.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm text-gray-900">
-                        <FaCalendarAlt className="text-gray-400 mr-2" />
-                        {enquiry.date}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FaClock className="text-gray-400 mr-2" />
-                        {enquiry.time}
-                      </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{enquiry.center}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{enquiry.class}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex items-center">
+                      <FaCalendarAlt className="text-gray-400 mr-2" />
+                      {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleString() : '-'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">Call</button>
-                    <button className="text-green-600 hover:text-green-900 mr-3">Update</button>
-                    <button className="text-red-600 hover:text-red-900">Delete</button>
+                    <button 
+                      className="text-red-600 hover:text-red-900"
+                      onClick={async () => {
+                        if (window.confirm('Delete this inquiry?')) {
+                          await deleteInquiry(enquiry._id);
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Pagination */}
+        <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="text-sm text-gray-600">Page {page} of {pages}</div>
+          <div className="flex items-center space-x-2">
+            <button
+              className="px-3 py-1 text-sm border rounded disabled:opacity-50"
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page <= 1 || loading}
+            >
+              Previous
+            </button>
+            <button
+              className="px-3 py-1 text-sm border rounded disabled:opacity-50"
+              onClick={() => setPage(Math.min(pages, page + 1))}
+              disabled={page >= pages || loading}
+            >
+              Next
+            </button>
+            <select
+              className="ml-2 border rounded px-2 py-1 text-sm"
+              value={limit}
+              onChange={(e) => setLimit(parseInt(e.target.value, 10))}
+              disabled={loading}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -199,3 +224,44 @@ const EnquiryPage = () => {
 };
 
 export default EnquiryPage;
+
+const InquiryCreateForm = ({ onCreate }) => {
+  const [form, setForm] = useState({ name: '', mobile: '', address: '', class: '', center: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await onCreate(form);
+      setForm({ name: '', mobile: '', address: '', class: '', center: '' });
+    } catch (err) {
+      setError(err?.message || 'Failed to create inquiry');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-3">
+      <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="border rounded px-3 py-2" required />
+      <input name="mobile" value={form.mobile} onChange={handleChange} placeholder="Mobile" className="border rounded px-3 py-2" required />
+      <input name="address" value={form.address} onChange={handleChange} placeholder="Address" className="border rounded px-3 py-2 md:col-span-2" />
+      <input name="class" value={form.class} onChange={handleChange} placeholder="Class" className="border rounded px-3 py-2" />
+      <input name="center" value={form.center} onChange={handleChange} placeholder="Center" className="border rounded px-3 py-2" />
+      <div className="md:col-span-5 flex items-center space-x-3">
+        <button type="submit" disabled={submitting} className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50">
+          {submitting ? 'Creating...' : 'Create Inquiry'}
+        </button>
+        {error && <span className="text-sm text-red-600">{error}</span>}
+      </div>
+    </form>
+  );
+};

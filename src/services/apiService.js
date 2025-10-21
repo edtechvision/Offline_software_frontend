@@ -578,6 +578,28 @@ export const feeDiscountService = {
   },
 };
 
+// Inquiry Services
+export const inquiryService = {
+  createInquiry: async (inquiryData) => {
+    return apiRequest(API_ENDPOINTS.INQUIRIES.CREATE, {
+      method: 'POST',
+      body: JSON.stringify(inquiryData),
+    });
+  },
+
+  getInquiries: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `${API_ENDPOINTS.INQUIRIES.GET_ALL}?${queryString}` : API_ENDPOINTS.INQUIRIES.GET_ALL;
+    return apiRequest(endpoint);
+  },
+
+  deleteInquiry: async (id) => {
+    return apiRequest(API_ENDPOINTS.INQUIRIES.DELETE(id), {
+      method: 'DELETE',
+    });
+  },
+};
+
 // Expense Services
 export const expenseService = {
   createExpense: async (expenseData) => {
