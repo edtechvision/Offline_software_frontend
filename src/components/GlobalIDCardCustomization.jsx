@@ -307,6 +307,251 @@ const GlobalIDCardCustomization = () => {
                 </Grid>
               </Box>
 
+              {/* Custom Solid Color Picker */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                  Custom Solid Color
+                </Typography>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 2,
+                  p: 2,
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 2,
+                  '&:hover': {
+                    borderColor: '#2196f3',
+                    boxShadow: '0 2px 8px rgba(33, 150, 243, 0.1)'
+                  }
+                }}>
+                  <IconButton
+                    onClick={() => setShowColorPicker(showColorPicker === 'backgroundGradient' ? null : 'backgroundGradient')}
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      backgroundColor: globalStyles.backgroundGradient.startsWith('linear-gradient') ? '#e0e0e0' : globalStyles.backgroundGradient,
+                      border: '4px solid #fff',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      '&:hover': { 
+                        border: '4px solid #2196f3',
+                        transform: 'scale(1.05)',
+                        boxShadow: '0 6px 20px rgba(33, 150, 243, 0.3)'
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <PaletteIcon sx={{ color: 'white', fontSize: 24 }} />
+                  </IconButton>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Choose Solid Color
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                      Select any solid color for the background
+                    </Typography>
+                    <Typography variant="caption" sx={{ 
+                      color: 'primary.main', 
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      display: 'block',
+                      mt: 0.5
+                    }}>
+                      {globalStyles.backgroundGradient.startsWith('linear-gradient') ? 'Gradient Selected' : globalStyles.backgroundGradient}
+                    </Typography>
+                  </Box>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setShowColorPicker(showColorPicker === 'backgroundGradient' ? null : 'backgroundGradient')}
+                    sx={{ fontSize: '0.75rem' }}
+                  >
+                    {showColorPicker === 'backgroundGradient' ? 'Close Picker' : 'Choose Color'}
+                  </Button>
+                </Box>
+
+                {showColorPicker === 'backgroundGradient' && (
+                  <>
+                    {/* Backdrop */}
+                    <Box
+                      sx={{ 
+                        position: 'fixed', 
+                        top: 0, 
+                        left: 0, 
+                        right: 0, 
+                        bottom: 0,
+                        zIndex: 999,
+                        backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                      }}
+                      onClick={() => setShowColorPicker(null)}
+                    />
+                    {/* Color Picker Dialog */}
+                    <Box sx={{ 
+                      position: 'fixed', 
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 1000, 
+                      p: 3,
+                      bgcolor: 'white',
+                      borderRadius: 2,
+                      boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+                      border: '1px solid #e0e0e0',
+                      minWidth: 400,
+                      maxWidth: '90vw',
+                      maxHeight: '90vh',
+                      overflow: 'auto'
+                    }}>
+                      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                        Choose Background Color
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                        Select a solid color for the ID card background
+                      </Typography>
+                      
+                      {/* Material UI Color Palette */}
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                          Quick Color Selection
+                        </Typography>
+                        <Grid container spacing={1}>
+                          {/* Basic Colors */}
+                          <Grid item xs={12}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
+                              Basic Colors
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                              {[
+                                { name: 'White', color: '#ffffff' },
+                                { name: 'Black', color: '#000000' },
+                                { name: 'Light Gray', color: '#f5f5f5' },
+                                { name: 'Gray', color: '#9e9e9e' },
+                                { name: 'Dark Gray', color: '#424242' }
+                              ].map((colorOption) => (
+                                <Button
+                                  key={colorOption.name}
+                                  size="small"
+                                  variant="outlined"
+                                  onClick={() => handleStyleChange('backgroundGradient', colorOption.color)}
+                                  sx={{
+                                    minWidth: 'auto',
+                                    width: 40,
+                                    height: 40,
+                                    backgroundColor: colorOption.color,
+                                    border: '2px solid #e0e0e0',
+                                    '&:hover': {
+                                      border: '2px solid #2196f3',
+                                      transform: 'scale(1.1)'
+                                    },
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  <Box sx={{ 
+                                    width: 20, 
+                                    height: 20, 
+                                    backgroundColor: colorOption.color,
+                                    borderRadius: '50%',
+                                    border: colorOption.color === '#ffffff' ? '1px solid #e0e0e0' : 'none'
+                                  }} />
+                                </Button>
+                              ))}
+                            </Box>
+                          </Grid>
+
+                          {/* Material UI Primary Colors */}
+                          <Grid item xs={12}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
+                              Material UI Colors
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                              {[
+                                { name: 'Red', color: '#f44336' },
+                                { name: 'Pink', color: '#e91e63' },
+                                { name: 'Purple', color: '#9c27b0' },
+                                { name: 'Deep Purple', color: '#673ab7' },
+                                { name: 'Indigo', color: '#3f51b5' },
+                                { name: 'Blue', color: '#2196f3' },
+                                { name: 'Light Blue', color: '#03a9f4' },
+                                { name: 'Cyan', color: '#00bcd4' },
+                                { name: 'Teal', color: '#009688' },
+                                { name: 'Green', color: '#4caf50' },
+                                { name: 'Light Green', color: '#8bc34a' },
+                                { name: 'Lime', color: '#cddc39' },
+                                { name: 'Yellow', color: '#ffeb3b' },
+                                { name: 'Amber', color: '#ffc107' },
+                                { name: 'Orange', color: '#ff9800' },
+                                { name: 'Deep Orange', color: '#ff5722' },
+                                { name: 'Brown', color: '#795548' },
+                                { name: 'Blue Grey', color: '#607d8b' }
+                              ].map((colorOption) => (
+                                <Button
+                                  key={colorOption.name}
+                                  size="small"
+                                  variant="outlined"
+                                  onClick={() => handleStyleChange('backgroundGradient', colorOption.color)}
+                                  sx={{
+                                    minWidth: 'auto',
+                                    width: 40,
+                                    height: 40,
+                                    backgroundColor: colorOption.color,
+                                    border: '2px solid #e0e0e0',
+                                    '&:hover': {
+                                      border: '2px solid #2196f3',
+                                      transform: 'scale(1.1)'
+                                    },
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  <Box sx={{ 
+                                    width: 20, 
+                                    height: 20, 
+                                    backgroundColor: colorOption.color,
+                                    borderRadius: '50%'
+                                  }} />
+                                </Button>
+                              ))}
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
+
+                      {/* Advanced Color Picker */}
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                          Advanced Color Picker
+                        </Typography>
+                        <HexColorPicker
+                          color={globalStyles.backgroundGradient.startsWith('linear-gradient') ? '#FFD700' : globalStyles.backgroundGradient}
+                          onChange={(color) => handleStyleChange('backgroundGradient', color)}
+                          style={{ width: '100%' }}
+                        />
+                      </Box>
+
+                      <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleStyleChange('backgroundGradient', 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)')}
+                        >
+                          Use Default Gradient
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => setShowColorPicker(null)}
+                        >
+                          Apply Color
+                        </Button>
+                      </Box>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Selected: <span style={{ fontFamily: 'monospace', color: globalStyles.backgroundGradient.startsWith('linear-gradient') ? '#FFD700' : globalStyles.backgroundGradient }}>{globalStyles.backgroundGradient.startsWith('linear-gradient') ? 'Gradient' : globalStyles.backgroundGradient}</span>
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </>
+                )}
+              </Box>
+
               {/* Color Customization */}
               <Box sx={{ mb: 4 }}>
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>

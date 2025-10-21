@@ -60,7 +60,7 @@ const IDCard = ({
       },
       spacing: 1.2,
       photoSize: 90,
-      qrSize: 50
+      qrSize: 100
     },
     medium: {
       width: 420, // Increased width for better proportions
@@ -74,7 +74,7 @@ const IDCard = ({
       },
       spacing: 1.8,
       photoSize: 110,
-      qrSize: 60
+      qrSize: 120
     },
     large: {
       width: 500, // Increased width for better visibility
@@ -88,7 +88,7 @@ const IDCard = ({
       },
       spacing: 2.2,
       photoSize: 130,
-      qrSize: 70
+      qrSize: 140
     }
   };
 
