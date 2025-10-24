@@ -34,6 +34,7 @@ import JobApplicationsListPage from './pages/JobApplicationsListPage';
 import AdmissionInchargePage from './pages/AdmissionInchargePage';
 import FeeReceiptDemo from './pages/FeeReceiptDemo';
 import StaffDashboard from './pages/StaffDashboard';
+import StaffPage from './pages/StaffPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -357,6 +358,15 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles="admin">
             <IcardPage />
+          </ProtectedLayout>
+        }
+      />
+
+      <Route
+        path="/staff"
+        element={
+          <ProtectedLayout requiredRoles="admin">
+            <StaffPage />
           </ProtectedLayout>
         }
       />

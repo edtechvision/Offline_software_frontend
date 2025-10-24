@@ -48,6 +48,7 @@ const StaffDashboard = () => {
   const [scannedStudents, setScannedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -92,37 +93,72 @@ const StaffDashboard = () => {
   };
 
   // Process scanned data
-  const processScannedData = () => {
+  const processScannedData = async () => {
+    setIsProcessing(true);
     try {
       const studentData = JSON.parse(scannedData);
       
-      // Check if student already exists
-      const existingIndex = scannedStudents.findIndex(
-        student => student.studentId === studentData.studentId
-      );
-      
-      if (existingIndex >= 0) {
-        // Update existing student
-        const updatedStudents = [...scannedStudents];
-        updatedStudents[existingIndex] = {
-          ...studentData,
-          scannedAt: new Date().toISOString(),
-          status: 'present'
-        };
-        setScannedStudents(updatedStudents);
-        showSnackbar('Student attendance updated!', 'success');
-      } else {
-        // Add new student
-        setScannedStudents(prev => [studentData, ...prev]);
-        showSnackbar('Student scanned successfully!', 'success');
+      // Get staff ID from current user
+      const staffId = currentUser?.id;
+      if (!staffId) {
+        showSnackbar('Staff ID not found. Please login again.', 'error');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Call attendance API with the correct format
+      try {
+        const response = await fetch('https://seashell-app-vgu3a.ondigitalocean.app/api/v1/attendance/mark', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            qrCodeData: scannedData, // Send the raw QR data
+            staffId: staffId
+          })
+        });
+
+        const apiResponse = await response.json();
+
+        if (response.ok) {
+          // Check if student already exists
+          const existingIndex = scannedStudents.findIndex(
+            student => student.studentId === studentData.studentId
+          );
+          
+          if (existingIndex >= 0) {
+            // Update existing student
+            const updatedStudents = [...scannedStudents];
+            updatedStudents[existingIndex] = {
+              ...studentData,
+              scannedAt: new Date().toISOString(),
+              status: 'present'
+            };
+            setScannedStudents(updatedStudents);
+            showSnackbar('Student attendance updated successfully!', 'success');
+          } else {
+            // Add new student
+            setScannedStudents(prev => [studentData, ...prev]);
+            showSnackbar('Student attendance marked successfully!', 'success');
+          }
+        } else {
+          showSnackbar(apiResponse.message || 'Failed to mark attendance', 'error');
+        }
+      } catch (apiError) {
+        console.error('API Error:', apiError);
+        showSnackbar('Failed to connect to server. Please try again.', 'error');
       }
       
       setShowScanner(false);
       setScannedData('');
     } catch (error) {
+      console.error('Parse Error:', error);
       showSnackbar('Invalid QR code data!', 'error');
       setShowScanner(false);
       setScannedData('');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -559,16 +595,22 @@ const StaffDashboard = () => {
             <Button
               variant="contained"
               onClick={processScannedData}
+              disabled={isProcessing}
+              startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',
                 px: 3,
                 py: 1.5,
                 borderRadius: 2,
-                fontWeight: 600
+                fontWeight: 600,
+                '&:disabled': {
+                  background: '#9ca3af',
+                  color: 'white'
+                }
               }}
             >
-              Process Student Data
+              {isProcessing ? 'Processing...' : 'Process Student Data'}
             </Button>
           </Box>
         </DialogContent>

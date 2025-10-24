@@ -87,9 +87,15 @@ const FeeHistoryPage = () => {
   
   // Extract data from API response
   const payments = feeHistoryData?.data || [];
+  console.log('API Response:', feeHistoryData);
+  console.log('Payments:', payments);
+  
   const totalPayments = feeHistoryData?.totalPayments || 0;
-  const pagination = feeHistoryData?.pagination || {};
-  const totalPages = pagination.totalPages || 1;
+  const totalPages = feeHistoryData?.totalPages || 1;
+  
+  console.log('totalPayments:', totalPayments);
+  console.log('totalPages:', totalPages);
+  console.log('currentPage:', currentPage);
 
   // Pagination handlers
   const handlePageChange = (event, page) => {
@@ -179,6 +185,74 @@ const FeeHistoryPage = () => {
       message: `Receipt downloaded successfully for ${receiptData.studentName}`,
       severity: 'success'
     });
+  };
+
+  // Export report functionality
+  const handleExportReport = () => {
+    try {
+      // Create CSV data
+      const csvData = payments.map(payment => ({
+        'Student Name': payment.studentName || 'N/A',
+        'Registration No': payment.registrationNo || 'N/A',
+        'Receipt No': payment.receiptNo || 'N/A',
+        'Amount': payment.amount || 0,
+        'Payment Mode': payment.paymentMode || 'N/A',
+        'Date': payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString('en-GB') : 'N/A',
+        'Status': 'Completed'
+      }));
+
+      // Convert to CSV string
+      const headers = Object.keys(csvData[0]);
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => headers.map(header => `"${row[header]}"`).join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Fee_History_Report_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSnackbar({
+        open: true,
+        message: 'Report exported successfully!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to export report. Please try again.',
+        severity: 'error'
+      });
+    }
+  };
+
+  // Print report functionality
+  const handlePrintReport = () => {
+    try {
+      // Simple print functionality - just print the current page
+      window.print();
+      
+      setSnackbar({
+        open: true,
+        message: 'Report sent to printer successfully!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to print report. Please try again.',
+        severity: 'error'
+      });
+    }
   };
 
   const getStatusColor = (status) => {
@@ -396,6 +470,7 @@ const FeeHistoryPage = () => {
               <Button
                 variant="outlined"
                 startIcon={<DownloadIcon />}
+                onClick={handleExportReport}
                 sx={{ borderRadius: '4px' }}
               >
                 Export Report
@@ -403,6 +478,7 @@ const FeeHistoryPage = () => {
               <Button
                 variant="contained"
                 startIcon={<PrintIcon />}
+                onClick={handlePrintReport}
                 sx={{ borderRadius: '4px' }}
               >
                 Print Report
@@ -481,11 +557,11 @@ const FeeHistoryPage = () => {
                           variant="outlined"
                         />
                       </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A'}
-                        </Typography>
-                      </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString('en-GB') : 'N/A'}
+                          </Typography>
+                        </TableCell>
                       <TableCell>
                         <Chip
                           label="Completed"

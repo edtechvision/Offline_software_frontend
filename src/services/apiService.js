@@ -675,3 +675,49 @@ export const logsService = {
     return apiRequest(`/get-logs/${id}`);
   },
 };
+
+// Staff Services
+export const staffService = {
+  createStaff: async (staffData) => {
+    return apiRequest('/staff/register', {
+      method: 'POST',
+      body: JSON.stringify(staffData),
+    });
+  },
+
+  getStaff: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/staff?${queryString}` : '/staff';
+    return apiRequest(endpoint);
+  },
+
+  getStaffById: async (id) => {
+    return apiRequest(`/staff/${id}`);
+  },
+
+  updateStaff: async (id, staffData) => {
+    return apiRequest(`/staff/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(staffData),
+    });
+  },
+
+  deleteStaff: async (id) => {
+    return apiRequest(`/staff/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  toggleBlockStaff: async (id) => {
+    return apiRequest(`/staff/${id}/toggle-block`, {
+      method: 'PATCH',
+    });
+  },
+
+  loginStaff: async (credentials) => {
+    return apiRequest('/staff/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+  },
+};

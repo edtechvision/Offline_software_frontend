@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { FaPhone, FaUser, FaEnvelope, FaCalendarAlt, FaClock, FaSearch, FaFilter } from 'react-icons/fa';
 import {
   Box,
   Card,
@@ -30,40 +29,43 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormControlLabel,
-  Switch
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
+  Block as BlockIcon,
   Person as PersonIcon,
   Phone as PhoneIcon,
-  Email as EmailIcon,
-  Schedule as ScheduleIcon
+  Badge as BadgeIcon,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon
 } from '@mui/icons-material';
-import useInquiries from '../hooks/useInquiries';
+import useStaff from '../hooks/useStaff';
 
-const EnquiryPage = () => {
+const StaffPage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, deleteInquiry } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
+  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createStaff, updateStaff, deleteStaff, toggleBlockStaff } = useStaff({ page: currentPage, limit: pageSize, search: searchTerm });
 
-  const enquiries = useMemo(() => data || [], [data]);
+  const staff = useMemo(() => data || [], [data]);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'New': return 'primary';
-      case 'Contacted': return 'warning';
-      case 'Follow Up': return 'secondary';
-      case 'Converted': return 'success';
-      default: return 'default';
-    }
+  const getStatusColor = (isBlocked) => {
+    return isBlocked ? 'error' : 'success';
+  };
+
+  const getStatusText = (isBlocked) => {
+    return isBlocked ? 'Blocked' : 'Active';
   };
 
   const handlePageChange = (event, value) => {
@@ -85,6 +87,48 @@ const EnquiryPage = () => {
     setSearch(value);
   };
 
+  const handleCreateStaff = async (staffData) => {
+    try {
+      await createStaff(staffData);
+      setOpenCreateDialog(false);
+    } catch (error) {
+      console.error('Error creating staff:', error);
+    }
+  };
+
+  const handleEditStaff = async (id, staffData) => {
+    try {
+      await updateStaff(id, staffData);
+      setOpenEditDialog(false);
+      setSelectedStaff(null);
+    } catch (error) {
+      console.error('Error updating staff:', error);
+    }
+  };
+
+  const handleDeleteStaff = async (id) => {
+    if (window.confirm('Are you sure you want to delete this staff member?')) {
+      try {
+        await deleteStaff(id);
+      } catch (error) {
+        console.error('Error deleting staff:', error);
+      }
+    }
+  };
+
+  const handleToggleBlock = async (id) => {
+    try {
+      await toggleBlockStaff(id);
+    } catch (error) {
+      console.error('Error toggling block status:', error);
+    }
+  };
+
+  const handleEditClick = (staff) => {
+    setSelectedStaff(staff);
+    setOpenEditDialog(true);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
@@ -93,13 +137,13 @@ const EnquiryPage = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
               <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Enquiry Management
+                Staff Management
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Track and manage student enquiries and leads
+                Manage staff accounts and permissions
               </Typography>
             </Box>
-            <PhoneIcon sx={{ fontSize: 60, opacity: 0.8 }} />
+            <PersonIcon sx={{ fontSize: 60, opacity: 0.8 }} />
           </Box>
         </CardContent>
       </Card>
@@ -116,31 +160,13 @@ const EnquiryPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="body2">
-                  Total Enquiries
+                  Total Staff
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  156
+                  {total}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
-                <PhoneIcon />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-        
-        <Card sx={{ height: '100%' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom variant="body2">
-                  New Today
-                </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  12
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
                 <PersonIcon />
               </Avatar>
             </Box>
@@ -152,14 +178,14 @@ const EnquiryPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="body2">
-                  Converted
+                  Active Staff
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  89
+                  {staff.filter(s => !s.isBlocked).length}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'success.light', width: 56, height: 56 }}>
-                <EmailIcon />
+              <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
+                <LockOpenIcon />
               </Avatar>
             </Box>
           </CardContent>
@@ -170,33 +196,51 @@ const EnquiryPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography color="textSecondary" gutterBottom variant="body2">
-                  Follow Up
+                  Blocked Staff
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  23
+                  {staff.filter(s => s.isBlocked).length}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
-                <ScheduleIcon />
+              <Avatar sx={{ bgcolor: 'error.main', width: 56, height: 56 }}>
+                <LockIcon />
+              </Avatar>
+            </Box>
+          </CardContent>
+        </Card>
+        
+        <Card sx={{ height: '100%' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography color="textSecondary" gutterBottom variant="body2">
+                  Current Page
+                </Typography>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                  {staff.length}
+                </Typography>
+              </Box>
+              <Avatar sx={{ bgcolor: 'info.main', width: 56, height: 56 }}>
+                <BadgeIcon />
               </Avatar>
             </Box>
           </CardContent>
         </Card>
       </Box>
 
-      {/* Create Inquiry */}
+      {/* Create Staff */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="h6" component="h2">
-              Create Inquiry
+              Staff Management
             </Typography>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => setOpenCreateDialog(true)}
             >
-              Add New Inquiry
+              Add New Staff
             </Button>
           </Box>
         </CardContent>
@@ -214,22 +258,20 @@ const EnquiryPage = () => {
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>Status</InputLabel>
                 <Select
-              value={filterStatus} 
+                  value={filterStatus}
                   label="Status"
-              onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) => setFilterStatus(e.target.value)}
                 >
                   <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="New">New</MenuItem>
-                  <MenuItem value="Contacted">Contacted</MenuItem>
-                  <MenuItem value="Follow Up">Follow Up</MenuItem>
-                  <MenuItem value="Converted">Converted</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="blocked">Blocked</MenuItem>
                 </Select>
               </FormControl>
             </Box>
             
             <TextField
               size="small"
-              placeholder="Search enquiries..." 
+              placeholder="Search staff..."
               value={searchTerm}
               onChange={handleSearchChange}
               InputProps={{
@@ -241,11 +283,13 @@ const EnquiryPage = () => {
               }}
               sx={{ minWidth: 250 }}
             />
+            
           </Box>
         </CardContent>
       </Card>
 
-      {/* Enquiries Table */}
+
+      {/* Staff Table */}
       <Card sx={{ borderRadius: '4px', overflow: 'hidden' }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -254,20 +298,20 @@ const EnquiryPage = () => {
         ) : error ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography color="error">
-              Error loading enquiries: {error}
+              Error loading staff: {error}
             </Typography>
             <Button variant="contained" onClick={() => window.location.reload()} sx={{ mt: 2 }}>
               Retry
             </Button>
           </Box>
-        ) : enquiries.length === 0 ? (
+        ) : staff.length === 0 ? (
           <Box sx={{ p: 8, textAlign: 'center' }}>
             <PersonIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }} />
             <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
-              No Enquiries Found
+              No Staff Found
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
-              {searchTerm ? 'No enquiries match your search criteria. Try adjusting your filters.' : 'No enquiry records found.'}
+              {searchTerm ? 'No staff match your search criteria. Try adjusting your filters.' : 'No staff records found.'}
             </Typography>
           </Box>
         ) : (
@@ -275,24 +319,34 @@ const EnquiryPage = () => {
             <Table>
               <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Staff</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Staff Code</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Mobile</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Center</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Enquiry Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: 'warning.main' }}>
+                    Plain Password
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-              {enquiries.map((enquiry) => (
-                  <TableRow key={enquiry._id} hover>
+                {staff.map((staffMember) => (
+                  <TableRow key={staffMember._id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ bgcolor: 'primary.main' }}>
-                          {enquiry.name?.charAt(0) || 'E'}
+                          {staffMember.staffname?.charAt(0) || 'S'}
                         </Avatar>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {enquiry.name || 'N/A'}
+                          {staffMember.staffname || 'N/A'}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <BadgeIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {staffMember.staffcode || 'N/A'}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -300,35 +354,55 @@ const EnquiryPage = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
                         <Typography variant="body2">
-                          {enquiry.mobile || 'N/A'}
+                          {staffMember.mobile_number || 'N/A'}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{enquiry.center || 'N/A'}</Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontFamily: 'monospace',
+                          color: 'warning.main',
+                          fontWeight: 600,
+                          backgroundColor: 'warning.light',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-block'
+                        }}
+                      >
+                        {staffMember.plainPassword || 'N/A'}
+                      </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{enquiry.class || 'N/A'}</Typography>
+                      <Chip
+                        label={getStatusText(staffMember.isBlocked)}
+                        color={getStatusColor(staffMember.isBlocked)}
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                      />
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <ScheduleIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2">
-                          {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleDateString('en-GB') : 'N/A'}
-                        </Typography>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEditClick(staffMember)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color={staffMember.isBlocked ? "success" : "warning"}
+                          onClick={() => handleToggleBlock(staffMember._id)}
+                        >
+                          {staffMember.isBlocked ? <LockOpenIcon /> : <BlockIcon />}
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteStaff(staffMember._id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        color="error"
-                      onClick={async () => {
-                        if (window.confirm('Delete this inquiry?')) {
-                          await deleteInquiry(enquiry._id);
-                        }
-                      }}
-                    >
-                        <DeleteIcon />
-                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -338,8 +412,8 @@ const EnquiryPage = () => {
         )}
       </Card>
 
-        {/* Pagination */}
-      {!loading && !error && enquiries.length > 0 && (
+      {/* Pagination */}
+      {!loading && !error && staff.length > 0 && (
         <Card sx={{ mt: 3, borderRadius: '4px' }}>
           <CardContent sx={{ p: 2 }}>
             <Box sx={{ 
@@ -383,21 +457,36 @@ const EnquiryPage = () => {
         </Card>
       )}
 
-      {/* Create Inquiry Dialog */}
+      {/* Create Staff Dialog */}
       <Dialog open={openCreateDialog} onClose={() => setOpenCreateDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Inquiry</DialogTitle>
+        <DialogTitle>Create New Staff Member</DialogTitle>
         <DialogContent>
-          <InquiryCreateForm onCreate={createInquiry} onClose={() => setOpenCreateDialog(false)} />
+          <StaffForm onSubmit={handleCreateStaff} onClose={() => setOpenCreateDialog(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Staff Dialog */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Staff Member</DialogTitle>
+        <DialogContent>
+          <StaffForm 
+            onSubmit={(data) => handleEditStaff(selectedStaff._id, data)} 
+            onClose={() => setOpenEditDialog(false)}
+            initialData={selectedStaff}
+          />
         </DialogContent>
       </Dialog>
     </Box>
   );
 };
 
-export default EnquiryPage;
-
-const InquiryCreateForm = ({ onCreate, onClose }) => {
-  const [form, setForm] = useState({ name: '', mobile: '', address: '', class: '', center: '' });
+// Staff Form Component
+const StaffForm = ({ onSubmit, onClose, initialData = null }) => {
+  const [form, setForm] = useState({
+    staffname: initialData?.staffname || '',
+    mobile_number: initialData?.mobile_number || '',
+    password: ''
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -411,11 +500,14 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
     setSubmitting(true);
     setError(null);
     try {
-      await onCreate(form);
-      setForm({ name: '', mobile: '', address: '', class: '', center: '' });
-      if (onClose) onClose();
+      const submitData = { ...form };
+      if (initialData && !submitData.password) {
+        delete submitData.password; // Don't update password if empty
+      }
+      await onSubmit(submitData);
+      setForm({ staffname: '', mobile_number: '', password: '' });
     } catch (err) {
-      setError(err?.message || 'Failed to create inquiry');
+      setError(err?.message || 'Failed to save staff member');
     } finally {
       setSubmitting(false);
     }
@@ -430,48 +522,32 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
       }}>
         <TextField
           fullWidth
-          name="name"
-          label="Name"
-          value={form.name}
+          name="staffname"
+          label="Staff Name"
+          value={form.staffname}
           onChange={handleChange}
           required
           disabled={submitting}
         />
         <TextField
           fullWidth
-          name="mobile"
-          label="Mobile"
-          value={form.mobile}
+          name="mobile_number"
+          label="Mobile Number"
+          value={form.mobile_number}
           onChange={handleChange}
           required
           disabled={submitting}
         />
         <TextField
           fullWidth
-          name="address"
-          label="Address"
-          value={form.address}
+          name="password"
+          label={initialData ? "New Password (leave empty to keep current)" : "Password"}
+          type="password"
+          value={form.password}
           onChange={handleChange}
-          multiline
-          rows={2}
+          required={!initialData}
           disabled={submitting}
           sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
-        />
-        <TextField
-          fullWidth
-          name="class"
-          label="Class"
-          value={form.class}
-          onChange={handleChange}
-          disabled={submitting}
-        />
-        <TextField
-          fullWidth
-          name="center"
-          label="Center"
-          value={form.center}
-          onChange={handleChange}
-          disabled={submitting}
         />
         {error && (
           <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}>
@@ -495,10 +571,12 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
             disabled={submitting}
             startIcon={submitting ? <CircularProgress size={20} /> : null}
           >
-          {submitting ? 'Creating...' : 'Create Inquiry'}
+            {submitting ? 'Saving...' : (initialData ? 'Update Staff' : 'Create Staff')}
           </Button>
         </Box>
       </Box>
     </Box>
   );
 };
+
+export default StaffPage;

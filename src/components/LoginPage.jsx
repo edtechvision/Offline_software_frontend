@@ -49,7 +49,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     admin: { email: '', password: '' },
-    staff: { email: '', password: '' },
+    staff: { identifier: '', password: '' },
     center: { centerCode: '', password: '' }
   });
   
@@ -116,8 +116,8 @@ const LoginPage = () => {
       case 1: // Staff
         credentials = formData.staff;
         loginType = 'staff';
-        if (!credentials.email || !credentials.password) {
-          showSnackbar('Please fill in all fields', 'error');
+        if (!credentials.identifier || !credentials.password) {
+          showSnackbar('Please enter staff code/email/username and password', 'error');
           return;
         }
         break;
@@ -157,35 +157,54 @@ const LoginPage = () => {
           });
           break;
         case 'staff':
-          // Staff login with static credentials
-          const staticCredentials = {
-            email: 'staff@targetboard.com',
-            password: 'staff123'
+          // Use staff login API with staffcode and password
+          const staffCredentials = {
+            staffcode: credentials.identifier,
+            password: credentials.password
           };
-          
-          // Check static credentials
-          if (credentials.email === staticCredentials.email && credentials.password === staticCredentials.password) {
-            const staffUser = {
-              id: 'staff_001',
-              name: 'Staff Member',
-              email: credentials.email,
-              role: 'staff'
-            };
-            
-            // Store in localStorage
-            localStorage.setItem('authToken', 'staff_token_static');
-            localStorage.setItem('userData', JSON.stringify(staffUser));
-            localStorage.setItem('userRole', 'staff');
-            
-            // Update auth context
-            authLogin(staffUser, 'staff_token', 'staff');
-            showSnackbar('Staff login successful!', 'success');
-            
-            // Redirect to staff dashboard
-            navigate('/staff-dashboard', { replace: true });
-          } else {
-            showSnackbar('Invalid staff credentials! Use: staff@targetboard.com / staff123', 'error');
+
+          try {
+            // Call staff login API directly
+            const staffResponse = await fetch('https://seashell-app-vgu3a.ondigitalocean.app/api/v1/staff/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(staffCredentials)
+            });
+
+            const staffData = await staffResponse.json();
+
+            if (staffResponse.ok && staffData.message === 'Staff login successful') {
+              // Store staff data in localStorage
+              const staffUser = {
+                id: staffData.user._id,
+                name: staffData.user.staffname,
+                staffcode: staffData.user.staffcode,
+                mobile_number: staffData.user.mobile_number,
+                isBlocked: staffData.user.isBlocked,
+                role: staffData.role || 'staff'
+              };
+
+              // Store in localStorage
+              localStorage.setItem('authToken', staffData.token);
+              localStorage.setItem('userData', JSON.stringify(staffUser));
+              localStorage.setItem('userRole', staffData.role || 'staff');
+              localStorage.setItem('staffData', JSON.stringify(staffData.user));
+
+              // Update auth context
+              authLogin(staffUser, staffData.token, staffData.role || 'staff');
+              showSnackbar('Staff login successful!', 'success');
+              
+              // Redirect to staff dashboard
+              navigate('/staff-dashboard', { replace: true });
+            } else {
+              showSnackbar(staffData.message || 'Staff login failed', 'error');
+            }
+          } catch (error) {
+            showSnackbar('Staff login failed. Please try again.', 'error');
           }
+
           break;
 
         case 'center':
@@ -502,7 +521,7 @@ const LoginPage = () => {
 
                 {/* Staff Login Tab */}
                 <TabPanel value={activeTab} index={1}>
-                  {/* Demo Credentials Info */}
+                  {/* Login Options Info */}
                   <Box sx={{ 
                     mb: 2, 
                     p: 2, 
@@ -511,24 +530,26 @@ const LoginPage = () => {
                     border: '1px solid #0ea5e9' 
                   }}>
                     <Typography variant="body2" sx={{ color: '#0c4a6e', fontWeight: 600, mb: 1 }}>
-                      Demo Credentials:
+                      Login Options:
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#0c4a6e', fontSize: '0.875rem' }}>
-                      Email: <strong>staff@targetboard.com</strong>
+                      • Staff Code (e.g., TB12345)
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#0c4a6e', fontSize: '0.875rem' }}>
-                      Password: <strong>staff123</strong>
+                      • Email Address (e.g., staff@example.com)
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#0c4a6e', fontSize: '0.875rem' }}>
+                      • Username (e.g., staff_username)
                     </Typography>
                   </Box>
 
                   <Box sx={{ mb: 2.5 }}>
                     <TextField
                       fullWidth
-                      label="Email Address"
-                      type="email"
-                      value={formData.staff.email}
-                      onChange={(e) => handleInputChange('staff', 'email', e.target.value)}
-                      placeholder="staff@targetboard.com"
+                      label="Staff Code / Email / Username"
+                      value={formData.staff.identifier}
+                      onChange={(e) => handleInputChange('staff', 'identifier', e.target.value)}
+                      placeholder="Enter staff code, email, or username"
                       size="small"
                       InputProps={{
                         startAdornment: (
