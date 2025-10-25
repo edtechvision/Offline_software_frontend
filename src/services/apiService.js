@@ -323,6 +323,13 @@ export const studentService = {
     apiRequest(`/students/${studentId}/deactivate`, {
       method: 'PUT',
     }),
+
+  updateIdCardStatus: async (studentId, idCardIssued) => {
+    return apiRequest(`/students/${studentId}/idcard`, {
+      method: 'PATCH',
+      body: JSON.stringify({ idCardIssued }),
+    });
+  },
 };
 
 // Course Services
@@ -593,6 +600,13 @@ export const inquiryService = {
     return apiRequest(endpoint);
   },
 
+  updateInquiry: async (id, inquiryData) => {
+    return apiRequest(API_ENDPOINTS.INQUIRIES.UPDATE(id), {
+      method: 'PUT',
+      body: JSON.stringify(inquiryData),
+    });
+  },
+
   deleteInquiry: async (id) => {
     return apiRequest(API_ENDPOINTS.INQUIRIES.DELETE(id), {
       method: 'DELETE',
@@ -718,6 +732,22 @@ export const staffService = {
     return apiRequest('/staff/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
+    });
+  },
+};
+
+// Attendance API service
+export const attendanceService = {
+  getAttendance: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/attendance?${queryString}` : '/attendance';
+    return apiRequest(endpoint);
+  },
+
+  markAttendance: async (data) => {
+    return apiRequest('/attendance/mark', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 };

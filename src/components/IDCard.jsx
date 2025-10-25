@@ -155,7 +155,7 @@ const IDCard = ({
       <Box
         sx={{
           position: 'absolute',
-          top: '-60px',
+          top: '-40px',
           left: '0',
           right: '0',
           bottom: '0',
@@ -296,7 +296,7 @@ const IDCard = ({
 
       {/* Details Section */}
       <Box sx={{ px: config.spacing, flex: 1, position: 'relative', zIndex: 2, pb: 2 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6 , marginLeft: '10px'}}>
           {[
             { label: "Father's Name", value: data.fatherName },
             { label: "Student Id", value: data.studentId },

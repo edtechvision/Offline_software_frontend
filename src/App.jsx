@@ -35,6 +35,8 @@ import AdmissionInchargePage from './pages/AdmissionInchargePage';
 import FeeReceiptDemo from './pages/FeeReceiptDemo';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffPage from './pages/StaffPage';
+import AttendancePage from './pages/AttendancePage';
+import EnquiryLayout from './components/EnquiryLayout';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -90,7 +92,17 @@ const AppRoutes = () => {
           />
         );
       case 'staff':
-        // Staff doesn't need a sidebar - they use the mobile-optimized interface
+        // Staff gets AdminCenterSidebar when accessing enquiry page
+        if (window.location.pathname === '/enquiry') {
+          return (
+            <AdminCenterSidebar 
+              isCollapsed={isSidebarCollapsed} 
+              onToggle={toggleSidebar} 
+              onLogout={handleLogout}
+            />
+          );
+        }
+        // Staff doesn't need a sidebar for other pages - they use the mobile-optimized interface
         return null;
       default:
         return null;
@@ -100,7 +112,8 @@ const AppRoutes = () => {
   // Layout wrapper for protected routes
   const ProtectedLayout = ({ children, requiredRoles = null }) => {
     // Special layout for staff - no sidebar, no header, full screen
-    if (userRole === 'staff') {
+    // Exception: staff can access enquiry page with normal layout
+    if (userRole === 'staff' && window.location.pathname !== '/enquiry') {
       return (
         <ProtectedRoute requiredRoles={requiredRoles}>
           <div className="h-screen overflow-hidden">
@@ -319,7 +332,7 @@ const AppRoutes = () => {
       <Route
         path="/enquiry"
         element={
-          <ProtectedLayout requiredRoles={["admin", "center"]}>
+          <ProtectedLayout requiredRoles={["admin", "center", "staff"]}>
             <EnquiryPage />
           </ProtectedLayout>
         }
@@ -434,6 +447,28 @@ const AppRoutes = () => {
         element={
           <ProtectedLayout requiredRoles="staff">
             <StaffDashboard />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Staff Enquiry Route */}
+      <Route
+        path="/enquiry-staff"
+        element={
+          <ProtectedRoute requiredRoles="staff">
+            <EnquiryLayout>
+              <EnquiryPage />
+            </EnquiryLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Attendance Route */}
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedLayout requiredRoles={["admin", "center", "staff"]}>
+            <AttendancePage />
           </ProtectedLayout>
         }
       />

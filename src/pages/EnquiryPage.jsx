@@ -31,7 +31,9 @@ import {
   DialogContent,
   DialogActions,
   FormControlLabel,
-  Switch
+  Switch,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -41,20 +43,52 @@ import {
   Person as PersonIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  Schedule as ScheduleIcon
+  Schedule as ScheduleIcon,
+  Call as CallIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import useInquiries from '../hooks/useInquiries';
 
 const EnquiryPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [filterStatus, setFilterStatus] = useState('all');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingNotes, setEditingNotes] = useState(null);
+  const [notesValue, setNotesValue] = useState('');
 
-  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, deleteInquiry } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
+  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, updateInquiry, deleteInquiry } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
 
   const enquiries = useMemo(() => data || [], [data]);
+
+  // Calculate stats from enquiries data
+  const stats = useMemo(() => {
+    const totalEnquiries = enquiries.length;
+    const today = new Date().toDateString();
+    const newToday = enquiries.filter(enquiry => 
+      enquiry.enquiry_date && new Date(enquiry.enquiry_date).toDateString() === today
+    ).length;
+    
+    const converted = enquiries.filter(enquiry => 
+      enquiry.status === 'Converted'
+    ).length;
+    
+    const followUp = enquiries.filter(enquiry => 
+      enquiry.status === 'Follow Up'
+    ).length;
+
+    return {
+      total: totalEnquiries,
+      newToday,
+      converted,
+      followUp
+    };
+  }, [enquiries]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -83,6 +117,32 @@ const EnquiryPage = () => {
     const value = event.target.value;
     setSearchTerm(value);
     setSearch(value);
+  };
+
+  const handleCall = (phoneNumber) => {
+    if (phoneNumber) {
+      window.open(`tel:${phoneNumber}`, '_self');
+    }
+  };
+
+  const handleEditNotes = (enquiryId, currentNotes) => {
+    setEditingNotes(enquiryId);
+    setNotesValue(currentNotes || '');
+  };
+
+  const handleSaveNotes = async (enquiryId) => {
+    try {
+      await updateInquiry(enquiryId, { notes: notesValue });
+      setEditingNotes(null);
+      setNotesValue('');
+    } catch (error) {
+      console.error('Error updating notes:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNotes(null);
+    setNotesValue('');
   };
 
   return (
@@ -119,7 +179,7 @@ const EnquiryPage = () => {
                   Total Enquiries
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  156
+                  {stats.total}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
@@ -137,7 +197,7 @@ const EnquiryPage = () => {
                   New Today
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  12
+                  {stats.newToday}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
@@ -155,7 +215,7 @@ const EnquiryPage = () => {
                   Converted
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  89
+                  {stats.converted}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'success.light', width: 56, height: 56 }}>
@@ -173,7 +233,7 @@ const EnquiryPage = () => {
                   Follow Up
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-                  23
+                  {stats.followUp}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
@@ -271,102 +331,340 @@ const EnquiryPage = () => {
             </Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
-              <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Mobile</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Center</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Enquiry Date</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          isMobile ? (
+            // Mobile Card View
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 1 }}>
               {enquiries.map((enquiry) => (
-                  <TableRow key={enquiry._id} hover>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: 'primary.main' }}>
-                          {enquiry.name?.charAt(0) || 'E'}
-                        </Avatar>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                <Card 
+                  key={enquiry._id} 
+                  sx={{ 
+                    borderRadius: 2,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    border: '1px solid #e5e7eb'
+                  }}
+                >
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    {/* Header with Avatar and Name */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                      <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                        {enquiry.name?.charAt(0) || 'E'}
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
                           {enquiry.name || 'N/A'}
                         </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2">
-                          {enquiry.mobile || 'N/A'}
+                        <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                          {enquiry.center || 'N/A'}
                         </Typography>
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{enquiry.center || 'N/A'}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{enquiry.class || 'N/A'}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <ScheduleIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2">
-                          {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleDateString('en-GB') : 'N/A'}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        color="error"
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        {enquiry.mobile && (
+                          <IconButton 
+                            size="small" 
+                            color="success"
+                            onClick={() => handleCall(enquiry.mobile)}
+                            sx={{ 
+                              '&:hover': { 
+                                backgroundColor: 'success.light',
+                                color: 'white'
+                              }
+                            }}
+                          >
+                            <CallIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        <IconButton 
+                          size="small" 
+                          color="error"
                       onClick={async () => {
                         if (window.confirm('Delete this inquiry?')) {
                           await deleteInquiry(enquiry._id);
                         }
                       }}
-                    >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
+                          sx={{ 
+                            '&:hover': { 
+                              backgroundColor: 'error.light',
+                              color: 'white'
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    
+                    {/* Details Row */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                        <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.8rem' }}>
+                          {enquiry.mobile || 'N/A'}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ScheduleIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                          {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleDateString('en-GB') : 'N/A'}
+                        </Typography>
+                      </Box>
+                      {enquiry.class && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                            Class: {enquiry.class}
+                          </Typography>
+                        </Box>
+                      )}
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 0.5 }}>
+                        {editingNotes === enquiry._id ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
+                            <TextField
+                              size="small"
+                              multiline
+                              rows={2}
+                              value={notesValue}
+                              onChange={(e) => setNotesValue(e.target.value)}
+                              placeholder="Add notes..."
+                              sx={{ fontSize: '0.75rem' }}
+                            />
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                color="success"
+                                onClick={() => handleSaveNotes(enquiry._id)}
+                                sx={{ p: 0.5 }}
+                              >
+                                <SaveIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={handleCancelEdit}
+                                sx={{ p: 0.5 }}
+                              >
+                                <CancelIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        ) : (
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: '100%' }}>
+                            <Typography variant="body2" sx={{ 
+                              color: '#6b7280', 
+                              fontSize: '0.75rem', 
+                              fontStyle: enquiry.notes ? 'normal' : 'italic',
+                              flex: 1
+                            }}>
+                              Notes: {enquiry.notes || 'No notes'}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditNotes(enquiry._id, enquiry.notes)}
+                              sx={{ p: 0.5, ml: 'auto' }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            // Desktop Table View
+            <TableContainer>
+              <Table>
+                <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Mobile</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Center</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Notes</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Enquiry Date</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                {enquiries.map((enquiry) => (
+                    <TableRow key={enquiry._id} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            {enquiry.name?.charAt(0) || 'E'}
+                          </Avatar>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {enquiry.name || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                          <Typography variant="body2">
+                            {enquiry.mobile || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{enquiry.center || 'N/A'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{enquiry.class || 'N/A'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        {editingNotes === enquiry._id ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 200 }}>
+                            <TextField
+                              size="small"
+                              multiline
+                              rows={2}
+                              value={notesValue}
+                              onChange={(e) => setNotesValue(e.target.value)}
+                              placeholder="Add notes..."
+                              sx={{ fontSize: '0.875rem' }}
+                            />
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                color="success"
+                                onClick={() => handleSaveNotes(enquiry._id)}
+                                sx={{ p: 0.5 }}
+                              >
+                                <SaveIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={handleCancelEdit}
+                                sx={{ p: 0.5 }}
+                              >
+                                <CancelIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        ) : (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 200 }}>
+                            <Typography variant="body2" sx={{ 
+                              maxWidth: 180, 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              fontStyle: enquiry.notes ? 'normal' : 'italic',
+                              color: enquiry.notes ? 'text.primary' : 'text.secondary',
+                              flex: 1
+                            }}>
+                              {enquiry.notes || 'No notes'}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditNotes(enquiry._id, enquiry.notes)}
+                              sx={{ p: 0.5 }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <ScheduleIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                          <Typography variant="body2">
+                            {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleDateString('en-GB') : 'N/A'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          {enquiry.mobile && (
+                            <IconButton
+                              size="small"
+                              color="success"
+                              onClick={() => handleCall(enquiry.mobile)}
+                              sx={{ 
+                                '&:hover': { 
+                                  backgroundColor: 'success.light',
+                                  color: 'white'
+                                }
+                              }}
+                            >
+                              <CallIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={async () => {
+                              if (window.confirm('Delete this inquiry?')) {
+                                await deleteInquiry(enquiry._id);
+                              }
+                            }}
+                            sx={{ 
+                              '&:hover': { 
+                                backgroundColor: 'error.light',
+                                color: 'white'
+                              }
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )
         )}
       </Card>
 
         {/* Pagination */}
       {!loading && !error && enquiries.length > 0 && (
-        <Card sx={{ mt: 3, borderRadius: '4px' }}>
-          <CardContent sx={{ p: 2 }}>
+        <Card sx={{ mt: 2, borderRadius: 2 }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center',
               flexWrap: 'wrap',
-              gap: 2
+              gap: { xs: 1, sm: 2 }
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2" color="text.secondary">
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: { xs: 1, sm: 2 },
+                flexWrap: 'wrap'
+              }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                   Rows per page:
                 </Typography>
-                <FormControl size="small" sx={{ minWidth: 80 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: 60, sm: 80 } }}>
                   <Select
                     value={pageSize}
                     onChange={handlePageSizeChange}
-                    sx={{ borderRadius: '4px' }}
+                    sx={{ 
+                      borderRadius: 2,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                    }}
                   >
-                    <MenuItem value={5}>5</MenuItem>
-                    <MenuItem value={10}>10</MenuItem>
-                    <MenuItem value={25}>25</MenuItem>
-                    <MenuItem value={50}>50</MenuItem>
+                    <MenuItem value={5} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>5</MenuItem>
+                    <MenuItem value={10} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>10</MenuItem>
+                    <MenuItem value={25} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>25</MenuItem>
+                    <MenuItem value={50} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>50</MenuItem>
                   </Select>
                 </FormControl>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ 
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                  display: { xs: 'none', sm: 'block' }
+                }}>
                   Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, total)} of {total} entries
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ 
+                  fontSize: '0.7rem',
+                  display: { xs: 'block', sm: 'none' }
+                }}>
+                  {currentPage} of {pages} pages
                 </Typography>
               </Box>
               <Pagination
@@ -374,9 +672,18 @@ const EnquiryPage = () => {
                 page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
-                size="medium"
-                showFirstButton
-                showLastButton
+                size={isMobile ? "small" : "medium"}
+                showFirstButton={!isMobile}
+                showLastButton={!isMobile}
+                siblingCount={isMobile ? 0 : 1}
+                boundaryCount={isMobile ? 1 : 1}
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    minWidth: { xs: 32, sm: 40 },
+                    height: { xs: 32, sm: 40 }
+                  }
+                }}
               />
             </Box>
           </CardContent>
@@ -397,9 +704,8 @@ const EnquiryPage = () => {
 export default EnquiryPage;
 
 const InquiryCreateForm = ({ onCreate, onClose }) => {
-  const [form, setForm] = useState({ name: '', mobile: '', address: '', class: '', center: '' });
+  const [form, setForm] = useState({ name: '', mobile: '', address: '', class: '', center: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -412,7 +718,7 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
     setError(null);
     try {
       await onCreate(form);
-      setForm({ name: '', mobile: '', address: '', class: '', center: '' });
+      setForm({ name: '', mobile: '', address: '', class: '', center: '', notes: '' });
       if (onClose) onClose();
     } catch (err) {
       setError(err?.message || 'Failed to create inquiry');
@@ -472,6 +778,17 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
           value={form.center}
           onChange={handleChange}
           disabled={submitting}
+        />
+        <TextField
+          fullWidth
+          name="notes"
+          label="Notes"
+          value={form.notes}
+          onChange={handleChange}
+          multiline
+          rows={2}
+          disabled={submitting}
+          sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}
         />
         {error && (
           <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}>

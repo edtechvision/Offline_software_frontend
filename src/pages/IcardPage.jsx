@@ -27,7 +27,7 @@ import {
   FaCog
 } from 'react-icons/fa';
 import IDCardAdminForm from '../components/IDCardAdminForm';
-import IDCardBulkGenerator from '../components/IDCardBulkGenerator';
+// import IDCardBulkGenerator from '../components/IDCardBulkGenerator';
 import StudentIDCardTable from '../components/StudentIDCardTable';
 import IDCardGallery from '../components/IDCardGallery';
 import GlobalIDCardCustomization from '../components/GlobalIDCardCustomization';
@@ -120,12 +120,12 @@ const IcardPage = () => {
                 iconPosition="start"
                 sx={{ minHeight: 64 }}
               />
-              <Tab 
+              {/* <Tab 
                 icon={<FaUsers />} 
                 label="Bulk Generator" 
                 iconPosition="start"
                 sx={{ minHeight: 64 }}
-              />
+              /> */}
               <Tab 
                 icon={<FaCog />} 
                 label="Global Settings" 
@@ -160,14 +160,14 @@ const IcardPage = () => {
             <IDCardAdminForm />
           </TabPanel>
 
-          <TabPanel value={activeTab} index={3}>
+          {/* <TabPanel value={activeTab} index={3}>
             <Alert severity="info" sx={{ m: 3, mb: 0 }}>
               Generate multiple ID cards for students in bulk. Select students and apply consistent styling across all cards.
             </Alert>
             <IDCardBulkGenerator />
-          </TabPanel>
+          </TabPanel> */}
 
-          <TabPanel value={activeTab} index={4}>
+          <TabPanel value={activeTab} index={3}>
             <Alert severity="info" sx={{ m: 3, mb: 0 }}>
               Set global styling preferences that will be applied to all student ID cards across the system.
             </Alert>

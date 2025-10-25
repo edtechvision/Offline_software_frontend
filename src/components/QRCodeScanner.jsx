@@ -58,29 +58,21 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
       await new Promise(resolve => setTimeout(resolve, 100));
       
       if (!videoRef.current) {
-        setError('Video element not found');
+        console.error('Video element not found');
         return;
       }
 
       // Check if QR scanner is supported
       if (!QrScanner.hasCamera()) {
         setError('No camera found on this device');
-        setHasPermission(false);
         return;
       }
 
       // Create QR scanner instance
       qrScannerRef.current = new QrScanner(
         videoRef.current,
-        (result) => {
-          console.log('QR Code detected:', result);
-          handleQRCodeDetected(result.data);
-        },
+        handleQRCodeDetected,
         {
-          onDecodeError: (err) => {
-            // Ignore decode errors - they're normal during scanning
-            console.log('QR decode error (normal):', err);
-          },
           highlightScanRegion: true,
           highlightCodeOutline: true,
         }
@@ -97,42 +89,43 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
 
       // Start scanning
       await qrScannerRef.current.start();
-      setHasPermission(true);
       setIsScanning(true);
-      
+      setHasPermission(true);
     } catch (err) {
-      console.error('Camera access error:', err);
-      setError('Camera access denied. Please allow camera permissions and try again.');
+      console.error('Camera error:', err);
+      setError(err.message || 'Failed to access camera');
       setHasPermission(false);
-      setIsScanning(false);
-      
-      if (onScanError) {
-        onScanError(err);
-      }
     }
   };
 
+  // Parse QR data to extract student information
   const parseQRData = (qrData) => {
     try {
-      // Parse the QR data text
-      const lines = qrData.split('\n');
+      // Handle both string and object formats
+      let dataString;
+      if (typeof qrData === 'string') {
+        dataString = qrData;
+      } else if (qrData && typeof qrData === 'object' && qrData.data) {
+        dataString = qrData.data;
+      } else {
+        console.error('Unexpected QR data format:', qrData);
+        return null;
+      }
+
+      const lines = dataString.split('\n');
       const studentData = {};
       
       lines.forEach(line => {
         if (line.includes('Name:')) {
-          studentData.name = line.replace('Name:', '').trim();
+          studentData.name = line.split('Name:')[1].trim();
         } else if (line.includes('ID:')) {
-          studentData.studentId = line.replace('ID:', '').trim();
+          studentData.studentId = line.split('ID:')[1].trim();
         } else if (line.includes('Contact:')) {
-          studentData.contact = line.replace('Contact:', '').trim();
+          studentData.contact = line.split('Contact:')[1].trim();
         } else if (line.includes('Course:')) {
-          studentData.course = line.replace('Course:', '').trim();
+          studentData.course = line.split('Course:')[1].trim();
         }
       });
-      
-      // Add timestamp
-      studentData.scannedAt = new Date().toISOString();
-      studentData.status = 'present';
       
       return studentData;
     } catch (error) {
@@ -141,7 +134,7 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
     }
   };
 
-  const handleQRCodeDetected = (qrData) => {
+  const handleQRCodeDetected = async (qrData) => {
     // This function will be called when a real QR code is detected
     console.log('QR Code detected:', qrData);
     
@@ -159,9 +152,124 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
     if (qrScannerRef.current) {
       qrScannerRef.current.stop();
     }
+
+    // Check if QR data could be parsed
+    if (!parsedData) {
+      console.error('Failed to parse QR data');
+      const errorMsg = 'Invalid QR code format. Please scan a valid student QR code.';
+      if (onScanError) {
+        onScanError(errorMsg);
+      }
+      return;
+    }
+
+    // Get staff ID from localStorage
+    const staffData = JSON.parse(localStorage.getItem('staffData') || '{}');
+    const staffId = staffData._id;
     
-    if (onScanSuccess) {
-      onScanSuccess(parsedData ? JSON.stringify(parsedData) : qrData);
+    if (!staffId) {
+      console.error('Staff ID not found in localStorage');
+      const errorMsg = 'Staff ID not found. Please login again.';
+      if (onScanError) {
+        onScanError(errorMsg);
+      }
+      return;
+    }
+
+    // Extract student ID from parsed data
+    const studentId = parsedData?.studentId || parsedData?.id;
+    
+    if (!studentId) {
+      console.error('Student ID not found in QR data');
+      const errorMsg = 'Student ID not found in QR code data';
+      if (onScanError) {
+        onScanError(errorMsg);
+      }
+      return;
+    }
+
+    // Call attendance API directly
+    try {
+      const response = await fetch('https://seashell-app-vgu3a.ondigitalocean.app/api/v1/attendance/mark', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          qrCodeData: studentId,
+          staffId: staffId
+        })
+      });
+
+      const apiResponse = await response.json();
+
+      if (response.ok) {
+        console.log('Attendance marked successfully:', apiResponse);
+        // Play success sound
+        try {
+          const audio = new Audio('/src/assets/sounds/scan.mp3');
+          audio.volume = 0.5;
+          audio.play().catch(error => {
+            console.log('Could not play success sound:', error);
+          });
+        } catch (error) {
+          console.log('Success sound not available:', error);
+        }
+        
+        // Show success message
+        if (onScanSuccess) {
+          onScanSuccess({
+            success: true,
+            message: 'Attendance marked successfully!',
+            studentData: parsedData,
+            apiResponse: apiResponse
+          });
+        }
+      } else {
+        console.error('API Error:', apiResponse);
+        // Play failure sound
+        try {
+          const audio = new Audio('/src/assets/sounds/failure.wav');
+          audio.volume = 0.5;
+          audio.play().catch(error => {
+            console.log('Could not play failure sound:', error);
+          });
+        } catch (error) {
+          console.log('Failure sound not available:', error);
+        }
+        
+        // Show error message
+        if (onScanSuccess) {
+          onScanSuccess({
+            success: false,
+            message: apiResponse.message || 'Failed to mark attendance',
+            studentData: parsedData,
+            error: apiResponse
+          });
+        }
+      }
+    } catch (apiError) {
+      console.error('Network Error:', apiError);
+      // Play failure sound for network errors
+      try {
+        const audio = new Audio('/src/assets/sounds/failure.wav');
+        audio.volume = 0.5;
+        audio.play().catch(error => {
+          console.log('Could not play failure sound:', error);
+        });
+      } catch (error) {
+        console.log('Failure sound not available:', error);
+      }
+      
+      // Show network error message
+      if (onScanSuccess) {
+        onScanSuccess({
+          success: false,
+          message: 'Failed to connect to server. Please try again.',
+          studentData: parsedData,
+          error: apiError
+        });
+      }
     }
   };
 
@@ -190,22 +298,18 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
     onClose();
   };
 
-  const handleManualScan = () => {
-    // This function is no longer needed since real QR scanning is working
-    console.log('Manual scan not needed - real QR scanning is active');
-  };
-
-
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
-          overflow: 'hidden'
+          borderRadius: 2,
+          overflow: 'hidden',
+          maxHeight: '90vh',
+          margin: 1
         }
       }}
     >
@@ -214,9 +318,10 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
         justifyContent: 'space-between', 
         alignItems: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white'
+        color: 'white',
+        fontWeight: 600
       }}>
-        <Typography variant="h6" component="span" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" component="span">
           QR Code Scanner
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: 'white' }}>
@@ -231,177 +336,167 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
           style={{ display: 'none' }}
         />
         
-        <Box sx={{ position: 'relative', minHeight: 400 }}>
-          {/* Camera View Area */}
-          <Box
-            sx={{
-              width: '100%',
-              height: 400,
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 2,
-              backgroundColor: '#000'
-            }}
-          >
-            {/* Real Camera Feed */}
-            {hasPermission && isScanning && !scanResult && !error && (
-              <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                {/* Camera feed will be displayed by QR scanner */}
-                
-                {/* Scanning Overlay */}
-                <Box
-                  sx={{
+        <Box sx={{ position: 'relative', minHeight: 250 }}>
+          {/* Camera View Area - Only show when camera is active */}
+          {hasPermission && isScanning && !scanResult && !error && (
+            <Box
+              sx={{
+                width: '100%',
+                height: 250,
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: 2
+              }}
+            >
+              {/* Camera feed will be displayed by QR scanner */}
+              
+              {/* Scanning Overlay */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 200,
+                  height: 200,
+                  border: '3px solid #667eea',
+                  borderRadius: 2,
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                  '&::before': {
+                    content: '""',
                     position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 200,
-                    height: 200,
-                    border: '3px solid #667eea',
+                    top: -3,
+                    left: -3,
+                    right: -3,
+                    bottom: -3,
+                    border: '2px solid rgba(102, 126, 234, 0.3)',
                     borderRadius: 2,
-                    pointerEvents: 'none',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: -3,
-                      left: -3,
-                      right: -3,
-                      bottom: -3,
-                      border: '2px solid rgba(102, 126, 234, 0.3)',
-                      borderRadius: 2,
-                      animation: 'pulse 2s infinite'
+                    animation: 'pulse 2s infinite'
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Permission Check */}
+          {hasPermission === null && !error && (
+            <Box
+              sx={{
+                width: '100%',
+                height: 250,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(45deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%)',
+                backgroundSize: '20px 20px',
+                borderRadius: 2
+              }}
+            >
+              <Box
+                sx={{
+                  textAlign: 'center',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  borderRadius: 2,
+                  p: 3,
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+                }}
+              >
+                <CircularProgress size={40} sx={{ color: '#667eea', mb: 2 }} />
+                <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
+                  Starting Camera...
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                  Please wait while we initialize the camera
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {/* Success State */}
+          {scanResult && (
+            <Box
+              sx={{
+                width: '100%',
+                height: 250,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: 2
+              }}
+            >
+              <Box sx={{ textAlign: 'center', p: 3 }}>
+                <CheckCircleIcon sx={{ fontSize: 48, color: '#10b981', mb: 2 }} />
+                <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
+                  QR Code Detected!
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                  Student data has been successfully scanned
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <Box
+              sx={{
+                width: '100%',
+                height: 250,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: 2
+              }}
+            >
+              <Box sx={{ textAlign: 'center', p: 3 }}>
+                <ErrorIcon sx={{ fontSize: 48, color: '#ef4444', mb: 2 }} />
+                <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
+                  Camera Error
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6b7280', mb: 2 }}>
+                  {error}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={startCamera}
+                  startIcon={<CameraIcon />}
+                  sx={{
+                    borderColor: '#667eea',
+                    color: '#667eea',
+                    '&:hover': {
+                      borderColor: '#5a67d8',
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)'
                     }
                   }}
-                />
-
-                {/* QR Scanner will automatically detect QR codes */}
-              </Box>
-            )}
-
-            {/* Permission Check */}
-            {hasPermission === null && !error && (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'linear-gradient(45deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%)',
-                  backgroundSize: '20px 20px'
-                }}
-              >
-                <Box
-                  sx={{
-                    textAlign: 'center',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    borderRadius: 2,
-                    p: 3,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
-                  }}
                 >
-                  <CircularProgress size={40} sx={{ color: '#667eea', mb: 2 }} />
-                  <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
-                    Starting Camera...
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                    Please allow camera permissions to scan QR codes
-                  </Typography>
-                </Box>
+                  Retry
+                </Button>
               </Box>
-            )}
+            </Box>
+          )}
+        </Box>
 
-            {/* Success State */}
-            {scanResult && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  borderRadius: 2
-                }}
-              >
-                <Box sx={{ textAlign: 'center', p: 3 }}>
-                  <CheckCircleIcon sx={{ fontSize: 48, color: '#10b981', mb: 2 }} />
-                  <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
-                    QR Code Detected!
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                    Student data has been successfully scanned
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-
-            {/* Error State */}
-            {error && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  borderRadius: 2
-                }}
-              >
-                <Box sx={{ textAlign: 'center', p: 3 }}>
-                  <ErrorIcon sx={{ fontSize: 48, color: '#ef4444', mb: 2 }} />
-                  <Typography variant="h6" sx={{ color: '#374151', fontWeight: 600, mb: 1 }}>
-                    Camera Error
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#6b7280', mb: 2 }}>
-                    {error}
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={startCamera}
-                    startIcon={<CameraIcon />}
-                    sx={{
-                      borderColor: '#667eea',
-                      color: '#667eea',
-                      '&:hover': {
-                        borderColor: '#5a67d8',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                      }
-                    }}
-                  >
-                    Retry
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </Box>
-
-          {/* Instructions */}
-          <Box sx={{ p: 3, backgroundColor: '#f8fafc' }}>
-            <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
-              {hasPermission === null 
-                ? 'Starting camera...'
-                : hasPermission && isScanning 
-                  ? 'Point camera at QR code - scanning automatically'
-                  : scanResult 
-                    ? 'QR code successfully scanned!'
-                    : error
-                      ? 'Camera access denied. Please check permissions.'
-                      : 'Camera ready for QR code scanning'
-              }
-            </Typography>
-          </Box>
+        {/* Instructions */}
+         <Box sx={{ p: 2, backgroundColor: '#f8fafc' }}>
+          <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
+            {hasPermission === null 
+              ? 'Starting camera...'
+              : hasPermission && isScanning 
+                ? 'Point camera at QR code - scanning automatically'
+                : scanResult 
+                  ? 'QR code successfully scanned!'
+                  : error
+                    ? 'Camera access denied. Please check permissions.'
+                    : 'Camera ready for QR code scanning'
+            }
+          </Typography>
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, backgroundColor: '#f8fafc' }}>
+       <DialogActions sx={{ p: 2, backgroundColor: '#f8fafc' }}>
         <Button
           onClick={handleClose}
           variant="outlined"

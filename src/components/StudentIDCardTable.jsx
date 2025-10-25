@@ -24,7 +24,10 @@ import {
   InputAdornment,
   Button,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Snackbar
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -38,12 +41,22 @@ import {
   LocationOn as LocationIcon
 } from '@mui/icons-material';
 import { useStudents } from '../hooks/useStudents';
+import { studentService } from '../services/apiService';
+import { useQueryClient } from '@tanstack/react-query';
 
 const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loadingStates, setLoadingStates] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const queryClient = useQueryClient();
 
   // Fetch students data
   const { data: studentsResponse, isLoading, error } = useStudents({
@@ -85,6 +98,47 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
   const handleClassChange = (event) => {
     setSelectedClass(event.target.value);
     setPage(0);
+  };
+
+  const handleIdCardToggle = async (studentId, currentStatus) => {
+    const newStatus = !currentStatus;
+    
+    // Set loading state for this specific student
+    setLoadingStates(prev => ({ ...prev, [studentId]: true }));
+    
+    try {
+      await studentService.updateIdCardStatus(studentId, newStatus);
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `ID Card status updated to ${newStatus ? 'Issued' : 'Not Issued'}`,
+        severity: 'success'
+      });
+      
+      // Invalidate and refetch students data
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      
+    } catch (error) {
+      console.error('Error updating ID card status:', error);
+      
+      // Show error message
+      setSnackbar({
+        open: true,
+        message: 'Failed to update ID card status. Please try again.',
+        severity: 'error'
+      });
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, [studentId]: false }));
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const formatAddress = (address) => {
@@ -187,6 +241,7 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
                   <TableCell>Course Details</TableCell>
                   <TableCell>Contact Info</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell align="center">ID Card Issued</TableCell>
                   <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -269,36 +324,65 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
                     </TableCell>
                     
                     <TableCell align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        {loadingStates[student._id] ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={student.idCardIssued || false}
+                                onChange={() => handleIdCardToggle(student._id, student.idCardIssued || false)}
+                                color="primary"
+                                size="small"
+                              />
+                            }
+                            label=""
+                            sx={{ margin: 0 }}
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                    
+                    <TableCell align="center">
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Tooltip title="View ID Card">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => onViewCard && onViewCard(student)}
-                          >
-                            <ViewIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        
-                        <Tooltip title="Edit ID Card">
-                          <IconButton
-                            size="small"
-                            color="secondary"
-                            onClick={() => onEditCard && onEditCard(student)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        
-                        <Tooltip title="Download ID Card">
-                          <IconButton
-                            size="small"
-                            color="info"
-                            onClick={() => onGenerateCard && onGenerateCard(student)}
-                          >
-                            <DownloadIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {student.idCardIssued ? (
+                          <>
+                            <Tooltip title="View ID Card">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => onViewCard && onViewCard(student)}
+                              >
+                                <ViewIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            
+                            <Tooltip title="Edit ID Card">
+                              <IconButton
+                                size="small"
+                                color="secondary"
+                                onClick={() => onEditCard && onEditCard(student)}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            
+                            <Tooltip title="Download ID Card">
+                              <IconButton
+                                size="small"
+                                color="info"
+                                onClick={() => onGenerateCard && onGenerateCard(student)}
+                              >
+                                <DownloadIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            ID Card not issued
+                          </Typography>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -319,6 +403,23 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
           />
         </CardContent>
       </Card>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -22,7 +22,19 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Grid,
+  Pagination,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
+  Avatar,
+  Divider,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   QrCodeScanner as QrCodeIcon,
@@ -34,28 +46,61 @@ import {
   LocationOn as LocationIcon,
   Close as CloseIcon,
   CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  History as HistoryIcon,
+  CalendarToday as CalendarIcon,
+  Sort as SortIcon,
+  FilterList as FilterIcon,
+  Help as EnquiryIcon
 } from '@mui/icons-material';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import QRCodeScanner from '../components/QRCodeScanner';
+import StaffHeader from '../components/StaffHeader';
+import StaffSidebar from '../components/StaffSidebar';
+import { useAttendance } from '../hooks/useAttendance';
 
 const StaffDashboard = () => {
   const { currentUser, logout } = useAuthContext();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // State management
   const [scannedStudents, setScannedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success'
   });
   const [showScanner, setShowScanner] = useState(false);
-  const [scannedData, setScannedData] = useState('');
+  const [activeTab, setActiveTab] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [currentView, setCurrentView] = useState('mark-attendance');
+
+  // Attendance hook
+  const {
+    data: attendanceData,
+    totalRecords,
+    currentPage,
+    totalPages,
+    limit,
+    search: attendanceSearch,
+    startDate,
+    endDate,
+    sortBy,
+    order,
+    loading: attendanceLoading,
+    error: attendanceError,
+    setCurrentPage,
+    setLimit,
+    setSearch: setAttendanceSearch,
+    setDateRange,
+    setSort,
+    fetchAttendance
+  } = useAttendance();
 
   // Load scanned students from localStorage on component mount
   useEffect(() => {
@@ -69,6 +114,20 @@ const StaffDashboard = () => {
     }
   }, []);
 
+  // Sound effects
+  const playScanSound = (success = true) => {
+    try {
+      const soundFile = success ? '/src/assets/sounds/scan.mp3' : '/src/assets/sounds/failure.wav';
+      const audio = new Audio(soundFile);
+      audio.volume = 0.5;
+      audio.play().catch(error => {
+        console.log('Could not play sound:', error);
+      });
+    } catch (error) {
+      console.log('Sound not available:', error);
+    }
+  };
+
   // Save scanned students to localStorage whenever the list changes
   useEffect(() => {
     localStorage.setItem('scannedStudents', JSON.stringify(scannedStudents));
@@ -80,8 +139,49 @@ const StaffDashboard = () => {
   };
 
   // Handle successful QR code scan
-  const handleScanSuccess = (qrData) => {
-    setScannedData(qrData);
+  const handleScanSuccess = (result) => {
+    console.log('QR scan success:', result);
+
+    // Handle the new response format from QR scanner
+    if (result.success) {
+      // API call was successful
+      showSnackbar(result.message, 'success');
+      playScanSound(true); // Play success sound
+
+      // Add student to the list if we have student data
+      if (result.studentData) {
+        const studentData = result.studentData;
+        const existingIndex = scannedStudents.findIndex(
+          student => student.studentId === studentData.studentId
+        );
+
+        if (existingIndex >= 0) {
+          // Update existing student
+          const updatedStudents = [...scannedStudents];
+          updatedStudents[existingIndex] = {
+            ...studentData,
+            scannedAt: new Date().toISOString(),
+            status: 'present'
+          };
+          setScannedStudents(updatedStudents);
+        } else {
+          // Add new student
+          setScannedStudents(prev => [{
+            ...studentData,
+            scannedAt: new Date().toISOString(),
+            status: 'present'
+          }, ...prev]);
+        }
+      }
+
+      // Refresh attendance data
+      fetchAttendance();
+    } else {
+      // API call failed
+      showSnackbar(result.message, 'error');
+      playScanSound(false); // Play error sound (same sound but different context)
+    }
+
     setShowScanner(false);
   };
 
@@ -92,76 +192,6 @@ const StaffDashboard = () => {
     setShowScanner(false);
   };
 
-  // Process scanned data
-  const processScannedData = async () => {
-    setIsProcessing(true);
-    try {
-      const studentData = JSON.parse(scannedData);
-      
-      // Get staff ID from current user
-      const staffId = currentUser?.id;
-      if (!staffId) {
-        showSnackbar('Staff ID not found. Please login again.', 'error');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Call attendance API with the correct format
-      try {
-        const response = await fetch('https://seashell-app-vgu3a.ondigitalocean.app/api/v1/attendance/mark', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            qrCodeData: scannedData, // Send the raw QR data
-            staffId: staffId
-          })
-        });
-
-        const apiResponse = await response.json();
-
-        if (response.ok) {
-          // Check if student already exists
-          const existingIndex = scannedStudents.findIndex(
-            student => student.studentId === studentData.studentId
-          );
-          
-          if (existingIndex >= 0) {
-            // Update existing student
-            const updatedStudents = [...scannedStudents];
-            updatedStudents[existingIndex] = {
-              ...studentData,
-              scannedAt: new Date().toISOString(),
-              status: 'present'
-            };
-            setScannedStudents(updatedStudents);
-            showSnackbar('Student attendance updated successfully!', 'success');
-          } else {
-            // Add new student
-            setScannedStudents(prev => [studentData, ...prev]);
-            showSnackbar('Student attendance marked successfully!', 'success');
-          }
-        } else {
-          showSnackbar(apiResponse.message || 'Failed to mark attendance', 'error');
-        }
-      } catch (apiError) {
-        console.error('API Error:', apiError);
-        showSnackbar('Failed to connect to server. Please try again.', 'error');
-      }
-      
-      setShowScanner(false);
-      setScannedData('');
-    } catch (error) {
-      console.error('Parse Error:', error);
-      showSnackbar('Invalid QR code data!', 'error');
-      setShowScanner(false);
-      setScannedData('');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   // Filter students based on search term
   const filteredStudents = scannedStudents.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -169,7 +199,7 @@ const StaffDashboard = () => {
     student.course.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Show snackbar notification
+  // Show snackbar
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({
       open: true,
@@ -195,6 +225,24 @@ const StaffDashboard = () => {
     navigate('/login');
   };
 
+  // Handle sidebar toggle
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  // Handle sidebar close
+  const handleSidebarClose = () => {
+    setSidebarOpen(false);
+  };
+
+  // Handle view change
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    if (view === 'enquiry') {
+      navigate('/enquiry-staff');
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -202,7 +250,7 @@ const StaffDashboard = () => {
         height: '100vh',
         maxWidth: '430px', // Mobile width constraint
         margin: '0 auto',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#f8fafc',
         p: 1,
         position: 'relative',
         overflow: 'hidden',
@@ -215,7 +263,7 @@ const StaffDashboard = () => {
           boxShadow: '0 0 30px rgba(102, 126, 234, 0.3)',
           margin: '20px auto',
           height: 'calc(100vh - 40px)'
-        }
+        },
       }}
     >
       {/* Mobile-only indicator for desktop */}
@@ -229,7 +277,7 @@ const StaffDashboard = () => {
         }}
       >
         <Chip
-          label="Mobile View"
+          label="Staff Portal"
           size="small"
           sx={{
             background: 'rgba(102, 126, 234, 0.9)',
@@ -239,32 +287,6 @@ const StaffDashboard = () => {
           }}
         />
       </Box>
-
-      {/* Background decorative elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -50,
-          right: -50,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.1)',
-          animation: 'float 6s ease-in-out infinite'
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: -30,
-          left: -30,
-          width: 150,
-          height: 150,
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.08)',
-          animation: 'float 8s ease-in-out infinite reverse'
-        }}
-      />
 
       <Box sx={{ 
         position: 'relative', 
@@ -279,10 +301,24 @@ const StaffDashboard = () => {
           sx={{
             mb: 3,
             borderRadius: 3,
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
             background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)'
+            backdropFilter: 'blur(20px)',
+            position: 'relative',
+            zIndex: 1,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 'inherit',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+              pointerEvents: 'none',
+              zIndex: -1
+            }
           }}
         >
           <CardContent sx={{ p: 3 }}>
@@ -303,7 +339,7 @@ const StaffDashboard = () => {
                   <QrCodeIcon sx={{ color: 'white', fontSize: 30 }} />
                 </Box>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#1f2937', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1f2937', mb: 0.5 }}>
                     Staff Scanner
                   </Typography>
                   <Typography variant="body1" sx={{ color: '#6b7280' }}>
@@ -371,277 +407,595 @@ const StaffDashboard = () => {
               </Button>
             </Box>
 
-            {/* Search Bar */}
-            <TextField
-              fullWidth
-              placeholder="Search students by name, ID, or course..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#667eea' }} />
-                  </InputAdornment>
-                )
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '& fieldset': {
-                    borderColor: '#e5e7eb'
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#667eea'
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#667eea'
-                  }
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Statistics Cards */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <Card
-            sx={{
-              flex: 1,
-              borderRadius: 2,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#667eea', mb: 0.5 }}>
-                {scannedStudents.length}
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
-                Total Scanned
-              </Typography>
-            </CardContent>
-          </Card>
-
-          <Card
-            sx={{
-              flex: 1,
-              borderRadius: 2,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981', mb: 0.5 }}>
-                {scannedStudents.filter(s => s.status === 'present').length}
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
-                Present Today
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* Students Table */}
-        <Card
-          sx={{
-            borderRadius: 2,
-            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
-                Scanned Students ({filteredStudents.length})
-              </Typography>
+            {/* Tabs */}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+                <Tab 
+                  label="Today's Scans" 
+                  icon={<QrCodeIcon />} 
+                  iconPosition="start"
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                />
+                <Tab 
+                  label="Attendance History" 
+                  icon={<HistoryIcon />} 
+                  iconPosition="start"
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                />
+              </Tabs>
             </Box>
 
-            {filteredStudents.length === 0 ? (
-              <Box sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <QrCodeIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
-                <Typography variant="body1" sx={{ color: '#6b7280', mb: 1, fontWeight: 600 }}>
-                  No students scanned yet
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                  Use the "Scan ID Card" button to start scanning
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f8fafc' }}>
-                        <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem', py: 1 }}>Student</TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem', py: 1 }}>Course</TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem', py: 1 }}>Time</TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.75rem', py: 1 }}>Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredStudents.map((student, index) => (
-                        <TableRow key={student.id || index} hover>
-                          <TableCell sx={{ py: 1 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box
-                                sx={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: '50%',
-                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: 'white',
-                                  fontWeight: 600,
-                                  fontSize: '0.75rem'
-                                }}
-                              >
-                                {student.name?.charAt(0) || 'S'}
-                              </Box>
-                              <Box sx={{ minWidth: 0 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.75rem', lineHeight: 1.2 }}>
-                                  {student.name}
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.65rem' }}>
-                                  {student.studentId}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          <TableCell sx={{ py: 1 }}>
-                            <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.75rem' }}>
-                              {student.course}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.65rem' }}>
-                              {student.class}
-                            </Typography>
-                          </TableCell>
-                          <TableCell sx={{ py: 1 }}>
-                            <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.75rem' }}>
-                              {new Date(student.scannedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.65rem' }}>
-                              {new Date(student.scannedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                            </Typography>
-                          </TableCell>
-                          <TableCell sx={{ py: 1 }}>
-                            <Chip
-                              icon={<CheckCircleIcon sx={{ fontSize: 12 }} />}
-                              label="Present"
-                              color="success"
-                              size="small"
-                              sx={{ 
-                                fontWeight: 600, 
-                                fontSize: '0.65rem',
-                                height: 20,
-                                '& .MuiChip-label': {
-                                  px: 0.5
-                                }
-                              }}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
+            {/* Mobile Navigation */}
+            <Box sx={{ 
+              display: { xs: 'flex', md: 'none' }, 
+              gap: 1, 
+              mb: 2,
+              justifyContent: 'center'
+            }}>
+              <Button
+                variant={currentView === 'mark-attendance' ? 'contained' : 'outlined'}
+                onClick={() => handleViewChange('mark-attendance')}
+                startIcon={<QrCodeIcon />}
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  px: 2
+                }}
+              >
+                Mark Attendance
+              </Button>
+              <Button
+                variant={currentView === 'enquiry' ? 'contained' : 'outlined'}
+                onClick={() => handleViewChange('enquiry')}
+                startIcon={<EnquiryIcon />}
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  px: 2
+                }}
+              >
+                Enquiry
+              </Button>
+            </Box>
           </CardContent>
         </Card>
-      </Box>
 
-      {/* QR Scanner Component */}
-      <QRCodeScanner
-        open={showScanner}
-        onClose={() => setShowScanner(false)}
-        onScanSuccess={handleScanSuccess}
-        onScanError={handleScanError}
-      />
+        {/* Dashboard Content */}
+        <Box sx={{
+          position: 'relative',
+          zIndex: 1,
+          flex: 1,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
 
-      {/* Process Scanned Data Dialog */}
-      <Dialog
-        open={!!scannedData && !showScanner}
-        onClose={() => setScannedData('')}
-        maxWidth="sm"
-        fullWidth
-        TransitionComponent={Fade}
-      >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Process Student Data
-          </Typography>
-          <IconButton onClick={() => setScannedData('')}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <CheckCircleIcon sx={{ fontSize: 60, color: '#10b981', mb: 2 }} />
-            <Typography variant="h6" sx={{ color: '#374151', mb: 1 }}>
-              QR Code Detected!
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#6b7280', mb: 3 }}>
-              Student data has been successfully scanned. Click "Process" to add to the list.
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={processScannedData}
-              disabled={isProcessing}
-              startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                px: 3,
-                py: 1.5,
-                borderRadius: 2,
-                fontWeight: 600,
-                '&:disabled': {
-                  background: '#9ca3af',
-                  color: 'white'
-                }
-              }}
-            >
-              {isProcessing ? 'Processing...' : 'Process Student Data'}
-            </Button>
+            {/* Tab Content */}
+            {activeTab === 0 && (
+              <>
+                {/* Search Bar */}
+                <TextField
+                  fullWidth
+                  placeholder="Search students by name, ID, or course..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: '#667eea' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea'
+                      }
+                    }
+                  }}
+                />
+
+                {/* Statistics Cards */}
+                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  <Card
+                    sx={{
+                      flex: 1,
+                      borderRadius: 2,
+                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(15px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                        pointerEvents: 'none'
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#667eea', mb: 0.5 }}>
+                        {scannedStudents.length}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                        Total Scanned
+                      </Typography>
+                    </CardContent>
+                  </Card>
+
+                  <Card
+                    sx={{
+                      flex: 1,
+                      borderRadius: 2,
+                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(15px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%)',
+                        pointerEvents: 'none'
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981', mb: 0.5 }}>
+                        {filteredStudents.length}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                        Present Today
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+
+                {/* Students List */}
+                <Card
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(15px)',
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                      pointerEvents: 'none',
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
+                        Scanned Students ({filteredStudents.length})
+                      </Typography>
+                    </Box>
+
+                    {filteredStudents.length === 0 ? (
+                      <Box sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <QrCodeIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
+                        <Typography variant="body1" sx={{ color: '#6b7280', mb: 1, fontWeight: 600 }}>
+                          No students scanned yet
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                          Use the "Scan ID Card" button to start scanning
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+                        {filteredStudents.map((student, index) => (
+                          <Card
+                            key={student.id || index}
+                            sx={{
+                              mb: 1.5,
+                              borderRadius: 2,
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                              border: '1px solid #e5e7eb'
+                            }}
+                          >
+                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                              {/* Student Info Row */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                                <Box
+                                  sx={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    fontSize: '0.875rem'
+                                  }}
+                                >
+                                  {student.name?.charAt(0) || 'S'}
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
+                                    {student.name}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                    {student.studentId}
+                                  </Typography>
+                                </Box>
+                                <Chip
+                                  label="Present"
+                                  color="success"
+                                  size="small"
+                                  sx={{
+                                    fontWeight: 600,
+                                    fontSize: '0.75rem',
+                                    height: 24,
+                                    '& .MuiChip-label': {
+                                      px: 1
+                                    }
+                                  }}
+                                />
+                              </Box>
+
+                              {/* Course and Time Row */}
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.8rem', fontWeight: 500 }}>
+                                    {student.course}
+                                  </Typography>
+                                </Box>
+                                <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem', ml: 1 }}>
+                                  {new Date(student.scannedAt).toLocaleTimeString()}
+                                </Typography>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {/* Attendance History Tab */}
+            {activeTab === 1 && (
+              <Box>
+                {/* Attendance Filters */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2, 
+                  mb: 3 
+                }}>
+                  {/* Search and Sort Row */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    flexWrap: 'wrap',
+                    alignItems: 'center'
+                  }}>
+                    <TextField
+                      placeholder="Search attendance..."
+                      value={attendanceSearch}
+                      onChange={(e) => setAttendanceSearch(e.target.value)}
+                      size="small"
+                      sx={{ flex: 1, minWidth: 200 }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon sx={{ color: '#667eea' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel>Sort By</InputLabel>
+                      <Select
+                        value={sortBy}
+                        label="Sort By"
+                        onChange={(e) => setSort(e.target.value, order)}
+                      >
+                        <MenuItem value="date">Date</MenuItem>
+                        <MenuItem value="studentId">Student ID</MenuItem>
+                        <MenuItem value="markedBy">Staff</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl size="small" sx={{ minWidth: 100 }}>
+                      <InputLabel>Order</InputLabel>
+                      <Select
+                        value={order}
+                        label="Order"
+                        onChange={(e) => setSort(sortBy, e.target.value)}
+                      >
+                        <MenuItem value="desc">Desc</MenuItem>
+                        <MenuItem value="asc">Asc</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+
+                  {/* Date Range Row */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    flexWrap: 'wrap',
+                    alignItems: 'center'
+                  }}>
+                    <TextField
+                      label="Start Date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setDateRange(e.target.value, endDate)}
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                      sx={{ minWidth: 150 }}
+                    />
+                    <TextField
+                      label="End Date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setDateRange(startDate, e.target.value)}
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                      sx={{ minWidth: 150 }}
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={() => setDateRange('', '')}
+                      size="small"
+                      sx={{
+                        borderColor: '#667eea',
+                        color: '#667eea',
+                        '&:hover': {
+                          borderColor: '#5a67d8',
+                          backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                        }
+                      }}
+                    >
+                      Clear Dates
+                    </Button>
+                  </Box>
+                </Box>
+
+                {/* Attendance List */}
+                <Card
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <CardContent sx={{ p: 0 }}>
+                    {attendanceLoading ? (
+                      <Box sx={{ p: 3, textAlign: 'center' }}>
+                        <CircularProgress size={24} />
+                        <Typography variant="body2" sx={{ mt: 1, color: '#6b7280' }}>
+                          Loading attendance records...
+                        </Typography>
+                      </Box>
+                    ) : attendanceError ? (
+                      <Box sx={{ p: 3, textAlign: 'center' }}>
+                        <ErrorIcon sx={{ fontSize: 48, color: '#ef4444', mb: 2 }} />
+                        <Typography variant="body1" sx={{ color: '#ef4444', mb: 1 }}>
+                          Error loading attendance
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                          {attendanceError}
+                        </Typography>
+                      </Box>
+                    ) : attendanceData.length === 0 ? (
+                      <Box sx={{ p: 3, textAlign: 'center' }}>
+                        <HistoryIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
+                        <Typography variant="body1" sx={{ color: '#6b7280', mb: 1, fontWeight: 600 }}>
+                          No attendance records found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                          Attendance records will appear here after scanning
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box>
+                        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
+                            Attendance Records ({totalRecords})
+                          </Typography>
+                        </Box>
+                        <Box sx={{ maxHeight: 400, overflow: 'auto', p: 1 }}>
+                          {attendanceData.map((record, index) => (
+                            <Card
+                              key={record._id || index}
+                              sx={{
+                                mb: 1.5,
+                                borderRadius: 2,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                border: '1px solid #e5e7eb'
+                              }}
+                            >
+                              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                {/* Student Info Row */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                                  <Avatar sx={{ width: 40, height: 40, bgcolor: '#667eea' }}>
+                                    {record.studentId?.studentName?.charAt(0) || 'S'}
+                                  </Avatar>
+                                  <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
+                                      {record.studentId?.studentName || 'Unknown Student'}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                      ID: {record.registrationNo || record.studentId?.registrationNo || 'N/A'}
+                                    </Typography>
+                                  </Box>
+                                  <Chip
+                                    label={record.status || 'Present'}
+                                    color="success"
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: '0.75rem',
+                                      height: 24,
+                                      '& .MuiChip-label': {
+                                        px: 1
+                                      }
+                                    }}
+                                  />
+                                </Box>
+
+                                {/* Staff and Time Row */}
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                    By: {record.markedBy?.staffname || 'Unknown Staff'} ({record.markedBy?.staffcode || 'N/A'})
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                    {new Date(record.date).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </Box>
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                          <Card sx={{ mt: 2, borderRadius: 2 }}>
+                            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                              <Box sx={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                                gap: { xs: 1, sm: 2 }
+                              }}>
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: { xs: 1, sm: 2 },
+                                  flexWrap: 'wrap'
+                                }}>
+                                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                                    Rows per page:
+                                  </Typography>
+                                  <FormControl size="small" sx={{ minWidth: { xs: 60, sm: 80 } }}>
+                                    <Select
+                                      value={limit}
+                                      onChange={(e) => setLimit(parseInt(e.target.value))}
+                                      sx={{ 
+                                        borderRadius: 2,
+                                        fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                      }}
+                                    >
+                                      <MenuItem value={5} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>5</MenuItem>
+                                      <MenuItem value={10} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>10</MenuItem>
+                                      <MenuItem value={25} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>25</MenuItem>
+                                      <MenuItem value={50} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>50</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                  <Typography variant="body2" color="text.secondary" sx={{ 
+                                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                                    display: { xs: 'none', sm: 'block' }
+                                  }}>
+                                    Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalRecords)} of {totalRecords} entries
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary" sx={{ 
+                                    fontSize: '0.7rem',
+                                    display: { xs: 'block', sm: 'none' }
+                                  }}>
+                                    {currentPage} of {totalPages} pages
+                                  </Typography>
+                                </Box>
+                                <Pagination
+                                  count={totalPages}
+                                  page={currentPage}
+                                  onChange={(e, page) => setCurrentPage(page)}
+                                  color="primary"
+                                  size={isMobile ? "small" : "medium"}
+                                  showFirstButton={!isMobile}
+                                  showLastButton={!isMobile}
+                                  siblingCount={isMobile ? 0 : 1}
+                                  boundaryCount={isMobile ? 1 : 1}
+                                  sx={{
+                                    '& .MuiPaginationItem-root': {
+                                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                      minWidth: { xs: 32, sm: 40 },
+                                      height: { xs: 32, sm: 40 }
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              </Box>
+            )}
           </Box>
-        </DialogContent>
-      </Dialog>
+        </Box>
 
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert
+        {/* QR Scanner Component */}
+        <QRCodeScanner
+          open={showScanner}
+          onClose={() => setShowScanner(false)}
+          onScanSuccess={handleScanSuccess}
+          onScanError={handleScanError}
+        />
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
           onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
 
-      {/* CSS animations */}
-      <style>
-        {`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-          }
-        `}
-      </style>
-    </Box>
+        {/* CSS animations */}
+        <style>
+          {`
+            @keyframes float {
+              0%, 100% { transform: translateY(0px); }
+              50% { transform: translateY(-20px); }
+            }
+          `}
+        </style>
+      </Box>
   );
 };
 

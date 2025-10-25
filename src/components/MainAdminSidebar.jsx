@@ -31,7 +31,8 @@ import {
   ExpandMore,
   ChevronLeft,
   ChevronRight,
-  Group
+  Group,
+  History
 } from '@mui/icons-material';
 
 const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
@@ -70,8 +71,9 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
     { id: 8, label: 'System Logs', icon: ListAlt, path: '/logs', color: '#8b5cf6' },
     { id: 9, label: 'All Icard', icon: Badge, path: '/icard', color: '#ef4444' },
     { id: 10, label: 'Staff', icon: Group, path: '/staff', color: '#8b5cf6' },
+    { id: 11, label: 'Attendance', icon: History, path: '/attendance', color: '#10b981' },
     {
-      id: 11,
+      id: 12,
       label: 'Fee',
       icon: CurrencyRupee,
       path: '/fee',
@@ -84,7 +86,7 @@ const MainAdminSidebar = ({ isCollapsed, onToggle, onLogout, userData }) => {
       ],
       color: '#16a34a'
     },
-    { id: 12, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
+    { id: 13, label: 'Enquiry', icon: Phone, path: '/enquiry', color: '#64748b' },
     // { id: 11, label: 'Stock Management', icon: Inventory2, path: '/stock-management', color: '#0ea5e9' },
     // {
     //   id: 12,

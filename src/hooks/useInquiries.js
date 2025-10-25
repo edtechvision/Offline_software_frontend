@@ -41,6 +41,11 @@ export const useInquiries = (initialParams = { page: 1, limit: 10, search: '' })
     await fetchInquiries();
   }, [fetchInquiries]);
 
+  const updateInquiry = useCallback(async (id, inquiryData) => {
+    await inquiryService.updateInquiry(id, inquiryData);
+    await fetchInquiries();
+  }, [fetchInquiries]);
+
   const deleteInquiry = useCallback(async (id) => {
     await inquiryService.deleteInquiry(id);
     await fetchInquiries();
@@ -65,6 +70,7 @@ export const useInquiries = (initialParams = { page: 1, limit: 10, search: '' })
     setSearch: setSearchAndResetPage,
     fetchInquiries,
     createInquiry,
+    updateInquiry,
     deleteInquiry,
     params: mergedParams,
   };
