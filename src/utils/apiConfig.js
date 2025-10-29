@@ -86,6 +86,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/inquiries',
     UPDATE: (id) => `/inquiry/${id}`,
     DELETE: (id) => `/inquiries/${id}`,
+    UPDATE_STATUS: (id) => `/inquiry-status/${id}`,
   },
 };
 

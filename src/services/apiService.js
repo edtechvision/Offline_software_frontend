@@ -612,6 +612,13 @@ export const inquiryService = {
       method: 'DELETE',
     });
   },
+
+  updateInquiryStatus: async (id, statusData) => {
+    return apiRequest(API_ENDPOINTS.INQUIRIES.UPDATE_STATUS(id), {
+      method: 'PUT',
+      body: JSON.stringify(statusData),
+    });
+  },
 };
 
 // Expense Services

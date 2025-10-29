@@ -21,6 +21,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Menu,
   Pagination,
   CircularProgress,
   Alert,
@@ -47,7 +48,9 @@ import {
   Call as CallIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Update as UpdateIcon,
+  MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import useInquiries from '../hooks/useInquiries';
 
@@ -61,8 +64,12 @@ const EnquiryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingNotes, setEditingNotes] = useState(null);
   const [notesValue, setNotesValue] = useState('');
+  const [statusUpdateDialog, setStatusUpdateDialog] = useState(null);
+  const [followUpDate, setFollowUpDate] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedEnquiryId, setSelectedEnquiryId] = useState(null);
 
-  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, updateInquiry, deleteInquiry } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
+  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, updateInquiry, deleteInquiry, updateInquiryStatus } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
 
   const enquiries = useMemo(() => data || [], [data]);
 
@@ -143,6 +150,40 @@ const EnquiryPage = () => {
   const handleCancelEdit = () => {
     setEditingNotes(null);
     setNotesValue('');
+  };
+
+  const handleStatusUpdate = async (enquiryId, status, followUpDateValue = null) => {
+    try {
+      const statusData = { status };
+      if (status === 'follow-up' && followUpDateValue) {
+        statusData.followUpDate = followUpDateValue;
+      }
+      await updateInquiryStatus(enquiryId, statusData);
+      setStatusUpdateDialog(null);
+      setFollowUpDate('');
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
+  const openStatusDialog = (enquiryId, status) => {
+    handleCloseMenu();
+    if (status === 'follow-up') {
+      setStatusUpdateDialog({ enquiryId, status });
+      setFollowUpDate('');
+    } else {
+      handleStatusUpdate(enquiryId, status);
+    }
+  };
+
+  const handleOpenMenu = (event, enquiryId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedEnquiryId(enquiryId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedEnquiryId(null);
   };
 
   return (
@@ -357,40 +398,17 @@ const EnquiryPage = () => {
                           {enquiry.center || 'N/A'}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        {enquiry.mobile && (
-                          <IconButton 
-                            size="small" 
-                            color="success"
-                            onClick={() => handleCall(enquiry.mobile)}
-                            sx={{ 
-                              '&:hover': { 
-                                backgroundColor: 'success.light',
-                                color: 'white'
-                              }
-                            }}
-                          >
-                            <CallIcon fontSize="small" />
-                          </IconButton>
-                        )}
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                      onClick={async () => {
-                        if (window.confirm('Delete this inquiry?')) {
-                          await deleteInquiry(enquiry._id);
-                        }
-                      }}
-                          sx={{ 
-                            '&:hover': { 
-                              backgroundColor: 'error.light',
-                              color: 'white'
-                            }
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleOpenMenu(e, enquiry._id)}
+                        sx={{ 
+                          '&:hover': { 
+                            backgroundColor: 'action.hover'
+                          }
+                        }}
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
                     </Box>
                     
                     {/* Details Row */}
@@ -414,6 +432,17 @@ const EnquiryPage = () => {
                           </Typography>
                         </Box>
                       )}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                          Status:
+                        </Typography>
+                        <Chip 
+                          label={enquiry.status || 'New'} 
+                          color={getStatusColor(enquiry.status || 'New')}
+                          size="small"
+                          sx={{ fontSize: '0.7rem', height: '20px' }}
+                        />
+                      </Box>
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 0.5 }}>
                         {editingNotes === enquiry._id ? (
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
@@ -467,6 +496,72 @@ const EnquiryPage = () => {
                       </Box>
                     </Box>
                   </CardContent>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl) && selectedEnquiryId === enquiry._id}
+                    onClose={handleCloseMenu}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                  >
+                    <MenuItem 
+                      onClick={() => openStatusDialog(enquiry._id, 'contacted')}
+                      sx={{ color: 'warning.main' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2">Mark as Contacted</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => openStatusDialog(enquiry._id, 'follow-up')}
+                      sx={{ color: 'secondary.main' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2">Mark as Follow-Up</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => openStatusDialog(enquiry._id, 'converted')}
+                      sx={{ color: 'success.main' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2">Mark as Converted</Typography>
+                      </Box>
+                    </MenuItem>
+                    {enquiry.mobile && (
+                      <MenuItem 
+                        onClick={() => {
+                          handleCloseMenu();
+                          handleCall(enquiry.mobile);
+                        }}
+                        sx={{ color: 'success.main' }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CallIcon fontSize="small" />
+                          <Typography variant="body2">Call</Typography>
+                        </Box>
+                      </MenuItem>
+                    )}
+                    <MenuItem 
+                      onClick={async () => {
+                        handleCloseMenu();
+                        if (window.confirm('Delete this inquiry?')) {
+                          await deleteInquiry(enquiry._id);
+                        }
+                      }}
+                      sx={{ color: 'error.main' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <DeleteIcon fontSize="small" />
+                        <Typography variant="body2">Delete</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Menu>
                 </Card>
               ))}
             </Box>
@@ -480,6 +575,7 @@ const EnquiryPage = () => {
                     <TableCell sx={{ fontWeight: 600 }}>Mobile</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Center</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Class</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Notes</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Enquiry Date</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
@@ -511,6 +607,13 @@ const EnquiryPage = () => {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">{enquiry.class || 'N/A'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={enquiry.status || 'New'} 
+                          color={getStatusColor(enquiry.status || 'New')}
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>
                         {editingNotes === enquiry._id ? (
@@ -575,40 +678,83 @@ const EnquiryPage = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleOpenMenu(e, enquiry._id)}
+                          sx={{ 
+                            '&:hover': { 
+                              backgroundColor: 'action.hover'
+                            }
+                          }}
+                        >
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl) && selectedEnquiryId === enquiry._id}
+                          onClose={handleCloseMenu}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                          }}
+                          transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                          }}
+                        >
+                          <MenuItem 
+                            onClick={() => openStatusDialog(enquiry._id, 'contacted')}
+                            sx={{ color: 'warning.main' }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2">Mark as Contacted</Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem 
+                            onClick={() => openStatusDialog(enquiry._id, 'follow-up')}
+                            sx={{ color: 'secondary.main' }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2">Mark as Follow-Up</Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem 
+                            onClick={() => openStatusDialog(enquiry._id, 'converted')}
+                            sx={{ color: 'success.main' }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2">Mark as Converted</Typography>
+                            </Box>
+                          </MenuItem>
                           {enquiry.mobile && (
-                            <IconButton
-                              size="small"
-                              color="success"
-                              onClick={() => handleCall(enquiry.mobile)}
-                              sx={{ 
-                                '&:hover': { 
-                                  backgroundColor: 'success.light',
-                                  color: 'white'
-                                }
+                            <MenuItem 
+                              onClick={() => {
+                                handleCloseMenu();
+                                handleCall(enquiry.mobile);
                               }}
+                              sx={{ color: 'success.main' }}
                             >
-                              <CallIcon fontSize="small" />
-                            </IconButton>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CallIcon fontSize="small" />
+                                <Typography variant="body2">Call</Typography>
+                              </Box>
+                            </MenuItem>
                           )}
-                          <IconButton
-                            size="small"
-                            color="error"
+                          <MenuItem 
                             onClick={async () => {
+                              handleCloseMenu();
                               if (window.confirm('Delete this inquiry?')) {
                                 await deleteInquiry(enquiry._id);
                               }
                             }}
-                            sx={{ 
-                              '&:hover': { 
-                                backgroundColor: 'error.light',
-                                color: 'white'
-                              }
-                            }}
+                            sx={{ color: 'error.main' }}
                           >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <DeleteIcon fontSize="small" />
+                              <Typography variant="body2">Delete</Typography>
+                            </Box>
+                          </MenuItem>
+                        </Menu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -697,6 +843,57 @@ const EnquiryPage = () => {
           <InquiryCreateForm onCreate={createInquiry} onClose={() => setOpenCreateDialog(false)} />
         </DialogContent>
       </Dialog>
+
+      {/* Follow-Up Date Dialog */}
+      <Dialog 
+        open={!!statusUpdateDialog} 
+        onClose={() => {
+          setStatusUpdateDialog(null);
+          setFollowUpDate('');
+        }} 
+        maxWidth="xs" 
+        fullWidth
+      >
+        <DialogTitle>Set Follow-Up Date</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              type="date"
+              label="Follow-Up Date"
+              value={followUpDate}
+              onChange={(e) => setFollowUpDate(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              inputProps={{
+                min: new Date().toISOString().split('T')[0],
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => {
+              setStatusUpdateDialog(null);
+              setFollowUpDate('');
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              if (statusUpdateDialog && followUpDate) {
+                handleStatusUpdate(statusUpdateDialog.enquiryId, statusUpdateDialog.status, followUpDate);
+              }
+            }}
+            disabled={!followUpDate}
+          >
+            Update Status
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
@@ -706,6 +903,7 @@ export default EnquiryPage;
 const InquiryCreateForm = ({ onCreate, onClose }) => {
   const [form, setForm] = useState({ name: '', mobile: '', address: '', class: '', center: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

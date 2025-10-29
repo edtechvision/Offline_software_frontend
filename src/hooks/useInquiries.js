@@ -51,6 +51,11 @@ export const useInquiries = (initialParams = { page: 1, limit: 10, search: '' })
     await fetchInquiries();
   }, [fetchInquiries]);
 
+  const updateInquiryStatus = useCallback(async (id, statusData) => {
+    await inquiryService.updateInquiryStatus(id, statusData);
+    await fetchInquiries();
+  }, [fetchInquiries]);
+
   const setSearchAndResetPage = useCallback((value) => {
     setSearch(value);
     setPage(1);
@@ -72,6 +77,7 @@ export const useInquiries = (initialParams = { page: 1, limit: 10, search: '' })
     createInquiry,
     updateInquiry,
     deleteInquiry,
+    updateInquiryStatus,
     params: mergedParams,
   };
 };
