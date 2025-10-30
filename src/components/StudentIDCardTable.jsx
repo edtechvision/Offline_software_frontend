@@ -10,7 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
+  Pagination,
   TextField,
   FormControl,
   Select,
@@ -41,14 +41,15 @@ import {
   LocationOn as LocationIcon
 } from '@mui/icons-material';
 import { useStudents } from '../hooks/useStudents';
+import { useDebounce } from '../hooks';
 import { studentService } from '../services/apiService';
 import { useQueryClient } from '@tanstack/react-query';
 
 const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [loadingStates, setLoadingStates] = useState({});
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -58,46 +59,44 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
 
   const queryClient = useQueryClient();
 
-  // Fetch students data
+  // Debounced search like StudentsPage
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const isSearching = searchTerm !== debouncedSearchTerm;
+
+  // Fetch students data (server-side pagination + filters)
   const { data: studentsResponse, isLoading, error } = useStudents({
-    page: page + 1,
-    limit: rowsPerPage,
-    search: searchTerm
+    page: currentPage,
+    limit: pageSize,
+    search: debouncedSearchTerm,
+    className: selectedClass || ''
   });
 
   const students = studentsResponse?.students || studentsResponse?.data?.students || [];
-  const pagination = studentsResponse?.pagination || {};
-  const totalStudents = pagination.totalStudents || students.length;
+  const pagination = studentsResponse?.data?.pagination || studentsResponse?.pagination || {};
+  const totalStudents = pagination.total || pagination.totalStudents || studentsResponse?.data?.totalStudents || students.length;
+  const totalPages = pagination.totalPages || Math.ceil((totalStudents || 0) / pageSize);
+  const serverCurrentPage = pagination.currentPage || currentPage;
 
-  // Filter students
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = 
-      student.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.registrationNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.mobileNumber?.includes(searchTerm);
-    
-    const matchesClass = !selectedClass || student.className === selectedClass;
-    
-    return matchesSearch && matchesClass;
-  });
+  // Server handles filtering; use returned page of students directly
+  const filteredStudents = students;
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+    setCurrentPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setPageSize(parseInt(event.target.value, 10));
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    setPage(0);
+    setCurrentPage(1);
   };
 
   const handleClassChange = (event) => {
     setSelectedClass(event.target.value);
-    setPage(0);
+    setCurrentPage(1);
   };
 
   const handleIdCardToggle = async (studentId, currentStatus) => {
@@ -217,13 +216,14 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
             </FormControl>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Chip 
               icon={<BadgeIcon />}
-              label={`${filteredStudents.length} Students`}
+              label={`Showing ${students.length} of ${totalStudents} Students`}
               color="primary"
               variant="outlined"
             />
+            {isSearching && <CircularProgress size={20} />}
           </Box>
         </Box>
       </Paper>
@@ -391,16 +391,35 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
             </Table>
           </TableContainer>
           
-          <TablePagination
-            component="div"
-            count={totalStudents}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            sx={{ borderTop: 1, borderColor: 'divider' }}
-          />
+          <Box sx={{ 
+            borderTop: 1, borderColor: 'divider', p: 2,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Rows per page:
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 80 }}>
+                <Select value={pageSize} onChange={handleChangeRowsPerPage}>
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={25}>25</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+              <Typography variant="body2" color="text.secondary">
+                Showing {((serverCurrentPage - 1) * pageSize) + 1} to {Math.min(serverCurrentPage * pageSize, totalStudents)} of {totalStudents} entries
+              </Typography>
+            </Box>
+            <Pagination
+              count={totalPages}
+              page={serverCurrentPage}
+              onChange={handleChangePage}
+              color="primary"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
         </CardContent>
       </Card>
 

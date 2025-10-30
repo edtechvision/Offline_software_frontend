@@ -94,6 +94,7 @@ const StaffDashboard = () => {
     order,
     loading: attendanceLoading,
     error: attendanceError,
+    stats,
     setCurrentPage,
     setLimit,
     setSearch: setAttendanceSearch,
@@ -145,12 +146,26 @@ const StaffDashboard = () => {
     // Handle the new response format from QR scanner
     if (result.success) {
       // API call was successful
-      showSnackbar(result.message, 'success');
-      playScanSound(true); // Play success sound
+      const pendingInfo = result?.apiResponse?.data?.pendingFees;
+      const pendingAmount = typeof pendingInfo === 'object' ? Number(pendingInfo?.pendingFees || 0) : Number(pendingInfo || 0);
+      const stats = result?.apiResponse?.data?.stats;
+      const statsPart = stats
+        ? ` • Scanned: ${stats.totalScanned} | Present: ${stats.totalPresent} | Absent: ${stats.totalAbsent}`
+        : '';
+      const successMsg = pendingAmount > 0
+        ? `${result.message} • Pending fees: ₹${pendingAmount}${statsPart}`
+        : `${result.message}${statsPart}`;
+      showSnackbar(successMsg, pendingAmount > 0 ? 'error' : 'success');
 
       // Add student to the list if we have student data
       if (result.studentData) {
         const studentData = result.studentData;
+        // attach pending fee info from API if available
+        const studentWithFees = {
+          ...studentData,
+          pendingFees: pendingAmount > 0 ? pendingAmount : 0,
+          pendingDetails: typeof pendingInfo === 'object' ? pendingInfo : null
+        };
         const existingIndex = scannedStudents.findIndex(
           student => student.studentId === studentData.studentId
         );
@@ -159,7 +174,7 @@ const StaffDashboard = () => {
           // Update existing student
           const updatedStudents = [...scannedStudents];
           updatedStudents[existingIndex] = {
-            ...studentData,
+            ...studentWithFees,
             scannedAt: new Date().toISOString(),
             status: 'present'
           };
@@ -167,7 +182,7 @@ const StaffDashboard = () => {
         } else {
           // Add new student
           setScannedStudents(prev => [{
-            ...studentData,
+            ...studentWithFees,
             scannedAt: new Date().toISOString(),
             status: 'present'
           }, ...prev]);
@@ -179,17 +194,16 @@ const StaffDashboard = () => {
     } else {
       // API call failed
       showSnackbar(result.message, 'error');
-      playScanSound(false); // Play error sound (same sound but different context)
     }
 
-    setShowScanner(false);
+    // Keep scanner open for continuous scanning; user can close manually
   };
 
   // Handle QR code scan error
   const handleScanError = (error) => {
     console.error('QR scan error:', error);
     showSnackbar('Failed to scan QR code. Please try again.', 'error');
-    setShowScanner(false);
+    // Keep scanner open so user can retry immediately
   };
 
   // Filter students based on search term
@@ -528,7 +542,7 @@ const StaffDashboard = () => {
                   >
                     <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
                       <Typography variant="h4" sx={{ fontWeight: 800, color: '#667eea', mb: 0.5 }}>
-                        {scannedStudents.length}
+                        {typeof stats?.totalScanned === 'number' ? stats.totalScanned : scannedStudents.length}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
                         Total Scanned
@@ -560,7 +574,7 @@ const StaffDashboard = () => {
                   >
                     <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
                       <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981', mb: 0.5 }}>
-                        {filteredStudents.length}
+                        {typeof stats?.totalPresent === 'number' ? stats.totalPresent : filteredStudents.length}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
                         Present Today
@@ -613,7 +627,7 @@ const StaffDashboard = () => {
                         </Typography>
                       </Box>
                     ) : (
-                      <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: 1, maxHeight: 420 }}>
                         {filteredStudents.map((student, index) => (
                           <Card
                             key={student.id || index}
@@ -651,19 +665,34 @@ const StaffDashboard = () => {
                                     {student.studentId}
                                   </Typography>
                                 </Box>
-                                <Chip
-                                  label="Present"
-                                  color="success"
-                                  size="small"
-                                  sx={{
-                                    fontWeight: 600,
-                                    fontSize: '0.75rem',
-                                    height: 24,
-                                    '& .MuiChip-label': {
-                                      px: 1
-                                    }
-                                  }}
-                                />
+                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                  <Chip
+                                    label="Present"
+                                    color="success"
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: '0.75rem',
+                                      height: 24,
+                                      '& .MuiChip-label': { px: 1 }
+                                    }}
+                                  />
+                                  {Number(student.pendingFees) > 0 && (
+                                    <Chip
+                                      label={`Pending ₹${Number(student.pendingFees)}`}
+                                      color="error"
+                                      size="small"
+                                      sx={{
+                                        fontWeight: 700,
+                                        fontSize: '0.72rem',
+                                        height: 24,
+                                        backgroundColor: 'error.light',
+                                        color: 'error.contrastText',
+                                        '& .MuiChip-label': { px: 1 }
+                                      }}
+                                    />
+                                  )}
+                                </Box>
                               </Box>
 
                               {/* Course and Time Row */}

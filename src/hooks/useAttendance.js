@@ -23,6 +23,7 @@ export const useAttendance = (initialParams = {
   const [order, setOrder] = useState(initialParams.order || 'desc');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState(null);
 
   const mergedParams = useMemo(() => ({ 
     page: currentPage, 
@@ -55,6 +56,7 @@ export const useAttendance = (initialParams = {
       setCurrentPage(res?.currentPage || 1);
       setTotalPages(res?.totalPages || 1);
       setLimit(res?.limit || limit);
+      setStats(res?.stats || null);
     } catch (e) {
       setError(e?.message || 'Failed to fetch attendance records');
     } finally {
@@ -96,6 +98,7 @@ export const useAttendance = (initialParams = {
     order,
     loading,
     error,
+    stats,
     setCurrentPage,
     setLimit,
     setSearch: setSearchAndResetPage,
