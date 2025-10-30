@@ -19,6 +19,8 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import QrScanner from 'qr-scanner';
+import successSoundUrl from '../assets/sounds/scan.mp3';
+import errorSoundUrl from '../assets/sounds/failure.wav';
 
 const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -254,7 +256,7 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
         console.log('Attendance marked successfully:', apiResponse);
         // Play success sound
         try {
-          const audio = new Audio('/src/assets/sounds/scan.mp3');
+          const audio = new Audio(successSoundUrl);
           audio.volume = 0.5;
           audio.play().catch(error => {
             console.log('Could not play success sound:', error);
@@ -279,7 +281,7 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
         console.error('API Error:', apiResponse);
         // Play failure sound
         try {
-          const audio = new Audio('/src/assets/sounds/failure.wav');
+          const audio = new Audio(errorSoundUrl);
           audio.volume = 0.5;
           audio.play().catch(error => {
             console.log('Could not play failure sound:', error);
@@ -306,7 +308,7 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
       console.error('Network Error:', apiError);
       // Play failure sound for network errors
       try {
-        const audio = new Audio('/src/assets/sounds/failure.wav');
+        const audio = new Audio(errorSoundUrl);
         audio.volume = 0.5;
         audio.play().catch(error => {
           console.log('Could not play failure sound:', error);
