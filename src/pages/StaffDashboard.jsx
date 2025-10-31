@@ -633,7 +633,7 @@ const StaffDashboard = () => {
                         </Typography>
                       </Box>
                     ) : (
-                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: { xs: 0.5, sm: 1 }, maxHeight: { xs: 340, sm: 420 } }}>
+                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: { xs: 0.5, sm: 1 }, maxHeight: { xs: '55vh', sm: 420 } }}>
                         {filteredStudents.map((student, index) => (
                           <Card
                             key={student.id || index}
