@@ -69,7 +69,7 @@ const EnquiryPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedEnquiryId, setSelectedEnquiryId] = useState(null);
 
-  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, updateInquiry, deleteInquiry, updateInquiryStatus } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm });
+  const { data, total, page, pages, limit, search, loading, error, setPage, setLimit, setSearch, createInquiry, updateInquiry, deleteInquiry, updateInquiryStatus } = useInquiries({ page: currentPage, limit: pageSize, search: searchTerm, status: filterStatus !== 'all' ? filterStatus : undefined });
 
   const enquiries = useMemo(() => data || [], [data]);
 
@@ -98,11 +98,13 @@ const EnquiryPage = () => {
   }, [enquiries]);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'New': return 'primary';
-      case 'Contacted': return 'warning';
-      case 'Follow Up': return 'secondary';
-      case 'Converted': return 'success';
+    const normalized = (status || '').toString().toLowerCase();
+    switch (normalized) {
+      case 'new': return 'primary';
+      case 'contacted': return 'warning';
+      case 'follow up':
+      case 'follow-up': return 'secondary';
+      case 'converted': return 'success';
       default: return 'default';
     }
   };
@@ -186,21 +188,27 @@ const EnquiryPage = () => {
     setSelectedEnquiryId(null);
   };
 
+  // Reset page when status filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+    setPage(1);
+  }, [filterStatus]);
+
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 1.5, sm: 3 } }}>
       {/* Header */}
-      <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 }, background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
-              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                 Enquiry Management
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Track and manage student enquiries and leads
               </Typography>
             </Box>
-            <PhoneIcon sx={{ fontSize: 60, opacity: 0.8 }} />
+            <PhoneIcon sx={{ fontSize: { xs: 40, sm: 60 }, opacity: 0.8 }} />
           </Box>
         </CardContent>
       </Card>
@@ -209,8 +217,8 @@ const EnquiryPage = () => {
       <Box sx={{ 
         display: 'grid', 
         gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-        gap: 3, 
-        mb: 3 
+        gap: { xs: 2, sm: 3 }, 
+        mb: { xs: 2, sm: 3 } 
       }}>
         <Card sx={{ height: '100%' }}>
           <CardContent>
@@ -219,11 +227,11 @@ const EnquiryPage = () => {
                 <Typography color="textSecondary" gutterBottom variant="body2">
                   Total Enquiries
                 </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {stats.total}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <PhoneIcon />
               </Avatar>
             </Box>
@@ -241,7 +249,7 @@ const EnquiryPage = () => {
                   {stats.newToday}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'success.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <PersonIcon />
               </Avatar>
             </Box>
@@ -259,7 +267,7 @@ const EnquiryPage = () => {
                   {stats.converted}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'success.light', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'success.light', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <EmailIcon />
               </Avatar>
             </Box>
@@ -277,7 +285,7 @@ const EnquiryPage = () => {
                   {stats.followUp}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'warning.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <ScheduleIcon />
               </Avatar>
             </Box>
@@ -286,14 +294,15 @@ const EnquiryPage = () => {
       </Box>
 
       {/* Create Inquiry */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               Create Inquiry
             </Typography>
             <Button
               variant="contained"
+              size="small"
               startIcon={<AddIcon />}
               onClick={() => setOpenCreateDialog(true)}
             >
@@ -304,10 +313,10 @@ const EnquiryPage = () => {
       </Card>
 
       {/* Filters and Search */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
         <CardContent>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <FilterIcon color="action" />
               <Typography variant="body2" color="textSecondary">
                 Filter by:
@@ -317,13 +326,13 @@ const EnquiryPage = () => {
                 <Select
               value={filterStatus} 
                   label="Status"
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); setPage(1); }}
                 >
                   <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="New">New</MenuItem>
-                  <MenuItem value="Contacted">Contacted</MenuItem>
-                  <MenuItem value="Follow Up">Follow Up</MenuItem>
-                  <MenuItem value="Converted">Converted</MenuItem>
+                  <MenuItem value="new">New</MenuItem>
+                  <MenuItem value="contacted">Contacted</MenuItem>
+                  <MenuItem value="follow-up">Follow Up</MenuItem>
+                  <MenuItem value="converted">Converted</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -340,7 +349,7 @@ const EnquiryPage = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: 250 }}
+              sx={{ minWidth: { xs: 200, sm: 250 } }}
             />
           </Box>
         </CardContent>
@@ -349,11 +358,11 @@ const EnquiryPage = () => {
       {/* Enquiries Table */}
       <Card sx={{ borderRadius: '4px', overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: { xs: 3, sm: 4 } }}>
             <CircularProgress />
           </Box>
         ) : error ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Box sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
             <Typography color="error">
               Error loading enquiries: {error}
             </Typography>
@@ -362,9 +371,9 @@ const EnquiryPage = () => {
             </Button>
           </Box>
         ) : enquiries.length === 0 ? (
-          <Box sx={{ p: 8, textAlign: 'center' }}>
-            <PersonIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }} />
-            <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
+          <Box sx={{ p: { xs: 4, sm: 8 }, textAlign: 'center' }}>
+            <PersonIcon sx={{ fontSize: { xs: 56, sm: 80 }, color: 'text.secondary', mb: 3 }} />
+            <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
               No Enquiries Found
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
@@ -374,27 +383,27 @@ const EnquiryPage = () => {
         ) : (
           isMobile ? (
             // Mobile Card View
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1 }}>
               {enquiries.map((enquiry) => (
                 <Card 
                   key={enquiry._id} 
                   sx={{ 
                     borderRadius: 2,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                     border: '1px solid #e5e7eb'
                   }}
                 >
-                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                     {/* Header with Avatar and Name */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                      <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 1.25 }}>
+                      <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
                         {enquiry.name?.charAt(0) || 'E'}
                       </Avatar>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.85rem' }}>
                           {enquiry.name || 'N/A'}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                        <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.72rem' }}>
                           {enquiry.center || 'N/A'}
                         </Typography>
                       </Box>
@@ -415,32 +424,32 @@ const EnquiryPage = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.8rem' }}>
+                        <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.78rem' }}>
                           {enquiry.mobile || 'N/A'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <ScheduleIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.72rem' }}>
                           {enquiry.enquiry_date ? new Date(enquiry.enquiry_date).toLocaleDateString('en-GB') : 'N/A'}
                         </Typography>
                       </Box>
                       {enquiry.class && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                          <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.72rem' }}>
                             Class: {enquiry.class}
                           </Typography>
                         </Box>
                       )}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                        <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.72rem' }}>
                           Status:
                         </Typography>
                         <Chip 
                           label={enquiry.status || 'New'} 
                           color={getStatusColor(enquiry.status || 'New')}
                           size="small"
-                          sx={{ fontSize: '0.7rem', height: '20px' }}
+                          sx={{ fontSize: '0.68rem', height: 20 }}
                         />
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 0.5 }}>
@@ -453,7 +462,7 @@ const EnquiryPage = () => {
                               value={notesValue}
                               onChange={(e) => setNotesValue(e.target.value)}
                               placeholder="Add notes..."
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: '0.72rem' }}
                             />
                             <Box sx={{ display: 'flex', gap: 0.5 }}>
                               <IconButton
@@ -478,7 +487,7 @@ const EnquiryPage = () => {
                           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: '100%' }}>
                             <Typography variant="body2" sx={{ 
                               color: '#6b7280', 
-                              fontSize: '0.75rem', 
+                              fontSize: '0.72rem', 
                               fontStyle: enquiry.notes ? 'normal' : 'italic',
                               flex: 1
                             }}>
@@ -767,8 +776,8 @@ const EnquiryPage = () => {
 
         {/* Pagination */}
       {!loading && !error && enquiries.length > 0 && (
-        <Card sx={{ mt: 2, borderRadius: 2 }}>
-          <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card sx={{ mt: { xs: 2, sm: 3 }, borderRadius: 2 }}>
+          <CardContent sx={{ p: { xs: 1.25, sm: 2 } }}>
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -915,7 +924,16 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
     setSubmitting(true);
     setError(null);
     try {
-      await onCreate(form);
+      // Only include optional fields if they have values
+      const formData = {
+        name: form.name,
+        mobile: form.mobile,
+        ...(form.class && { class: form.class }),
+        ...(form.address && { address: form.address }),
+        ...(form.center && { center: form.center }),
+        ...(form.notes && { notes: form.notes }),
+      };
+      await onCreate(formData);
       setForm({ name: '', mobile: '', address: '', class: '', center: '', notes: '' });
       if (onClose) onClose();
     } catch (err) {
@@ -953,7 +971,7 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
         <TextField
           fullWidth
           name="address"
-          label="Address"
+          label="Address (Optional)"
           value={form.address}
           onChange={handleChange}
           multiline
@@ -972,7 +990,7 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
         <TextField
           fullWidth
           name="center"
-          label="Center"
+          label="Center (Optional)"
           value={form.center}
           onChange={handleChange}
           disabled={submitting}
@@ -980,7 +998,7 @@ const InquiryCreateForm = ({ onCreate, onClose }) => {
         <TextField
           fullWidth
           name="notes"
-          label="Notes"
+          label="Notes (Optional)"
           value={form.notes}
           onChange={handleChange}
           multiline
