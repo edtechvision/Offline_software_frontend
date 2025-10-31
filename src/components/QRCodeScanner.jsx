@@ -364,12 +364,18 @@ const QRCodeScanner = ({ open, onClose, onScanSuccess, onScanError }) => {
       onClose={handleClose}
       maxWidth="xs"
       fullWidth
+      sx={{
+        '& .MuiDialog-container': {
+          alignItems: 'flex-start'
+        }
+      }}
       PaperProps={{
         sx: {
           borderRadius: 2,
           overflow: 'hidden',
           maxHeight: '90vh',
-          margin: 1
+          margin: 1,
+          mt: 1
         }
       }}
     >
