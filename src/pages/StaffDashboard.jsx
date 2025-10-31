@@ -267,7 +267,8 @@ const StaffDashboard = () => {
         background: '#f8fafc',
         p: 1,
         position: 'relative',
-        overflow: 'hidden',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
         // Force mobile view on all screen sizes
@@ -306,36 +307,11 @@ const StaffDashboard = () => {
         position: 'relative', 
         zIndex: 1, 
         flex: 1, 
-        overflow: 'auto',
         display: 'flex',
         flexDirection: 'column'
       }}>
-        {/* Header */}
-        <Card
-          sx={{
-            mb: { xs: 2, sm: 3 },
-            borderRadius: 3,
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            position: 'relative',
-            zIndex: 1,
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              borderRadius: 'inherit',
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-              pointerEvents: 'none',
-              zIndex: -1
-            }
-          }}
-        >
-          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        {/* Header (merged, no card) */}
+        <Box sx={{ mb: { xs: 2, sm: 3 }, px: { xs: 1, sm: 0 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
                 <Box
@@ -479,8 +455,7 @@ const StaffDashboard = () => {
                 Enquiry
               </Button>
             </Box>
-          </CardContent>
-        </Card>
+        </Box>
 
         {/* Dashboard Content */}
         <Box sx={{
@@ -633,18 +608,18 @@ const StaffDashboard = () => {
                         </Typography>
                       </Box>
                     ) : (
-                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: { xs: 0.5, sm: 1 }, maxHeight: { xs: '55vh', sm: 420 } }}>
+                      <Box sx={{ flex: 1, p: { xs: 0.5, sm: 1 } }}>
                         {filteredStudents.map((student, index) => (
-                          <Card
+                          <Box
                             key={student.id || index}
                             sx={{
                               mb: { xs: 1, sm: 1.5 },
                               borderRadius: 2,
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                              border: '1px solid #e5e7eb'
+                              border: '1px solid #e5e7eb',
+                              backgroundColor: 'transparent'
                             }}
                           >
-                            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+                            <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
                               {/* Student Info Row */}
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.5 }, mb: { xs: 1.25, sm: 1.5 } }}>
                                 <Box
@@ -712,8 +687,8 @@ const StaffDashboard = () => {
                                   {new Date(student.scannedAt).toLocaleTimeString()}
                                 </Typography>
                               </Box>
-                            </CardContent>
-                          </Card>
+                            </Box>
+                          </Box>
                         ))}
                       </Box>
                     )}
@@ -866,16 +841,16 @@ const StaffDashboard = () => {
                         </Box>
                         <Box sx={{ maxHeight: { xs: 340, sm: 400 }, overflow: 'auto', p: { xs: 0.5, sm: 1 } }}>
                           {attendanceData.map((record, index) => (
-                            <Card
+                            <Box
                               key={record._id || index}
                               sx={{
                                 mb: { xs: 1, sm: 1.5 },
                                 borderRadius: 2,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                border: '1px solid #e5e7eb'
+                                border: '1px solid #e5e7eb',
+                                backgroundColor: 'transparent'
                               }}
                             >
-                              <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+                              <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
                                 {/* Student Info Row */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.5 }, mb: { xs: 1.25, sm: 1.5 } }}>
                                   <Avatar sx={{ width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 }, bgcolor: '#667eea' }}>
@@ -913,8 +888,8 @@ const StaffDashboard = () => {
                                     {new Date(record.date).toLocaleString()}
                                   </Typography>
                                 </Box>
-                              </CardContent>
-                            </Card>
+                              </Box>
+                            </Box>
                           ))}
                         </Box>
 
