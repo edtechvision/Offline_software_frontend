@@ -228,7 +228,7 @@ const EnquiryPage = () => {
                   Total Enquiries
                 </Typography>
                 <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-                  {stats.total}
+                  {typeof total === 'number' ? total : stats.total}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
