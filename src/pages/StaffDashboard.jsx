@@ -313,7 +313,7 @@ const StaffDashboard = () => {
         {/* Header */}
         <Card
           sx={{
-            mb: 3,
+            mb: { xs: 2, sm: 3 },
             borderRadius: 3,
             boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
             border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -335,13 +335,13 @@ const StaffDashboard = () => {
             }
           }}
         >
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
                 <Box
                   sx={{
-                    width: 60,
-                    height: 60,
+                    width: { xs: 48, sm: 60 },
+                    height: { xs: 48, sm: 60 },
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     borderRadius: '50%',
                     display: 'flex',
@@ -350,13 +350,13 @@ const StaffDashboard = () => {
                     boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)'
                   }}
                 >
-                  <QrCodeIcon sx={{ color: 'white', fontSize: 30 }} />
+                  <QrCodeIcon sx={{ color: 'white', fontSize: { xs: 22, sm: 30 } }} />
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1f2937', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1f2937', mb: 0.5, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Staff Scanner
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#6b7280' }}>
+                  <Typography variant="body1" sx={{ color: '#6b7280', fontSize: { xs: '0.85rem', sm: '1rem' } }}>
                     Welcome, {currentUser?.name || 'Staff Member'}
                   </Typography>
                 </Box>
@@ -367,6 +367,9 @@ const StaffDashboard = () => {
                 sx={{
                   borderColor: '#667eea',
                   color: '#667eea',
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 0.5, sm: 0.75 },
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
                   '&:hover': {
                     borderColor: '#5a67d8',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)'
@@ -378,7 +381,7 @@ const StaffDashboard = () => {
             </Box>
 
             {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2 }, flexWrap: 'wrap', mb: { xs: 1.5, sm: 2 } }}>
               <Button
                 variant="contained"
                 onClick={handleScan}
@@ -387,9 +390,9 @@ const StaffDashboard = () => {
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   color: 'white',
                   borderRadius: 2,
-                  px: 3,
-                  py: 1.5,
-                  fontSize: '1rem',
+                  px: { xs: 2, sm: 3 },
+                  py: { xs: 1, sm: 1.5 },
+                  fontSize: { xs: '0.85rem', sm: '1rem' },
                   fontWeight: 600,
                   textTransform: 'none',
                   boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
@@ -411,6 +414,9 @@ const StaffDashboard = () => {
                 sx={{
                   borderColor: '#ef4444',
                   color: '#ef4444',
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 0.75, sm: 1 },
+                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
                   '&:hover': {
                     borderColor: '#dc2626',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)'
@@ -422,19 +428,19 @@ const StaffDashboard = () => {
             </Box>
 
             {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, sm: 3 } }}>
               <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
                 <Tab 
                   label="Today's Scans" 
                   icon={<QrCodeIcon />} 
                   iconPosition="start"
-                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                  sx={{ textTransform: 'none', fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
                 />
                 <Tab 
                   label="Attendance History" 
                   icon={<HistoryIcon />} 
                   iconPosition="start"
-                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                  sx={{ textTransform: 'none', fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
                 />
               </Tabs>
             </Box>
@@ -503,9 +509,9 @@ const StaffDashboard = () => {
                     ),
                   }}
                   sx={{
-                    mb: 3,
+                    mb: { xs: 2, sm: 3 },
                     '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
+                      borderRadius: { xs: 1.5, sm: 2 },
                       '&:hover .MuiOutlinedInput-notchedOutline': {
                         borderColor: '#667eea'
                       },
@@ -517,7 +523,7 @@ const StaffDashboard = () => {
                 />
 
                 {/* Statistics Cards */}
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, mb: { xs: 1.5, sm: 2 } }}>
                   <Card
                     sx={{
                       flex: 1,
@@ -540,11 +546,11 @@ const StaffDashboard = () => {
                       }
                     }}
                   >
-                    <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
-                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#667eea', mb: 0.5 }}>
+                    <CardContent sx={{ textAlign: 'center', p: { xs: 1, sm: 1.5 } }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#667eea', mb: 0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                         {typeof stats?.totalScanned === 'number' ? stats.totalScanned : scannedStudents.length}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                         Total Scanned
                       </Typography>
                     </CardContent>
@@ -572,11 +578,11 @@ const StaffDashboard = () => {
                       }
                     }}
                   >
-                    <CardContent sx={{ textAlign: 'center', p: 1.5 }}>
-                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981', mb: 0.5 }}>
+                    <CardContent sx={{ textAlign: 'center', p: { xs: 1, sm: 1.5 } }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981', mb: 0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                         {typeof stats?.totalPresent === 'number' ? stats.totalPresent : filteredStudents.length}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                      <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                         Present Today
                       </Typography>
                     </CardContent>
@@ -610,41 +616,41 @@ const StaffDashboard = () => {
                   }}
                 >
                   <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
+                    <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: { xs: '0.95rem', sm: '1rem' } }}>
                         Scanned Students ({filteredStudents.length})
                       </Typography>
                     </Box>
 
                     {filteredStudents.length === 0 ? (
-                      <Box sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <QrCodeIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
+                      <Box sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <QrCodeIcon sx={{ fontSize: { xs: 40, sm: 48 }, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
                         <Typography variant="body1" sx={{ color: '#6b7280', mb: 1, fontWeight: 600 }}>
                           No students scanned yet
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                           Use the "Scan ID Card" button to start scanning
                         </Typography>
                       </Box>
                     ) : (
-                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: 1, maxHeight: 420 }}>
+                      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', p: { xs: 0.5, sm: 1 }, maxHeight: { xs: 340, sm: 420 } }}>
                         {filteredStudents.map((student, index) => (
                           <Card
                             key={student.id || index}
                             sx={{
-                              mb: 1.5,
+                              mb: { xs: 1, sm: 1.5 },
                               borderRadius: 2,
                               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                               border: '1px solid #e5e7eb'
                             }}
                           >
-                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
                               {/* Student Info Row */}
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.5 }, mb: { xs: 1.25, sm: 1.5 } }}>
                                 <Box
                                   sx={{
-                                    width: 40,
-                                    height: 40,
+                                    width: { xs: 34, sm: 40 },
+                                    height: { xs: 34, sm: 40 },
                                     borderRadius: '50%',
                                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     display: 'flex',
@@ -652,29 +658,29 @@ const StaffDashboard = () => {
                                     justifyContent: 'center',
                                     color: 'white',
                                     fontWeight: 600,
-                                    fontSize: '0.875rem'
+                                    fontSize: { xs: '0.8rem', sm: '0.875rem' }
                                   }}
                                 >
                                   {student.name?.charAt(0) || 'S'}
                                 </Box>
                                 <Box sx={{ flex: 1 }}>
-                                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
+                                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                     {student.name}
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                                     {student.studentId}
                                   </Typography>
                                 </Box>
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', gap: { xs: 0.75, sm: 1 }, alignItems: 'center' }}>
                                   <Chip
                                     label="Present"
                                     color="success"
                                     size="small"
                                     sx={{
                                       fontWeight: 600,
-                                      fontSize: '0.75rem',
-                                      height: 24,
-                                      '& .MuiChip-label': { px: 1 }
+                                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                      height: { xs: 22, sm: 24 },
+                                      '& .MuiChip-label': { px: { xs: 0.75, sm: 1 } }
                                     }}
                                   />
                                   {Number(student.pendingFees) > 0 && (
@@ -684,11 +690,11 @@ const StaffDashboard = () => {
                                       size="small"
                                       sx={{
                                         fontWeight: 700,
-                                        fontSize: '0.72rem',
-                                        height: 24,
+                                        fontSize: { xs: '0.68rem', sm: '0.72rem' },
+                                        height: { xs: 22, sm: 24 },
                                         backgroundColor: 'error.light',
                                         color: 'error.contrastText',
-                                        '& .MuiChip-label': { px: 1 }
+                                        '& .MuiChip-label': { px: { xs: 0.75, sm: 1 } }
                                       }}
                                     />
                                   )}
@@ -698,11 +704,11 @@ const StaffDashboard = () => {
                               {/* Course and Time Row */}
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Box sx={{ flex: 1 }}>
-                                  <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.8rem', fontWeight: 500 }}>
+                                  <Typography variant="body2" sx={{ color: '#374151', fontSize: { xs: '0.78rem', sm: '0.8rem' }, fontWeight: 500 }}>
                                     {student.course}
                                   </Typography>
                                 </Box>
-                                <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem', ml: 1 }}>
+                                <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' }, ml: { xs: 0.5, sm: 1 } }}>
                                   {new Date(student.scannedAt).toLocaleTimeString()}
                                 </Typography>
                               </Box>
@@ -825,15 +831,15 @@ const StaffDashboard = () => {
                 >
                   <CardContent sx={{ p: 0 }}>
                     {attendanceLoading ? (
-                      <Box sx={{ p: 3, textAlign: 'center' }}>
+                      <Box sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                         <CircularProgress size={24} />
                         <Typography variant="body2" sx={{ mt: 1, color: '#6b7280' }}>
                           Loading attendance records...
                         </Typography>
                       </Box>
                     ) : attendanceError ? (
-                      <Box sx={{ p: 3, textAlign: 'center' }}>
-                        <ErrorIcon sx={{ fontSize: 48, color: '#ef4444', mb: 2 }} />
+                      <Box sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
+                        <ErrorIcon sx={{ fontSize: { xs: 40, sm: 48 }, color: '#ef4444', mb: 2 }} />
                         <Typography variant="body1" sx={{ color: '#ef4444', mb: 1 }}>
                           Error loading attendance
                         </Typography>
@@ -842,44 +848,44 @@ const StaffDashboard = () => {
                         </Typography>
                       </Box>
                     ) : attendanceData.length === 0 ? (
-                      <Box sx={{ p: 3, textAlign: 'center' }}>
-                        <HistoryIcon sx={{ fontSize: 48, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
+                      <Box sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
+                        <HistoryIcon sx={{ fontSize: { xs: 40, sm: 48 }, color: '#9ca3af', mb: 2, opacity: 0.6 }} />
                         <Typography variant="body1" sx={{ color: '#6b7280', mb: 1, fontWeight: 600 }}>
                           No attendance records found
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                           Attendance records will appear here after scanning
                         </Typography>
                       </Box>
                     ) : (
                       <Box>
-                        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
+                        <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: 1, borderColor: 'divider' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: { xs: '0.95rem', sm: '1rem' } }}>
                             Attendance Records ({totalRecords})
                           </Typography>
                         </Box>
-                        <Box sx={{ maxHeight: 400, overflow: 'auto', p: 1 }}>
+                        <Box sx={{ maxHeight: { xs: 340, sm: 400 }, overflow: 'auto', p: { xs: 0.5, sm: 1 } }}>
                           {attendanceData.map((record, index) => (
                             <Card
                               key={record._id || index}
                               sx={{
-                                mb: 1.5,
+                                mb: { xs: 1, sm: 1.5 },
                                 borderRadius: 2,
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                 border: '1px solid #e5e7eb'
                               }}
                             >
-                              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                              <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
                                 {/* Student Info Row */}
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                                  <Avatar sx={{ width: 40, height: 40, bgcolor: '#667eea' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.5 }, mb: { xs: 1.25, sm: 1.5 } }}>
+                                  <Avatar sx={{ width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 }, bgcolor: '#667eea' }}>
                                     {record.studentId?.studentName?.charAt(0) || 'S'}
                                   </Avatar>
                                   <Box sx={{ flex: 1 }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#1f2937', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                       {record.studentId?.studentName || 'Unknown Student'}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                    <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                                       ID: {record.registrationNo || record.studentId?.registrationNo || 'N/A'}
                                     </Typography>
                                   </Box>
@@ -889,10 +895,10 @@ const StaffDashboard = () => {
                                     size="small"
                                     sx={{
                                       fontWeight: 600,
-                                      fontSize: '0.75rem',
-                                      height: 24,
+                                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                      height: { xs: 22, sm: 24 },
                                       '& .MuiChip-label': {
-                                        px: 1
+                                        px: { xs: 0.75, sm: 1 }
                                       }
                                     }}
                                   />
@@ -900,10 +906,10 @@ const StaffDashboard = () => {
 
                                 {/* Staff and Time Row */}
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                                     By: {record.markedBy?.staffname || 'Unknown Staff'} ({record.markedBy?.staffcode || 'N/A'})
                                   </Typography>
-                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                                     {new Date(record.date).toLocaleString()}
                                   </Typography>
                                 </Box>

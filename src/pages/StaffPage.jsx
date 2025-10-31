@@ -130,20 +130,20 @@ const StaffPage = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 1.5, sm: 3 } }}>
       {/* Header */}
-      <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 }, background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
-              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                 Staff Management
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Manage staff accounts and permissions
               </Typography>
             </Box>
-            <PersonIcon sx={{ fontSize: 60, opacity: 0.8 }} />
+            <PersonIcon sx={{ fontSize: { xs: 40, sm: 60 }, opacity: 0.8 }} />
           </Box>
         </CardContent>
       </Card>
@@ -152,8 +152,8 @@ const StaffPage = () => {
       <Box sx={{ 
         display: 'grid', 
         gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-        gap: 3, 
-        mb: 3 
+        gap: { xs: 2, sm: 3 }, 
+        mb: { xs: 2, sm: 3 } 
       }}>
         <Card sx={{ height: '100%' }}>
           <CardContent>
@@ -162,11 +162,11 @@ const StaffPage = () => {
                 <Typography color="textSecondary" gutterBottom variant="body2">
                   Total Staff
                 </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {total}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <PersonIcon />
               </Avatar>
             </Box>
@@ -180,11 +180,11 @@ const StaffPage = () => {
                 <Typography color="textSecondary" gutterBottom variant="body2">
                   Active Staff
                 </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {staff.filter(s => !s.isBlocked).length}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'success.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <LockOpenIcon />
               </Avatar>
             </Box>
@@ -198,11 +198,11 @@ const StaffPage = () => {
                 <Typography color="textSecondary" gutterBottom variant="body2">
                   Blocked Staff
                 </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {staff.filter(s => s.isBlocked).length}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'error.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'error.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <LockIcon />
               </Avatar>
             </Box>
@@ -216,11 +216,11 @@ const StaffPage = () => {
                 <Typography color="textSecondary" gutterBottom variant="body2">
                   Current Page
                 </Typography>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {staff.length}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'info.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'info.main', width: { xs: 44, sm: 56 }, height: { xs: 44, sm: 56 } }}>
                 <BadgeIcon />
               </Avatar>
             </Box>
@@ -229,14 +229,15 @@ const StaffPage = () => {
       </Box>
 
       {/* Create Staff */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               Staff Management
             </Typography>
             <Button
               variant="contained"
+              size="small"
               startIcon={<AddIcon />}
               onClick={() => setOpenCreateDialog(true)}
             >
@@ -247,10 +248,10 @@ const StaffPage = () => {
       </Card>
 
       {/* Filters and Search */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
         <CardContent>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <FilterIcon color="action" />
               <Typography variant="body2" color="textSecondary">
                 Filter by:
@@ -281,7 +282,7 @@ const StaffPage = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: 250 }}
+              sx={{ minWidth: { xs: 200, sm: 250 } }}
             />
             
           </Box>
@@ -292,11 +293,11 @@ const StaffPage = () => {
       {/* Staff Table */}
       <Card sx={{ borderRadius: '4px', overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: { xs: 3, sm: 4 } }}>
             <CircularProgress />
           </Box>
         ) : error ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Box sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
             <Typography color="error">
               Error loading staff: {error}
             </Typography>
@@ -305,9 +306,9 @@ const StaffPage = () => {
             </Button>
           </Box>
         ) : staff.length === 0 ? (
-          <Box sx={{ p: 8, textAlign: 'center' }}>
-            <PersonIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }} />
-            <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
+          <Box sx={{ p: { xs: 4, sm: 8 }, textAlign: 'center' }}>
+            <PersonIcon sx={{ fontSize: { xs: 56, sm: 80 }, color: 'text.secondary', mb: 3 }} />
+            <Typography variant="h5" color="text.secondary" sx={{ mb: 2, fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
               No Staff Found
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
@@ -333,11 +334,11 @@ const StaffPage = () => {
                 {staff.map((staffMember) => (
                   <TableRow key={staffMember._id} hover>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
+                        <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 34, sm: 40 }, height: { xs: 34, sm: 40 }, fontSize: { xs: '0.85rem', sm: '1rem' } }}>
                           {staffMember.staffname?.charAt(0) || 'S'}
                         </Avatar>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                           {staffMember.staffname || 'N/A'}
                         </Typography>
                       </Box>
@@ -345,7 +346,7 @@ const StaffPage = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <BadgeIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                           {staffMember.staffcode || 'N/A'}
                         </Typography>
                       </Box>
@@ -353,7 +354,7 @@ const StaffPage = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <PhoneIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                           {staffMember.mobile_number || 'N/A'}
                         </Typography>
                       </Box>
@@ -366,7 +367,7 @@ const StaffPage = () => {
                           color: 'warning.main',
                           fontWeight: 600,
                           backgroundColor: 'warning.light',
-                          padding: '4px 8px',
+                          padding: { xs: '2px 6px', sm: '4px 8px' },
                           borderRadius: '4px',
                           display: 'inline-block'
                         }}
@@ -379,11 +380,11 @@ const StaffPage = () => {
                         label={getStatusText(staffMember.isBlocked)}
                         color={getStatusColor(staffMember.isBlocked)}
                         size="small"
-                        sx={{ fontWeight: 600 }}
+                        sx={{ fontWeight: 600, height: { xs: 22, sm: 24 }, '& .MuiChip-label': { px: { xs: 0.75, sm: 1 } } }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 0.75, sm: 1 } }}>
                         <IconButton
                           color="primary"
                           onClick={() => handleEditClick(staffMember)}
@@ -414,20 +415,20 @@ const StaffPage = () => {
 
       {/* Pagination */}
       {!loading && !error && staff.length > 0 && (
-        <Card sx={{ mt: 3, borderRadius: '4px' }}>
-          <CardContent sx={{ p: 2 }}>
+        <Card sx={{ mt: { xs: 2, sm: 3 }, borderRadius: '4px' }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center',
               flexWrap: 'wrap',
-              gap: 2
+              gap: { xs: 1.5, sm: 2 }
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2" color="text.secondary">
                   Rows per page:
                 </Typography>
-                <FormControl size="small" sx={{ minWidth: 80 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: 70, sm: 80 } }}>
                   <Select
                     value={pageSize}
                     onChange={handlePageSizeChange}
@@ -448,7 +449,7 @@ const StaffPage = () => {
                 page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
-                size="medium"
+                size="small"
                 showFirstButton
                 showLastButton
               />
