@@ -140,8 +140,13 @@ const IDCardGallery = () => {
 
       {/* Controls */}
       <Paper sx={{ p: 3, mb: 4 }}>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          alignItems: 'center',
+          flexWrap: 'wrap'
+        }}>
+          <Box sx={{ flex: 1, minWidth: 250 }}>
             <TextField
               fullWidth
               label="Search Students"
@@ -152,9 +157,9 @@ const IDCardGallery = () => {
                 startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
               }}
             />
-          </Grid>
+          </Box>
           
-          <Grid item xs={12} md={2}>
+          <Box sx={{ minWidth: 180 }}>
             <FormControl fullWidth>
               <InputLabel>Class Filter</InputLabel>
               <Select
@@ -169,43 +174,26 @@ const IDCardGallery = () => {
                 <MenuItem value="12th">12th Standard</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>Card Size</InputLabel>
-              <Select
-                value={cardSize}
-                onChange={(e) => setCardSize(e.target.value)}
-                label="Card Size"
-              >
-                <MenuItem value="small">Small</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="large">Large</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedClass('');
-                  setCurrentPage(1);
-                }}
-              >
-                Clear Filters
-              </Button>
-              <Chip 
-                label={`${filteredStudents.length} Cards`}
-                color="primary"
-                variant="outlined"
-              />
-            </Box>
-          </Grid>
-        </Grid>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedClass('');
+                setCurrentPage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
+            <Chip 
+              label={`${filteredStudents.length} Cards`}
+              color="primary"
+              variant="outlined"
+            />
+          </Box>
+        </Box>
       </Paper>
 
       {/* ID Cards Grid */}

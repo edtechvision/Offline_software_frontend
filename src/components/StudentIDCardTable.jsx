@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Card,
@@ -40,17 +40,22 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon
 } from '@mui/icons-material';
-import { useStudents } from '../hooks/useStudents';
+import { useStudents, useCourses } from '../hooks';
 import { useDebounce } from '../hooks';
 import { studentService } from '../services/apiService';
 import { useQueryClient } from '@tanstack/react-query';
+import { useIDCard } from '../hooks/useIDCard';
+import IDCard from './IDCard';
+import html2canvas from 'html2canvas';
+import { createRoot } from 'react-dom/client';
 
 const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loadingStates, setLoadingStates] = useState({});
+  const [downloadingId, setDownloadingId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -58,17 +63,22 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
   });
 
   const queryClient = useQueryClient();
+  const { bulkCardSettings } = useIDCard();
 
   // Debounced search like StudentsPage
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const isSearching = searchTerm !== debouncedSearchTerm;
+
+  // Fetch courses data
+  const { data: coursesData, isLoading: coursesLoading } = useCourses();
+  const courses = coursesData?.items || coursesData?.data?.items || [];
 
   // Fetch students data (server-side pagination + filters)
   const { data: studentsResponse, isLoading, error } = useStudents({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearchTerm,
-    className: selectedClass || ''
+    courseId: selectedCourse || ''
   });
 
   const students = studentsResponse?.students || studentsResponse?.data?.students || [];
@@ -94,8 +104,8 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
     setCurrentPage(1);
   };
 
-  const handleClassChange = (event) => {
-    setSelectedClass(event.target.value);
+  const handleCourseChange = (event) => {
+    setSelectedCourse(event.target.value);
     setCurrentPage(1);
   };
 
@@ -130,6 +140,155 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
     } finally {
       // Clear loading state
       setLoadingStates(prev => ({ ...prev, [studentId]: false }));
+    }
+  };
+
+  const handleDirectDownload = async (student) => {
+    if (!student.idCardIssued) {
+      setSnackbar({
+        open: true,
+        message: 'ID Card is not issued for this student.',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    setDownloadingId(student._id);
+    
+    try {
+      // Format student data for ID card
+      const studentData = {
+        name: student.studentName || '',
+        fatherName: student.fathersName || '',
+        studentId: student.registrationNo || '',
+        class: student.className || '',
+        course: student.courseDetails?.courseId?.name || '',
+        address: student.presentAddress?.fullAddress ? 
+          `${student.presentAddress.fullAddress}, ${student.presentAddress.district || ''}, ${student.presentAddress.state || ''} - ${student.presentAddress.pincode || ''}` : '',
+        contactNo: student.mobileNumber || '',
+        photoUrl: student.image || null
+      };
+
+      // Create temporary container for ID card
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.width = '420px';
+      tempContainer.style.height = '600px';
+      document.body.appendChild(tempContainer);
+
+      // Create root and render ID card
+      const root = createRoot(tempContainer);
+      root.render(
+        <IDCard
+          studentData={studentData}
+          customStyles={bulkCardSettings.customStyles}
+          size={bulkCardSettings.size || 'medium'}
+          showDownloadButton={false}
+        />
+      );
+
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Find the card element - IDCard renders a Box containing a Card
+      let cardElement = tempContainer.querySelector('div[class*="MuiCard"]') || 
+                       tempContainer.querySelector('div[class*="MuiBox"]') ||
+                       tempContainer.firstElementChild;
+      
+      if (!cardElement) {
+        // Wait a bit more and try again
+        await new Promise(resolve => setTimeout(resolve, 300));
+        cardElement = tempContainer.querySelector('div[class*="MuiCard"]') || 
+                     tempContainer.querySelector('div[class*="MuiBox"]') ||
+                     tempContainer.firstElementChild;
+      }
+      
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
+
+      // Wait a bit more for images and fonts to load
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Capture with html2canvas - target the entire container
+      const canvas = await html2canvas(tempContainer.firstElementChild || tempContainer, {
+        backgroundColor: null,
+        scale: 4,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        imageTimeout: 15000,
+        removeContainer: false,
+        foreignObjectRendering: false,
+        letterRendering: true,
+        onclone: (clonedDoc) => {
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Khand:wght@300;400;500;600;700&display=swap');
+          `;
+          clonedDoc.head.appendChild(style);
+        }
+      });
+
+      // Download the image
+      const link = document.createElement('a');
+      link.download = `ID_Card_${studentData.studentId || studentData.name}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      root.unmount();
+      document.body.removeChild(tempContainer);
+
+      setSnackbar({
+        open: true,
+        message: 'ID Card downloaded successfully!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error downloading ID card:', error);
+      
+      // Try fallback with lower scale
+      try {
+        const tempContainer = document.body.querySelector('[style*="-9999px"]');
+        if (tempContainer) {
+          const cardElement = tempContainer.querySelector('div') || tempContainer;
+          const canvas = await html2canvas(cardElement, {
+            backgroundColor: null,
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            imageTimeout: 10000
+          });
+
+          const link = document.createElement('a');
+          link.download = `ID_Card_${student.studentName || 'student'}.png`;
+          link.href = canvas.toDataURL('image/png', 1.0);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Cleanup
+          if (tempContainer.parentNode) {
+            tempContainer.parentNode.removeChild(tempContainer);
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fallback download failed:', fallbackError);
+        setSnackbar({
+          open: true,
+          message: 'Failed to download ID card. Please try again.',
+          severity: 'error'
+        });
+      }
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -201,17 +360,30 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
           
           <Box sx={{ minWidth: 200 }}>
             <FormControl fullWidth>
-              <InputLabel>Filter by Class</InputLabel>
+              <InputLabel>Filter by Course</InputLabel>
               <Select
-                value={selectedClass}
-                onChange={handleClassChange}
-                label="Filter by Class"
+                value={selectedCourse}
+                onChange={handleCourseChange}
+                label="Filter by Course"
+                disabled={coursesLoading}
               >
-                <MenuItem value="">All Classes</MenuItem>
-                <MenuItem value="9th">9th Standard</MenuItem>
-                <MenuItem value="10th">10th Standard</MenuItem>
-                <MenuItem value="11th">11th Standard</MenuItem>
-                <MenuItem value="12th">12th Standard</MenuItem>
+                <MenuItem value="">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    All Courses
+                  </Box>
+                </MenuItem>
+                {courses.map((course) => (
+                  <MenuItem key={course._id || course.id} value={course._id || course.id}>
+                    <Box sx={{ 
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '200px'
+                    }}>
+                      {course.name}
+                    </Box>
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Box>
@@ -372,9 +544,14 @@ const StudentIDCardTable = ({ onViewCard, onEditCard, onGenerateCard }) => {
                               <IconButton
                                 size="small"
                                 color="info"
-                                onClick={() => onGenerateCard && onGenerateCard(student)}
+                                onClick={() => handleDirectDownload(student)}
+                                disabled={downloadingId === student._id}
                               >
-                                <DownloadIcon fontSize="small" />
+                                {downloadingId === student._id ? (
+                                  <CircularProgress size={16} />
+                                ) : (
+                                  <DownloadIcon fontSize="small" />
+                                )}
                               </IconButton>
                             </Tooltip>
                           </>

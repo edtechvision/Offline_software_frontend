@@ -101,30 +101,71 @@ const IDCard = ({
   // Generate QR code value
   const qrValue = `Name: ${data.name}\nID: ${data.studentId}\nContact: ${data.contactNo}\nCourse: ${data.course}`;
 
-  // Download ID card as image
+  // Download ID card as image with high quality
   const handleDownload = async () => {
     if (!cardRef.current) return;
     
     try {
+      // Wait a bit to ensure all images and fonts are loaded before capture
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Generate high-quality canvas with maximum resolution
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: null,
-        scale: 2, // Higher resolution
+        scale: 4, // High resolution (4x scale for print quality - 300 DPI equivalent)
         useCORS: true,
         allowTaint: true,
-        logging: false
+        logging: false,
+        imageTimeout: 15000, // Wait longer for images to load
+        removeContainer: false,
+        foreignObjectRendering: false, // Better quality rendering
+        letterRendering: true, // Better text rendering
+        onclone: (clonedDoc) => {
+          // Ensure all styles are preserved in cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Khand:wght@300;400;500;600;700&display=swap');
+          `;
+          clonedDoc.head.appendChild(style);
+        }
       });
       
+      // Create download link with maximum quality (PNG is lossless)
       const link = document.createElement('a');
       link.download = `ID_Card_${data.studentId || data.name}.png`;
-      link.href = canvas.toDataURL('image/png');
+      // PNG format with maximum quality (1.0 = no compression, lossless)
+      link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading ID card:', error);
+      // Fallback to 3x scale if 4x fails (for older devices)
+      try {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const canvas = await html2canvas(cardRef.current, {
+          backgroundColor: null,
+          scale: 3, // Fallback to 3x scale
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          imageTimeout: 10000
+        });
+        const link = document.createElement('a');
+        link.download = `ID_Card_${data.studentId || data.name}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+      }
     }
   };
 
   return (
-    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+    <Box sx={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
       <Card
         ref={cardRef}
         sx={{
@@ -377,27 +418,30 @@ const IDCard = ({
       
       {/* Download Button */}
       {showDownloadButton && (
-        <Tooltip title="Download ID Card">
-          <IconButton
-            onClick={handleDownload}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              color: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 1)',
-                transform: 'scale(1.1)'
-              },
-              transition: 'all 0.2s ease',
-              zIndex: 10
-            }}
-            size="small"
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          mt: 2 
+        }}>
+          <Tooltip title="Download ID Card">
+            <IconButton
+              onClick={handleDownload}
+              sx={{
+                backgroundColor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+              size="large"
+            >
+              <DownloadIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       )}
     </Box>
   );

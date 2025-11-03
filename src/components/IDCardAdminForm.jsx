@@ -833,18 +833,7 @@ const IDCardAdminForm = ({ initialStudentData = null, isCustomizing = false }) =
                   <Grid item xs={12}>
                     <Typography variant="h6" sx={{ mb: 2 }}>Export Options</Typography>
                   </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      startIcon={<DownloadIcon />}
-                      onClick={exportAsPNG}
-                      sx={{ height: '56px' }}
-                    >
-                      Export as PNG
-                    </Button>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <Button
                       fullWidth
                       variant="contained"
@@ -855,7 +844,7 @@ const IDCardAdminForm = ({ initialStudentData = null, isCustomizing = false }) =
                       Export as PDF
                     </Button>
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <Button
                       fullWidth
                       variant="outlined"
