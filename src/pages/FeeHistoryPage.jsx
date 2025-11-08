@@ -72,12 +72,21 @@ const FeeHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Format date to YYYY-MM-DD format
+  const formatDateForAPI = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // API parameters
   const apiParams = {
     search: searchTerm,
     paymentMode: filterPaymentMode === 'all' ? '' : filterPaymentMode,
-    startDate: startDate ? startDate.toISOString() : '',
-    endDate: endDate ? endDate.toISOString() : '',
+    startDate: formatDateForAPI(startDate),
+    endDate: formatDateForAPI(endDate),
     page: currentPage,
     limit: pageSize
   };
@@ -427,8 +436,6 @@ const FeeHistoryPage = () => {
                   <MenuItem value="all">All Modes</MenuItem>
                   <MenuItem value="Cash">Cash</MenuItem>
                   <MenuItem value="UPI">UPI</MenuItem>
-                  <MenuItem value="Card">Card</MenuItem>
-                  <MenuItem value="Cheque">Cheque</MenuItem>
                 </Select>
               </FormControl>
               
