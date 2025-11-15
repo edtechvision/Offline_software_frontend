@@ -149,9 +149,9 @@ const FeeCollectionComponent = () => {
     }
 
     return feesData.data.map((feeRecord, index) => {
-      const studentInfo = feeRecord.studentId;
-      const courseInfo = feeRecord.courseId;
-      const batchInfo = feeRecord.batchId;
+      const studentInfo = feeRecord.studentId || {};
+      const courseInfo = feeRecord.courseId || {};
+      const batchInfo = feeRecord.batchId || null;
 
       // Determine status based on payment
       let status = "Pending";
@@ -176,10 +176,20 @@ const FeeCollectionComponent = () => {
         collectedBy: payment.collectedBy || null
       })) || [];
 
+      // Build name with null-safe checks
+      const className = studentInfo?.className || '';
+      const courseName = courseInfo?.name || 'N/A';
+      const batchName = batchInfo?.batchName || null;
+      
+      // Only include batch name if it exists
+      const name = batchName 
+        ? `${className} - ${courseName} (${batchName})`
+        : `${className} - ${courseName}`;
+
       return {
         id: feeRecord._id || index + 1,
-        name: `${studentInfo.className} - ${courseInfo.name} (${batchInfo.batchName})`,
-        code: courseInfo.fee?.toString() || "0",
+        name: name,
+        code: courseInfo?.fee?.toString() || "-",
         dueDate: feeRecord.nextPaymentDueDate || new Date().toISOString(),
         nextPaymentDueDate: feeRecord.nextPaymentDueDate,
         status: status,
@@ -611,6 +621,18 @@ const FeeCollectionComponent = () => {
     }
   };
 
+  // Format amount: show "-" if 0, otherwise show formatted amount
+  const formatAmount = (amount) => {
+    if (!amount || amount === 0) return '-';
+    return `₹${amount.toFixed(2)}`;
+  };
+
+  // Format amount with rupee symbol: show "-" if 0, otherwise show formatted amount
+  const formatAmountWithSymbol = (amount) => {
+    if (!amount || amount === 0) return '-';
+    return amount.toFixed(2);
+  };
+
   if (loading || isLoading || feesLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -910,7 +932,7 @@ const FeeCollectionComponent = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                       <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                        Code: {feeGroup.code}
+                        Code: {feeGroup.code || '-'}
                       </Typography>
                       <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
                         Due: {new Date(feeGroup.dueDate).toLocaleDateString()}
@@ -975,10 +997,10 @@ const FeeCollectionComponent = () => {
                               {new Date(payment.date).toLocaleDateString()}
                             </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '60px' }}>
-                              Discount: ₹{payment.discount.toFixed(2)}
+                              Discount: {formatAmount(payment.discount)}
                             </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.7rem', minWidth: '50px' }}>
-                              Fine: ₹{payment.fine.toFixed(2)}
+                              Fine: {formatAmount(payment.fine)}
                             </Typography>
                             <Typography variant="caption" sx={{
                               fontSize: '0.7rem',
@@ -1030,10 +1052,10 @@ const FeeCollectionComponent = () => {
               }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
-                    Discount: ₹{feeGroup.discount.toFixed(2)}
+                    Discount: {formatAmount(feeGroup.discount)}
                   </Typography>
                   <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
-                    Fine: ₹{feeGroup.fine.toFixed(2)}
+                    Fine: {formatAmount(feeGroup.fine)}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
@@ -1074,10 +1096,10 @@ const FeeCollectionComponent = () => {
                   Amount: ₹{feeGroups.reduce((sum, fee) => sum + fee.amount, 0).toFixed(2)}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
-                  Discount: ₹{feeGroups.reduce((sum, fee) => sum + fee.discount, 0).toFixed(2)}
+                  Discount: {formatAmount(feeGroups.reduce((sum, fee) => sum + fee.discount, 0))}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
-                  Fine: ₹{feeGroups.reduce((sum, fee) => sum + fee.fine, 0).toFixed(2)}
+                  Fine: {formatAmount(feeGroups.reduce((sum, fee) => sum + fee.fine, 0))}
                 </Typography>
                 <Typography variant="body2" sx={{
                   fontWeight: 700,
