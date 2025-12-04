@@ -341,7 +341,7 @@ const institutionConfig = {
   name: 'TARGET BIHAR',
   logo: 'TB', // Text logo or import image
   address: 'NEAR HP PETROL PUMP, MAIN ROAD',
-  location: 'JEHANABAD, 7779833559',
+  location: 'JEHANABAD, 7779855339',
   colors: {
     primary: '#033398',
     secondary: '#2E7D32'

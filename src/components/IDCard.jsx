@@ -269,7 +269,7 @@ const IDCard = ({
                 textAlign: 'center'
               }}
             >
-              JEHANABAD, 7779833559
+              JEHANABAD, 7779855339
             </Typography>
           </Box>
         </Box>
