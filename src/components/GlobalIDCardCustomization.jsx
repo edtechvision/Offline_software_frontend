@@ -883,6 +883,7 @@ const GlobalIDCardCustomization = () => {
                           <MenuItem value="12px">12px</MenuItem>
                           <MenuItem value="13px">13px</MenuItem>
                           <MenuItem value="14px">14px</MenuItem>
+                          <MenuItem value="15px">15px</MenuItem>
                         </Select>
                       </FormControl>
                       <FormControl size="small" sx={{ flex: 1 }}>
@@ -930,6 +931,8 @@ const GlobalIDCardCustomization = () => {
                           <MenuItem value="11px">11px</MenuItem>
                           <MenuItem value="12px">12px</MenuItem>
                           <MenuItem value="13px">13px</MenuItem>
+                          <MenuItem value="14px">14px</MenuItem>
+                          <MenuItem value="15px">15px</MenuItem>
                         </Select>
                       </FormControl>
                       <FormControl size="small" sx={{ flex: 1 }}>
