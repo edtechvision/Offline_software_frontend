@@ -93,15 +93,15 @@ const FeeHistoryPage = () => {
 
   // Fetch fee history data from API
   const { data: feeHistoryData, isLoading, error, refetch } = useFeeHistory(apiParams);
-  
+
   // Extract data from API response
   const payments = feeHistoryData?.data || [];
   console.log('API Response:', feeHistoryData);
   console.log('Payments:', payments);
-  
+
   const totalPayments = feeHistoryData?.totalPayments || 0;
   const totalPages = feeHistoryData?.totalPages || 1;
-  
+
   console.log('totalPayments:', totalPayments);
   console.log('totalPages:', totalPages);
   console.log('currentPage:', currentPage);
@@ -134,30 +134,30 @@ const FeeHistoryPage = () => {
       // Import the PDF generation function
       const { pdf } = await import('@react-pdf/renderer');
       const FeeReceiptPDF = (await import('../components/FeeReceiptPDF')).default;
-      
+
       // Generate PDF blob
       const blob = await pdf(<FeeReceiptPDF data={payment} />).toBlob();
-      
+
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `Fee_Receipt_${payment.receiptNo || payment.studentName}.pdf`;
-      
+
       // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up
       URL.revokeObjectURL(url);
-      
+
       setSnackbar({
         open: true,
         message: `Receipt downloaded successfully for ${payment.studentName}`,
         severity: 'success'
       });
-      
+
     } catch (error) {
       console.error('Download error:', error);
       setSnackbar({
@@ -248,7 +248,7 @@ const FeeHistoryPage = () => {
     try {
       // Simple print functionality - just print the current page
       window.print();
-      
+
       setSnackbar({
         open: true,
         message: 'Report sent to printer successfully!',
@@ -295,13 +295,13 @@ const FeeHistoryPage = () => {
         </Box>
 
         {/* Stats Cards */}
-        <Box sx={{ 
-          display: 'grid', 
+        <Box sx={{
+          display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-          gap: 3, 
-          mb: 4 
+          gap: 3,
+          mb: 4
         }}>
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%)',
             color: 'white',
             borderRadius: '4px'
@@ -321,7 +321,7 @@ const FeeHistoryPage = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
             color: 'white',
             borderRadius: '4px'
@@ -341,7 +341,7 @@ const FeeHistoryPage = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #f57c00 0%, #ef6c00 100%)',
             color: 'white',
             borderRadius: '4px'
@@ -361,7 +361,7 @@ const FeeHistoryPage = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%)',
             color: 'white',
             borderRadius: '4px'
@@ -385,14 +385,14 @@ const FeeHistoryPage = () => {
         {/* Search and Filters */}
         <Card sx={{ mb: 3, borderRadius: '4px' }}>
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: { 
-                xs: '1fr', 
-                sm: '1fr 1fr', 
-                md: '2fr 1fr 1fr 2fr auto' 
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr 1fr',
+                md: '2fr 1fr 1fr 2fr auto'
               },
-              gap: 2, 
+              gap: 2,
               alignItems: 'end'
             }}>
               <TextField
@@ -409,7 +409,7 @@ const FeeHistoryPage = () => {
                 }}
                 sx={{ borderRadius: '4px' }}
               />
-              
+
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -424,7 +424,7 @@ const FeeHistoryPage = () => {
                   <MenuItem value="failed">Failed</MenuItem>
                 </Select>
               </FormControl>
-              
+
               <FormControl fullWidth>
                 <InputLabel>Payment Mode</InputLabel>
                 <Select
@@ -438,34 +438,36 @@ const FeeHistoryPage = () => {
                   <MenuItem value="UPI">UPI</MenuItem>
                 </Select>
               </FormControl>
-              
+
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <DatePicker
                   label="Start Date"
                   value={startDate}
                   onChange={setStartDate}
-                  slotProps={{ 
-                    textField: { 
-                      size: 'small', 
-                      fullWidth: true, 
-                      sx: { borderRadius: '4px' } 
-                    } 
+                  format="dd/MM/yyyy"
+                  slotProps={{
+                    textField: {
+                      size: 'small',
+                      fullWidth: true,
+                      sx: { borderRadius: '4px' }
+                    }
                   }}
                 />
                 <DatePicker
                   label="End Date"
                   value={endDate}
                   onChange={setEndDate}
-                  slotProps={{ 
-                    textField: { 
-                      size: 'small', 
-                      fullWidth: true, 
-                      sx: { borderRadius: '4px' } 
-                    } 
+                  format="dd/MM/yyyy"
+                  slotProps={{
+                    textField: {
+                      size: 'small',
+                      fullWidth: true,
+                      sx: { borderRadius: '4px' }
+                    }
                   }}
                 />
               </Box>
-           
+
             </Box>
           </CardContent>
         </Card>
@@ -564,11 +566,11 @@ const FeeHistoryPage = () => {
                           variant="outlined"
                         />
                       </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString('en-GB') : 'N/A'}
-                          </Typography>
-                        </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString('en-GB') : 'N/A'}
+                        </Typography>
+                      </TableCell>
                       <TableCell>
                         <Chip
                           label="Completed"
@@ -625,9 +627,9 @@ const FeeHistoryPage = () => {
         {!isLoading && !error && payments.length > 0 && (
           <Card sx={{ mt: 3, borderRadius: '4px' }}>
             <CardContent sx={{ p: 2 }}>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: 2
@@ -682,12 +684,12 @@ const FeeHistoryPage = () => {
           maxWidth="md"
           fullWidth
         >
-          <DialogTitle sx={{ 
-            backgroundColor: '#033398', 
-            color: 'white', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1 
+          <DialogTitle sx={{
+            backgroundColor: '#033398',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
           }}>
             <ReceiptIcon />
             Receipt Details

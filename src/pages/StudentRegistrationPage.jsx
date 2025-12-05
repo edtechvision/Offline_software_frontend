@@ -54,13 +54,13 @@ const StudentRegistrationPage = ({ onBack }) => {
     category: 'General',
     nationality: 'Indian',
     gender: 'Male',
-    
+
     // Contact Information
     email: '',
     mobileNumber: '',
     alternativeMobileNumber: '',
     adharNumber: '',
-    
+
     // Address Information
     presentAddress: {
       fullAddress: '',
@@ -77,11 +77,11 @@ const StudentRegistrationPage = ({ onBack }) => {
       country: 'India',
       pincode: ''
     },
-    
+
     // Academic Information
     collegeName: '',
     className: '',
-    
+
     // Course Information
     courseId: '',
     additionalCourseId: '',
@@ -94,12 +94,12 @@ const StudentRegistrationPage = ({ onBack }) => {
     paymentMode: '',
     transactionId: '',
     referenceNumber: '',
-    
+
     // Discount Information
     discountCode: '',
     discountAmount: '',
     discountFile: null,
-    
+
     // File Upload
     imageFile: null
   });
@@ -110,7 +110,7 @@ const StudentRegistrationPage = ({ onBack }) => {
   const [isValidatingIncharge, setIsValidatingIncharge] = useState(false);
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
   const [apiError, setApiError] = useState(null);
-  
+
   // State and District management
   const [presentDistricts, setPresentDistricts] = useState([]);
   const [permanentDistricts, setPermanentDistricts] = useState([]);
@@ -128,7 +128,7 @@ const StudentRegistrationPage = ({ onBack }) => {
   const batches = batchesData?.data?.batches || batchesData?.batches || [];
   const additionalCourses = additionalCoursesData?.items || additionalCoursesData?.data?.items || [];
   const feeDiscounts = feeDiscountsData?.data || feeDiscountsData || [];
-  
+
 
 
   // Validate incharge code using API
@@ -138,7 +138,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       const timeoutId = setTimeout(() => {
         validateInchargeCode(formData.inchargeCode);
       }, 500);
-      
+
       return () => clearTimeout(timeoutId);
     } else {
       // Clear validation result for short codes
@@ -176,7 +176,7 @@ const StudentRegistrationPage = ({ onBack }) => {
       });
 
       const data = await response.json();
-      
+
       if (data.exists) {
         setInchargeValidationResult({
           success: true,
@@ -221,7 +221,7 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (formData.presentAddress.state) {
       const districts = getDistrictsByState(formData.presentAddress.state);
       setPresentDistricts(districts);
-      
+
       // Reset district if current district is not in the new state
       if (formData.presentAddress.district && !districts.includes(formData.presentAddress.district)) {
         setFormData(prev => ({
@@ -242,7 +242,7 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (formData.permanentAddress.state) {
       const districts = getDistrictsByState(formData.permanentAddress.state);
       setPermanentDistricts(districts);
-      
+
       // Reset district if current district is not in the new state
       if (formData.permanentAddress.district && !districts.includes(formData.permanentAddress.district)) {
         setFormData(prev => ({
@@ -260,11 +260,11 @@ const StudentRegistrationPage = ({ onBack }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Incharge validation
     if (!formData.inchargeCode.trim()) newErrors.inchargeCode = 'Incharge code is required';
     if (!isInchargeCodeValid) newErrors.inchargeCode = 'Please enter a valid incharge code';
-    
+
     // Student personal information validation
     if (!formData.studentName.trim()) newErrors.studentName = 'Student name is required';
     if (formData.studentName.trim().length < 2) newErrors.studentName = 'Student name must be at least 2 characters';
@@ -273,7 +273,7 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (!formData.mothersName.trim()) newErrors.mothersName = 'Mother\'s name is required';
     if (formData.mothersName.trim().length < 2) newErrors.mothersName = 'Mother\'s name must be at least 2 characters';
     if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    
+
     // Age validation (must be at least 5 years old)
     if (formData.dateOfBirth) {
       const today = new Date();
@@ -282,32 +282,32 @@ const StudentRegistrationPage = ({ onBack }) => {
       if (age < 5) newErrors.dateOfBirth = 'Student must be at least 5 years old';
       if (age > 100) newErrors.dateOfBirth = 'Please enter a valid date of birth';
     }
-    
+
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.nationality) newErrors.nationality = 'Nationality is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
-    
+
     // Contact validation
     if (!formData.mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
     if (!/^[6-9]\d{9}$/.test(formData.mobileNumber.trim())) {
       newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number starting with 6-9';
     }
-    
+
     // Alternative mobile validation (if provided)
     if (formData.alternativeMobileNumber.trim() && !/^[6-9]\d{9}$/.test(formData.alternativeMobileNumber.trim())) {
       newErrors.alternativeMobileNumber = 'Please enter a valid 10-digit mobile number';
     }
-    
+
     // Email validation (if provided)
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Aadhar validation (if provided)
     if (formData.adharNumber.trim() && !/^\d{12}$/.test(formData.adharNumber.trim())) {
       newErrors.adharNumber = 'Aadhar number must be exactly 12 digits';
     }
-    
+
     // Address validation
     if (!formData.presentAddress.fullAddress.trim()) newErrors.presentAddress = 'Present address is required';
     if (!formData.presentAddress.state) newErrors.presentState = 'Present state is required';
@@ -317,7 +317,7 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (!/^\d{6}$/.test(formData.presentAddress.pincode.trim())) {
       newErrors.presentPincode = 'Pincode must be exactly 6 digits';
     }
-    
+
     // Permanent address validation (if not same as present)
     if (!formData.isPermanentSameAsPresent) {
       if (!formData.permanentAddress.fullAddress.trim()) newErrors.permanentAddress = 'Permanent address is required';
@@ -329,17 +329,17 @@ const StudentRegistrationPage = ({ onBack }) => {
         newErrors.permanentPincode = 'Pincode must be exactly 6 digits';
       }
     }
-    
+
     // Academic validation
     if (!formData.collegeName.trim()) newErrors.collegeName = 'College name is required';
     if (formData.collegeName.trim().length < 3) newErrors.collegeName = 'College name must be at least 3 characters';
     if (!formData.className) newErrors.className = 'Class name is required';
-    
+
     // Course validation
     if (!formData.courseId) newErrors.courseId = 'Course is required';
     if (!formData.session.trim()) newErrors.session = 'Session is required';
     if (!formData.paymentType) newErrors.paymentType = 'Payment type is required';
-    
+
     // Payment validation
     if (formData.paymentType === 'EMI') {
       if (!formData.downPayment || parseFloat(formData.downPayment) <= 0) {
@@ -355,17 +355,17 @@ const StudentRegistrationPage = ({ onBack }) => {
         newErrors.nextPaymentDueDate = 'Next payment due date is required for EMI';
       }
     }
-    
+
     // Course fee validation
     if (!formData.courseFee || parseFloat(formData.courseFee) <= 0) {
       newErrors.courseFee = 'Course fee must be greater than 0';
     }
-    
+
     // Image validation
     if (!formData.imageFile) {
       newErrors.imageFile = 'Student photo is required';
     }
-    
+
     console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -377,22 +377,22 @@ const StudentRegistrationPage = ({ onBack }) => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
-    
+
     // Real-time validation for down payment
     if (field === 'downPayment') {
       const courseFee = parseFloat(formData.courseFee) || 0;
       const downPayment = parseFloat(value) || 0;
-      
+
       if (downPayment > courseFee) {
-        setErrors(prev => ({ 
-          ...prev, 
-          downPayment: `Down payment (₹${downPayment}) cannot exceed course fee (₹${courseFee})` 
+        setErrors(prev => ({
+          ...prev,
+          downPayment: `Down payment (₹${downPayment}) cannot exceed course fee (₹${courseFee})`
         }));
       } else if (errors.downPayment) {
         setErrors(prev => ({ ...prev, downPayment: '' }));
       }
     }
-    
+
     // Auto-populate course fee when course is selected
     if (field === 'courseId' && value) {
       const selectedCourse = courses.find(course => course._id === value);
@@ -403,56 +403,56 @@ const StudentRegistrationPage = ({ onBack }) => {
         } else {
           setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
         }
-        
+
         // Recalculate discount if one is selected
         if (formData.discountCode) {
           const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
           if (selectedDiscount) {
             const courseFee = formData.paymentType === 'EMI' && selectedCourse.emiFee > 0 ? selectedCourse.emiFee : selectedCourse.fee;
             let discountAmount = 0;
-            
+
             if (selectedDiscount.discountType === 'percentage') {
               discountAmount = (courseFee * selectedDiscount.percentage) / 100;
             } else {
               discountAmount = selectedDiscount.amount;
             }
-            
+
             setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
           }
         }
       }
     }
-    
+
     // Auto-populate additional course fee when additional course is selected
     if (field === 'additionalCourseId' && value) {
       const selectedAdditionalCourse = additionalCourses.find(course => course._id === value);
       if (selectedAdditionalCourse) {
         const currentFee = parseFloat(formData.courseFee) || 0;
         // Add additional fee based on payment type
-        const additionalFee = formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee > 0 
-          ? selectedAdditionalCourse.emiFee 
+        const additionalFee = formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee > 0
+          ? selectedAdditionalCourse.emiFee
           : selectedAdditionalCourse.fee || 0;
         const newCourseFee = currentFee + additionalFee;
         setFormData(prev => ({ ...prev, courseFee: newCourseFee.toString() }));
-        
+
         // Recalculate discount if one is selected
         if (formData.discountCode) {
           const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
           if (selectedDiscount) {
             let discountAmount = 0;
-            
+
             if (selectedDiscount.discountType === 'percentage') {
               discountAmount = (newCourseFee * selectedDiscount.percentage) / 100;
             } else {
               discountAmount = selectedDiscount.amount;
             }
-            
+
             setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
           }
         }
       }
     }
-    
+
     // Auto-populate course fee and down payment when payment type changes
     if (field === 'paymentType') {
       const selectedCourse = courses.find(course => course._id === formData.courseId);
@@ -466,25 +466,25 @@ const StudentRegistrationPage = ({ onBack }) => {
           newCourseFee = selectedCourse.fee;
         }
         setFormData(prev => ({ ...prev, courseFee: newCourseFee.toString() }));
-        
+
         // Recalculate discount if one is selected
         if (formData.discountCode) {
           const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
           if (selectedDiscount) {
             let discountAmount = 0;
-            
+
             if (selectedDiscount.discountType === 'percentage') {
               discountAmount = (newCourseFee * selectedDiscount.percentage) / 100;
             } else {
               discountAmount = selectedDiscount.amount;
             }
-            
+
             setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
           }
         }
       }
     }
-    
+
     // Auto-calculate discount amount when discount code is selected
     if (field === 'discountCode') {
       if (value) {
@@ -492,20 +492,20 @@ const StudentRegistrationPage = ({ onBack }) => {
         if (selectedDiscount) {
           const courseFee = parseFloat(formData.courseFee) || 0;
           let discountAmount = 0;
-          
+
           if (selectedDiscount.discountType === 'percentage') {
             discountAmount = (courseFee * selectedDiscount.percentage) / 100;
           } else {
             discountAmount = selectedDiscount.amount;
           }
-          
+
           setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
         }
       } else {
         setFormData(prev => ({ ...prev, discountAmount: '' }));
       }
     }
-    
+
     // Clear discount code when manually entering discount amount
     if (field === 'discountAmount' && value && formData.discountCode) {
       setFormData(prev => ({ ...prev, discountCode: '' }));
@@ -514,21 +514,21 @@ const StudentRegistrationPage = ({ onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Clear any previous API errors
     setApiError(null);
-    
+
     // Validate all mandatory fields first
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Prepare the data according to API requirements
       const studentData = new FormData();
-      
+
       // Basic Information
       studentData.append('inchargeCode', formData.inchargeCode);
       studentData.append('inchargeName', formData.inchargeName);
@@ -540,21 +540,21 @@ const StudentRegistrationPage = ({ onBack }) => {
       studentData.append('nationality', formData.nationality);
       studentData.append('gender', formData.gender);
       studentData.append('centerCode', currentUser.centerCode);
-      
+
       // Contact Information
       studentData.append('email', formData.email);
       studentData.append('mobileNumber', formData.mobileNumber);
       studentData.append('alternativeMobileNumber', formData.alternativeMobileNumber);
       studentData.append('adharNumber', formData.adharNumber);
-      
+
       // Address Information
       studentData.append('presentAddress', JSON.stringify(formData.presentAddress));
       studentData.append('isPermanentSameAsPresent', formData.isPermanentSameAsPresent.toString());
-      
+
       // Academic Information
       studentData.append('collegeName', formData.collegeName);
       studentData.append('className', formData.className);
-      
+
       // Course Details - format exactly like Postman
       const courseDetails = {
         courseId: formData.courseId,
@@ -572,19 +572,19 @@ const StudentRegistrationPage = ({ onBack }) => {
         discountAmount: formData.discountAmount || '',
         discountFile: formData.discountFile || ''
       };
-      
+
       // Format courseDetails exactly like Postman (compact JSON)
       const courseDetailsString = JSON.stringify(courseDetails, null, 0);
       studentData.append('courseDetails', courseDetailsString);
-      
+
       // Image upload
       if (formData.imageFile) {
         studentData.append('image', formData.imageFile);
       }
-      
+
       // Call the API
       const result = await createStudentMutation.mutateAsync(studentData);
-      
+
       if (result.success) {
         setShowSuccess(true);
         setTimeout(() => {
@@ -621,7 +621,7 @@ const StudentRegistrationPage = ({ onBack }) => {
         `}
       </style>
       {/* Header */}
-      <Box sx={{ 
+      <Box sx={{
         background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
         color: 'white',
         p: 4,
@@ -640,13 +640,13 @@ const StudentRegistrationPage = ({ onBack }) => {
           background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
           transform: 'translate(50%, -50%)'
         }} />
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={onBack}
-            sx={{ 
-              color: 'white', 
+            sx={{
+              color: 'white',
               minWidth: 'auto',
               borderRadius: '50%',
               width: 48,
@@ -684,9 +684,9 @@ const StudentRegistrationPage = ({ onBack }) => {
       <Box sx={{ maxWidth: '100%', mx: 'auto', px: 2 }}>
         <form onSubmit={handleSubmit}>
           {/* Incharge Details */}
-          <Card sx={{ 
-            mb: 4, 
-            borderRadius: 4, 
+          <Card sx={{
+            mb: 4,
+            borderRadius: 4,
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e8e8e8',
             transition: 'all 0.3s ease-in-out',
@@ -697,9 +697,9 @@ const StudentRegistrationPage = ({ onBack }) => {
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -759,40 +759,40 @@ const StudentRegistrationPage = ({ onBack }) => {
                       },
                     }}
                   />
-                  
+
                   {/* Validation Status */}
                   {isValidatingIncharge && (
-                    <Chip 
-                      label="Validating..." 
-                      size="small" 
-                      color="default" 
+                    <Chip
+                      label="Validating..."
+                      size="small"
+                      color="default"
                       sx={{ mt: 1 }}
                     />
                   )}
-                  
+
                   {inchargeValidationResult?.success && (
-                    <Chip 
+                    <Chip
                       label={`Valid: ${inchargeValidationResult.incharge_name}`}
-                      size="small" 
-                      color="success" 
+                      size="small"
+                      color="success"
                       sx={{ mt: 1 }}
                     />
                   )}
-                  
+
                   {inchargeValidationResult?.success === false && (
-                    <Chip 
+                    <Chip
                       label={inchargeValidationResult.message}
-                      size="small" 
-                      color="error" 
+                      size="small"
+                      color="error"
                       sx={{ mt: 1 }}
                     />
                   )}
-                  
+
                   {formData.inchargeCode === 'TBINC29819' && (
-                    <Chip 
-                      label="Auto-populated" 
-                      size="small" 
-                      color="success" 
+                    <Chip
+                      label="Auto-populated"
+                      size="small"
+                      color="success"
                       sx={{ mt: 1 }}
                     />
                   )}
@@ -838,17 +838,17 @@ const StudentRegistrationPage = ({ onBack }) => {
           {isInchargeCodeValid && (
             <>
               {/* Student Personal Information */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -954,6 +954,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                           label="Date of Birth *"
                           value={formData.dateOfBirth}
                           onChange={(newValue) => handleInputChange('dateOfBirth', newValue)}
+                          format="dd/MM/yyyy"
                           slotProps={{
                             textField: {
                               fullWidth: true,
@@ -982,8 +983,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -1031,8 +1032,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -1082,20 +1083,20 @@ const StudentRegistrationPage = ({ onBack }) => {
                           value={formData.gender}
                           onChange={(e) => handleInputChange('gender', e.target.value)}
                         >
-                          <FormControlLabel 
-                            value="Male" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
-                            label="Male" 
+                          <FormControlLabel
+                            value="Male"
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />}
+                            label="Male"
                           />
-                          <FormControlLabel 
-                            value="Female" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
-                            label="Female" 
+                          <FormControlLabel
+                            value="Female"
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />}
+                            label="Female"
                           />
-                          <FormControlLabel 
-                            value="Other" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
-                            label="Other" 
+                          <FormControlLabel
+                            value="Other"
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />}
+                            label="Other"
                           />
                         </RadioGroup>
                       </FormControl>
@@ -1231,17 +1232,17 @@ const StudentRegistrationPage = ({ onBack }) => {
               </Card>
 
               {/* Present Address */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -1288,8 +1289,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.presentState}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.presentState ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1344,8 +1345,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.presentDistrict}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.presentDistrict ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1407,8 +1408,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.presentCountry}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.presentCountry ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1499,17 +1500,17 @@ const StudentRegistrationPage = ({ onBack }) => {
               </Card>
 
               {/* Permanent Address */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -1531,13 +1532,13 @@ const StudentRegistrationPage = ({ onBack }) => {
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControlLabel
                         control={
-                                                  <Checkbox
-                          checked={formData.isPermanentSameAsPresent}
-                          onChange={(e) => handleInputChange('isPermanentSameAsPresent', e.target.checked)}
-                            sx={{ 
-                              '&.Mui-checked': { 
-                                color: '#033398' 
-                              } 
+                          <Checkbox
+                            checked={formData.isPermanentSameAsPresent}
+                            onChange={(e) => handleInputChange('isPermanentSameAsPresent', e.target.checked)}
+                            sx={{
+                              '&.Mui-checked': {
+                                color: '#033398'
+                              }
                             }}
                           />
                         }
@@ -1580,8 +1581,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.permanentState}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.permanentState ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1640,8 +1641,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.permanentDistrict}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.permanentDistrict ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1706,8 +1707,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.permanentCountry}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.permanentCountry ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1806,17 +1807,17 @@ const StudentRegistrationPage = ({ onBack }) => {
               </Card>
 
               {/* College and Class Details */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -1864,8 +1865,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.className}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.className ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -1917,17 +1918,17 @@ const StudentRegistrationPage = ({ onBack }) => {
               </Card>
 
               {/* Course Details */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -1946,12 +1947,12 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                   </Box>
 
-                  
+
                   <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small" error={!!errors.courseName}>
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: errors.courseId ? '#d32f2f' : '#374151',
                             '&.Mui-focused': {
@@ -2014,8 +2015,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -2079,8 +2080,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -2155,8 +2156,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -2279,6 +2280,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                               label="Next Payment Due Date"
                               value={formData.nextPaymentDueDate}
                               onChange={(newValue) => handleInputChange('nextPaymentDueDate', newValue)}
+                              format="dd/MM/yyyy"
                               slotProps={{
                                 textField: {
                                   fullWidth: true,
@@ -2314,20 +2316,20 @@ const StudentRegistrationPage = ({ onBack }) => {
                           value={formData.paymentMode}
                           onChange={(e) => handleInputChange('paymentMode', e.target.value)}
                         >
-                          <FormControlLabel 
-                            value="Cash" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
-                            label="Cash" 
+                          <FormControlLabel
+                            value="Cash"
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />}
+                            label="Cash"
                           />
-                          <FormControlLabel 
-                            value="UPI" 
-                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />} 
-                            label="UPI" 
+                          <FormControlLabel
+                            value="UPI"
+                            control={<Radio sx={{ '&.Mui-checked': { color: '#033398' } }} />}
+                            label="UPI"
                           />
                         </RadioGroup>
                       </FormControl>
                     </Box>
-                    
+
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <TextField
                         fullWidth
@@ -2354,8 +2356,8 @@ const StudentRegistrationPage = ({ onBack }) => {
                     </Box>
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <FormControl fullWidth size="small">
-                        <InputLabel 
-                          sx={{ 
+                        <InputLabel
+                          sx={{
                             fontSize: '0.875rem',
                             color: '#374151',
                             '&.Mui-focused': {
@@ -2448,17 +2450,17 @@ const StudentRegistrationPage = ({ onBack }) => {
               </Card>
 
               {/* Additional Information */}
-              <Card sx={{ 
-                mb: 3, 
-                borderRadius: 3, 
+              <Card sx={{
+                mb: 3,
+                borderRadius: 3,
                 boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e0e0e0'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                       background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                      borderRadius: '50%', 
+                      borderRadius: '50%',
                       p: 2,
                       display: 'flex',
                       alignItems: 'center',
@@ -2485,11 +2487,11 @@ const StudentRegistrationPage = ({ onBack }) => {
                         <Typography variant="body2" sx={{ mb: 3, color: '#666', fontSize: '0.875rem' }}>
                           Upload a clear passport-size photo of the student (JPG, PNG, JPEG - Max 5MB)
                         </Typography>
-                        
-                        <Box sx={{ 
-                          border: '2px dashed #d1d5db', 
-                          borderRadius: 2, 
-                          p: 4, 
+
+                        <Box sx={{
+                          border: '2px dashed #d1d5db',
+                          borderRadius: 2,
+                          p: 4,
                           textAlign: 'center',
                           backgroundColor: formData.imageFile ? '#f0f9ff' : '#fafafa',
                           borderColor: formData.imageFile ? '#033398' : '#d1d5db',
@@ -2505,10 +2507,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                         }}>
                           {formData.imageFile ? (
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                              <Box sx={{ 
-                                width: 80, 
-                                height: 80, 
-                                borderRadius: '50%', 
+                              <Box sx={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: '50%',
                                 overflow: 'hidden',
                                 border: '3px solid #033398',
                                 display: 'flex',
@@ -2516,9 +2518,9 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 justifyContent: 'center',
                                 backgroundColor: '#e3f2fd'
                               }}>
-                                <img 
-                                  src={URL.createObjectURL(formData.imageFile)} 
-                                  alt="Student Preview" 
+                                <img
+                                  src={URL.createObjectURL(formData.imageFile)}
+                                  alt="Student Preview"
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                               </Box>
@@ -2529,7 +2531,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 variant="outlined"
                                 size="small"
                                 onClick={() => setFormData(prev => ({ ...prev, imageFile: null }))}
-                                sx={{ 
+                                sx={{
                                   textTransform: 'none',
                                   borderColor: '#dc3545',
                                   color: '#dc3545',
@@ -2544,10 +2546,10 @@ const StudentRegistrationPage = ({ onBack }) => {
                             </Box>
                           ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                              <Box sx={{ 
-                                width: 80, 
-                                height: 80, 
-                                borderRadius: '50%', 
+                              <Box sx={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: '50%',
                                 backgroundColor: '#e3f2fd',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -2563,7 +2565,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                                 variant="outlined"
                                 component="label"
                                 startIcon={<UploadIcon />}
-                                sx={{ 
+                                sx={{
                                   textTransform: 'none',
                                   borderColor: '#033398',
                                   color: '#033398',
@@ -2586,13 +2588,13 @@ const StudentRegistrationPage = ({ onBack }) => {
                             </Box>
                           )}
                         </Box>
-                        
+
                         {formData.imageFile && (
                           <Typography variant="body2" sx={{ mt: 2, color: '#10b981', fontWeight: 500, textAlign: 'center' }}>
                             ✓ Photo uploaded successfully
                           </Typography>
                         )}
-                        
+
                         {errors.imageFile && (
                           <Typography variant="body2" sx={{ mt: 2, color: '#d32f2f', fontWeight: 500, textAlign: 'center' }}>
                             {errors.imageFile}
@@ -2600,7 +2602,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                         )}
                       </Box>
                     </Box>
-                    
+
                     <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
                       <Box>
                         <Typography variant="body2" sx={{ mb: 2, color: '#333', fontWeight: 600, fontSize: '1rem' }}>
@@ -2609,7 +2611,7 @@ const StudentRegistrationPage = ({ onBack }) => {
                         <Typography variant="body2" sx={{ mb: 3, color: '#666', fontSize: '0.875rem' }}>
                           Enter referral student admission number if applicable
                         </Typography>
-                        
+
                         <TextField
                           fullWidth
                           label="Reference Number"
@@ -2643,9 +2645,9 @@ const StudentRegistrationPage = ({ onBack }) => {
 
           {/* Show message when incharge code is not valid */}
           {!isInchargeCodeValid && formData.inchargeCode.length > 0 && (
-            <Card sx={{ 
-              mb: 3, 
-              borderRadius: 3, 
+            <Card sx={{
+              mb: 3,
+              borderRadius: 3,
               boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
               border: '1px solid #e0e0e0'
             }}>
@@ -2658,7 +2660,7 @@ const StudentRegistrationPage = ({ onBack }) => {
           )}
 
           {/* Show validation errors */}
-         
+
 
           {/* Action Buttons */}
           {isInchargeCodeValid && (
@@ -2740,9 +2742,9 @@ const StudentRegistrationPage = ({ onBack }) => {
         onClose={() => setShowSuccess(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setShowSuccess(false)} 
-          severity="success" 
+        <Alert
+          onClose={() => setShowSuccess(false)}
+          severity="success"
           sx={{ width: '100%' }}
         >
           Student registered successfully! Redirecting to dashboard...
@@ -2756,9 +2758,9 @@ const StudentRegistrationPage = ({ onBack }) => {
         onClose={() => setApiError(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setApiError(null)} 
-          severity="error" 
+        <Alert
+          onClose={() => setApiError(null)}
+          severity="error"
           sx={{ width: '100%' }}
         >
           {apiError}

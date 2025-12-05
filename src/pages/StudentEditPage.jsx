@@ -51,13 +51,13 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     category: 'General',
     nationality: 'Indian',
     gender: 'Male',
-    
+
     // Contact Information
     email: '',
     mobileNumber: '',
     alternativeMobileNumber: '',
     adharNumber: '',
-    
+
     // Address Information
     presentAddress: {
       fullAddress: '',
@@ -74,11 +74,11 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
       country: 'India',
       pincode: ''
     },
-    
+
     // Academic Information
     collegeName: '',
     className: '',
-    
+
     // Course Information
     courseId: '',
     additionalCourseId: '',
@@ -91,12 +91,12 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     paymentMode: '',
     transactionId: '',
     referenceNumber: '',
-    
+
     // Discount Information
     discountCode: '',
     discountAmount: '',
     discountFile: null,
-    
+
     // File Upload
     imageFile: null
   });
@@ -110,7 +110,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
   const [currentImageUrl, setCurrentImageUrl] = useState('');
   const [isValidatingIncharge, setIsValidatingIncharge] = useState(false);
   const [inchargeValidationResult, setInchargeValidationResult] = useState(null);
-  
+
   // State and District management
   const [presentDistricts, setPresentDistricts] = useState([]);
   const [permanentDistricts, setPermanentDistricts] = useState([]);
@@ -135,7 +135,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         setIsLoading(true);
         const response = await fetch(`https://seashell-app-vgu3a.ondigitalocean.app/api/v1/students/${studentId}`);
         const data = await response.json();
-        
+
         if (data.success && data.data) {
           const student = data.data;
           setCurrentImageUrl(student.image || '');
@@ -301,7 +301,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (formData.presentAddress.state) {
       const districts = getDistrictsByState(formData.presentAddress.state);
       setPresentDistricts(districts);
-      
+
       // Reset district if current district is not in the new state
       if (formData.presentAddress.district && !districts.includes(formData.presentAddress.district)) {
         setFormData(prev => ({
@@ -322,7 +322,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (formData.permanentAddress.state) {
       const districts = getDistrictsByState(formData.permanentAddress.state);
       setPermanentDistricts(districts);
-      
+
       // Reset district if current district is not in the new state
       if (formData.permanentAddress.district && !districts.includes(formData.permanentAddress.district)) {
         setFormData(prev => ({
@@ -340,7 +340,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Student personal information validation
     if (!formData.studentName.trim()) newErrors.studentName = 'Student name is required';
     if (formData.studentName.trim().length < 2) newErrors.studentName = 'Student name must be at least 2 characters';
@@ -349,7 +349,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (!formData.mothersName.trim()) newErrors.mothersName = 'Mother\'s name is required';
     if (formData.mothersName.trim().length < 2) newErrors.mothersName = 'Mother\'s name must be at least 2 characters';
     if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    
+
     // Age validation (must be at least 5 years old)
     if (formData.dateOfBirth) {
       const today = new Date();
@@ -358,32 +358,32 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
       if (age < 5) newErrors.dateOfBirth = 'Student must be at least 5 years old';
       if (age > 100) newErrors.dateOfBirth = 'Please enter a valid date of birth';
     }
-    
+
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.nationality) newErrors.nationality = 'Nationality is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
-    
+
     // Contact validation
     if (!formData.mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
     if (!/^[6-9]\d{9}$/.test(formData.mobileNumber.trim())) {
       newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number starting with 6-9';
     }
-    
+
     // Alternative mobile validation (if provided)
     if (formData.alternativeMobileNumber.trim() && !/^[6-9]\d{9}$/.test(formData.alternativeMobileNumber.trim())) {
       newErrors.alternativeMobileNumber = 'Please enter a valid 10-digit mobile number';
     }
-    
+
     // Email validation (if provided)
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Aadhar validation (if provided)
     if (formData.adharNumber.trim() && !/^\d{12}$/.test(formData.adharNumber.trim())) {
       newErrors.adharNumber = 'Aadhar number must be exactly 12 digits';
     }
-    
+
     // Address validation
     if (!formData.presentAddress.fullAddress.trim()) newErrors.presentAddress = 'Present address is required';
     if (!formData.presentAddress.state) newErrors.presentState = 'Present state is required';
@@ -393,7 +393,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (!/^\d{6}$/.test(formData.presentAddress.pincode.trim())) {
       newErrors.presentPincode = 'Pincode must be exactly 6 digits';
     }
-    
+
     // Permanent address validation (if not same as present)
     if (!formData.isPermanentSameAsPresent) {
       if (!formData.permanentAddress.fullAddress.trim()) newErrors.permanentAddress = 'Permanent address is required';
@@ -405,17 +405,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         newErrors.permanentPincode = 'Pincode must be exactly 6 digits';
       }
     }
-    
+
     // Academic validation
     if (!formData.collegeName.trim()) newErrors.collegeName = 'College name is required';
     if (formData.collegeName.trim().length < 3) newErrors.collegeName = 'College name must be at least 3 characters';
     if (!formData.className) newErrors.className = 'Class name is required';
-    
+
     // Course validation
     if (!formData.courseId) newErrors.courseId = 'Course is required';
     if (!formData.session.trim()) newErrors.session = 'Session is required';
     if (!formData.paymentType) newErrors.paymentType = 'Payment type is required';
-    
+
     // Payment validation
     if (formData.paymentType === 'EMI') {
       if (!formData.downPayment || parseFloat(formData.downPayment) <= 0) {
@@ -431,12 +431,12 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         newErrors.nextPaymentDueDate = 'Next payment due date is required for EMI';
       }
     }
-    
+
     // Course fee validation
     if (!formData.courseFee || parseFloat(formData.courseFee) <= 0) {
       newErrors.courseFee = 'Course fee must be greater than 0';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -447,37 +447,37 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
-    
+
     // Auto-populate course fee when course is selected
     if (field === 'courseId' && value) {
       const selectedCourse = courses.find(course => course._id === value);
       if (selectedCourse) {
         setFormData(prev => ({ ...prev, courseFee: selectedCourse.fee.toString() }));
-        
+
         // Auto-populate down payment with EMI fee if EMI is selected
         if (formData.paymentType === 'EMI' && selectedCourse.emiFee) {
           setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
         }
-        
+
         // Recalculate discount if one is selected
         if (formData.discountCode) {
           const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
           if (selectedDiscount) {
             const courseFee = formData.paymentType === 'EMI' && selectedCourse.emiFee > 0 ? selectedCourse.emiFee : selectedCourse.fee;
             let discountAmount = 0;
-            
+
             if (selectedDiscount.discountType === 'percentage') {
               discountAmount = (courseFee * selectedDiscount.percentage) / 100;
             } else {
               discountAmount = selectedDiscount.amount;
             }
-            
+
             setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
           }
         }
       }
     }
-    
+
     // Auto-populate additional course fee when additional course is selected
     if (field === 'additionalCourseId' && value) {
       const selectedAdditionalCourse = additionalCourses.find(course => course._id === value);
@@ -486,30 +486,30 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         const additionalFee = selectedAdditionalCourse.fee || 0;
         const newCourseFee = currentFee + additionalFee;
         setFormData(prev => ({ ...prev, courseFee: newCourseFee.toString() }));
-        
+
         // Auto-populate down payment with EMI fee if EMI is selected
         if (formData.paymentType === 'EMI' && selectedAdditionalCourse.emiFee) {
           setFormData(prev => ({ ...prev, downPayment: selectedAdditionalCourse.emiFee.toString() }));
         }
-        
+
         // Recalculate discount if one is selected
         if (formData.discountCode) {
           const selectedDiscount = feeDiscounts.find(discount => discount.discountCode === formData.discountCode);
           if (selectedDiscount) {
             let discountAmount = 0;
-            
+
             if (selectedDiscount.discountType === 'percentage') {
               discountAmount = (newCourseFee * selectedDiscount.percentage) / 100;
             } else {
               discountAmount = selectedDiscount.amount;
             }
-            
+
             setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
           }
         }
       }
     }
-    
+
     // Auto-populate down payment with EMI fee when payment type changes to EMI
     if (field === 'paymentType' && value === 'EMI') {
       const selectedCourse = courses.find(course => course._id === formData.courseId);
@@ -517,7 +517,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         setFormData(prev => ({ ...prev, downPayment: selectedCourse.emiFee.toString() }));
       }
     }
-    
+
     // Auto-calculate discount amount when discount code is selected
     if (field === 'discountCode') {
       if (value) {
@@ -525,20 +525,20 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         if (selectedDiscount) {
           const courseFee = parseFloat(formData.courseFee) || 0;
           let discountAmount = 0;
-          
+
           if (selectedDiscount.discountType === 'percentage') {
             discountAmount = (courseFee * selectedDiscount.percentage) / 100;
           } else {
             discountAmount = selectedDiscount.amount;
           }
-          
+
           setFormData(prev => ({ ...prev, discountAmount: discountAmount.toString() }));
         }
       } else {
         setFormData(prev => ({ ...prev, discountAmount: '' }));
       }
     }
-    
+
     // Clear discount code when manually entering discount amount
     if (field === 'discountAmount' && value && formData.discountCode) {
       setFormData(prev => ({ ...prev, discountCode: '' }));
@@ -547,17 +547,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Prepare the data according to API requirements
       const studentData = new FormData();
-      
+
       // Basic Information
       studentData.append('inchargeCode', formData.inchargeCode);
       studentData.append('inchargeName', formData.inchargeName);
@@ -568,21 +568,21 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
       studentData.append('category', formData.category);
       studentData.append('nationality', formData.nationality);
       studentData.append('gender', formData.gender);
-      
+
       // Contact Information
       studentData.append('email', formData.email);
       studentData.append('mobileNumber', formData.mobileNumber);
       studentData.append('alternativeMobileNumber', formData.alternativeMobileNumber);
       studentData.append('adharNumber', formData.adharNumber);
-      
+
       // Address Information
       studentData.append('presentAddress', JSON.stringify(formData.presentAddress));
       studentData.append('isPermanentSameAsPresent', formData.isPermanentSameAsPresent.toString());
-      
+
       // Academic Information
       studentData.append('collegeName', formData.collegeName);
       studentData.append('className', formData.className);
-      
+
       // Course Details - format exactly like Postman
       const courseDetails = {
         courseId: formData.courseId,
@@ -600,24 +600,24 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         discountAmount: formData.discountAmount || '',
         discountFile: formData.discountFile || ''
       };
-      
+
       // Format courseDetails exactly like Postman (compact JSON)
       const courseDetailsString = JSON.stringify(courseDetails, null, 0);
       studentData.append('courseDetails', courseDetailsString);
-      
+
       // Image upload (only if new image is selected)
       if (formData.imageFile) {
         studentData.append('image', formData.imageFile);
       }
-      
+
       // Call the PUT API
       const response = await fetch(`https://seashell-app-vgu3a.ondigitalocean.app/api/v1/student-update/${studentId}`, {
         method: 'PUT',
         body: studentData
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setShowSuccess(true);
         setTimeout(() => {
@@ -658,7 +658,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
   return (
     <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', pb: 4 }}>
       {/* Header */}
-      <Box sx={{ 
+      <Box sx={{
         background: 'linear-gradient(135deg, #033398 0%, #1565c0 100%)',
         color: 'white',
         p: 4,
@@ -671,8 +671,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           <Button
             startIcon={<ArrowBackIcon />}
             onClick={() => (onBack ? onBack() : navigate(-1))}
-            sx={{ 
-              color: 'white', 
+            sx={{
+              color: 'white',
               minWidth: 'auto',
               borderRadius: '50%',
               width: 48,
@@ -710,18 +710,18 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
       <Box sx={{ maxWidth: '100%', mx: 'auto', px: 2 }}>
         <form onSubmit={handleSubmit}>
           {/* Incharge Details */}
-          <Card sx={{ 
-            mb: 4, 
-            borderRadius: 4, 
+          <Card sx={{
+            mb: 4,
+            borderRadius: 4,
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e8e8e8',
             transition: 'all 0.3s ease-in-out'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -827,17 +827,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
             </CardContent>
           </Card>
           {/* Student Personal Information */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -929,6 +929,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       label="Date of Birth *"
                       value={formData.dateOfBirth}
                       onChange={(newValue) => handleInputChange('dateOfBirth', newValue)}
+                      format="dd/MM/yyyy"
                       slotProps={{
                         textField: {
                           fullWidth: true,
@@ -1137,17 +1138,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           </Card>
 
           {/* Present Address */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -1194,8 +1195,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.presentState}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.presentState ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.presentState ? '#d32f2f' : '#033398',
@@ -1239,8 +1240,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.presentDistrict}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.presentDistrict ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.presentDistrict ? '#d32f2f' : '#033398',
@@ -1291,8 +1292,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.presentCountry}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.presentCountry ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.presentCountry ? '#d32f2f' : '#033398',
@@ -1368,17 +1369,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           </Card>
 
           {/* Permanent Address */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -1444,8 +1445,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.permanentState}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.permanentState ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.permanentState ? '#d32f2f' : '#033398',
@@ -1493,8 +1494,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.permanentDistrict}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.permanentDistrict ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.permanentDistrict ? '#d32f2f' : '#033398',
@@ -1548,8 +1549,8 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small" error={!!errors.permanentCountry}>
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         color: errors.permanentCountry ? '#d32f2f' : '#374151',
                         '&.Mui-focused': {
                           color: errors.permanentCountry ? '#d32f2f' : '#033398',
@@ -1633,17 +1634,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           </Card>
 
           {/* College and Class Details */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -1724,17 +1725,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           </Card>
 
           {/* Course Details */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -1964,21 +1965,22 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                   />
                 </Grid>
                 {formData.paymentType !== 'Full-payment' && (
-                    <Grid item xs={12} sm={6}>
-                      <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DatePicker
-                          label="Next Payment Due Date"
-                          value={formData.nextPaymentDueDate}
-                          onChange={(newValue) => handleInputChange('nextPaymentDueDate', newValue)}
-                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                        />
-                      </LocalizationProvider>
-                    </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DatePicker
+                        label="Next Payment Due Date"
+                        value={formData.nextPaymentDueDate}
+                        onChange={(newValue) => handleInputChange('nextPaymentDueDate', newValue)}
+                        format="dd/MM/yyyy"
+                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
                 )}
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth size="small">
-                    <InputLabel 
-                      sx={{ 
+                    <InputLabel
+                      sx={{
                         fontSize: '0.875rem',
                         color: '#374151',
                         '&.Mui-focused': {
@@ -2071,17 +2073,17 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
           </Card>
 
           {/* Additional Information */}
-          <Card sx={{ 
-            mb: 3, 
-            borderRadius: 3, 
+          <Card sx={{
+            mb: 3,
+            borderRadius: 3,
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e0e0e0'
           }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
-                <Box sx={{ 
+                <Box sx={{
                   background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   p: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -2101,10 +2103,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
               </Box>
               <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    border: '2px dashed #d1d5db', 
-                    borderRadius: 2, 
-                    p: 4, 
+                  <Box sx={{
+                    border: '2px dashed #d1d5db',
+                    borderRadius: 2,
+                    p: 4,
                     textAlign: 'center',
                     backgroundColor: formData.imageFile ? '#f0f9ff' : '#fafafa',
                     borderColor: formData.imageFile ? '#033398' : '#d1d5db',
@@ -2116,10 +2118,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                   }}>
                     {formData.imageFile ? (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          borderRadius: '50%', 
+                        <Box sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
                           overflow: 'hidden',
                           border: '3px solid #033398',
                           display: 'flex',
@@ -2127,9 +2129,9 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                           justifyContent: 'center',
                           backgroundColor: '#e3f2fd'
                         }}>
-                          <img 
-                            src={URL.createObjectURL(formData.imageFile)} 
-                            alt="Student Preview" 
+                          <img
+                            src={URL.createObjectURL(formData.imageFile)}
+                            alt="Student Preview"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </Box>
@@ -2140,7 +2142,7 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                           variant="outlined"
                           size="small"
                           onClick={() => setFormData(prev => ({ ...prev, imageFile: null }))}
-                          sx={{ 
+                          sx={{
                             textTransform: 'none'
                           }}
                         >
@@ -2149,10 +2151,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       </Box>
                     ) : currentImageUrl ? (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          borderRadius: '50%', 
+                        <Box sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
                           overflow: 'hidden',
                           border: '3px solid #033398',
                           display: 'flex',
@@ -2160,9 +2162,9 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                           justifyContent: 'center',
                           backgroundColor: '#e3f2fd'
                         }}>
-                          <img 
-                            src={currentImageUrl} 
-                            alt="Current Student" 
+                          <img
+                            src={currentImageUrl}
+                            alt="Current Student"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </Box>
@@ -2186,10 +2188,10 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
                       </Box>
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          borderRadius: '50%', 
+                        <Box sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
                           backgroundColor: '#e3f2fd',
                           display: 'flex',
                           alignItems: 'center',
@@ -2330,9 +2332,9 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         onClose={() => setShowSuccess(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setShowSuccess(false)} 
-          severity="success" 
+        <Alert
+          onClose={() => setShowSuccess(false)}
+          severity="success"
           sx={{ width: '100%' }}
         >
           Student updated successfully! Redirecting to dashboard...
@@ -2346,9 +2348,9 @@ const StudentEditPage = ({ studentId: propStudentId, onBack }) => {
         onClose={() => setShowError(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setShowError(false)} 
-          severity="error" 
+        <Alert
+          onClose={() => setShowError(false)}
+          severity="error"
           sx={{ width: '100%' }}
         >
           {errorMessage}

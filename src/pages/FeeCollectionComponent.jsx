@@ -103,18 +103,18 @@ const FeeCollectionComponent = () => {
 
   // Fetch student fees data
   const { data: feesData, isLoading: feesLoading, error: feesError } = useStudentFees(id);
-  
+
   // Fetch discount codes
   const { data: discountsData } = useFeeDiscounts();
-  
+
   // Fetch incharges for center users
   const { data: inchargesData } = useIncharges({}, { enabled: userRole !== 'admin' });
 
   console.log("inchargesData:", inchargesData)
-  
+
   // Fee collection mutation
   const collectPaymentMutation = useCollectPayment();
-  
+
   // Revert payment mutation
   const revertPaymentMutation = useRevertPayment();
 
@@ -180,9 +180,9 @@ const FeeCollectionComponent = () => {
       const className = studentInfo?.className || '';
       const courseName = courseInfo?.name || 'N/A';
       const batchName = batchInfo?.batchName || null;
-      
+
       // Only include batch name if it exists
-      const name = batchName 
+      const name = batchName
         ? `${className} - ${courseName} (${batchName})`
         : `${className} - ${courseName}`;
 
@@ -214,7 +214,7 @@ const FeeCollectionComponent = () => {
       return paymentAmount <= totalPendingAmount;
     })();
     const hasIncharge = userRole === 'admin' || paymentData.inchargeCode;
-    
+
     // If all validations pass, clear errors
     if (hasValidAmount && hasIncharge && Object.keys(validationErrors).length > 0) {
       setValidationErrors({});
@@ -296,19 +296,19 @@ const FeeCollectionComponent = () => {
     // Only allow numeric input and prevent negative values
     const numericValue = amount.replace(/[^0-9.]/g, '');
     const parsedAmount = parseFloat(numericValue);
-    
+
     // Set the amount first, then validate
     setPaymentData({ ...paymentData, amount: numericValue });
-    
+
     // Check if amount exceeds pending amount for validation display
     if (numericValue && selectedFees.length > 0) {
       const selectedFeeGroups = feeGroups.filter(fee => selectedFees.includes(fee.id));
       const totalPendingAmount = selectedFeeGroups.reduce((sum, fee) => sum + fee.balance, 0);
-      
+
       if (parsedAmount > totalPendingAmount) {
-        setValidationErrors(prev => ({ 
-          ...prev, 
-          amount: `Payment amount (₹${parsedAmount}) cannot exceed pending amount (₹${totalPendingAmount})` 
+        setValidationErrors(prev => ({
+          ...prev,
+          amount: `Payment amount (₹${parsedAmount}) cannot exceed pending amount (₹${totalPendingAmount})`
         }));
       } else {
         setValidationErrors(prev => ({ ...prev, amount: '' }));
@@ -316,7 +316,7 @@ const FeeCollectionComponent = () => {
     } else {
       setValidationErrors(prev => ({ ...prev, amount: '' }));
     }
-    
+
     if (paymentData.discountCode) {
       const discountAmount = calculateDiscount(paymentData.discountCode, parsedAmount);
       setPaymentData(prev => ({ ...prev, discountAmount }));
@@ -326,7 +326,7 @@ const FeeCollectionComponent = () => {
   // Validate payment form
   const validatePaymentForm = () => {
     const errors = {};
-    
+
     // Amount validation
     if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
       errors.amount = 'Please enter a valid payment amount';
@@ -335,17 +335,17 @@ const FeeCollectionComponent = () => {
       const selectedFeeGroups = feeGroups.filter(fee => selectedFees.includes(fee.id));
       const totalPendingAmount = selectedFeeGroups.reduce((sum, fee) => sum + fee.balance, 0);
       const paymentAmount = parseFloat(paymentData.amount);
-      
+
       if (paymentAmount > totalPendingAmount) {
         errors.amount = `Payment amount (₹${paymentAmount}) cannot exceed pending amount (₹${totalPendingAmount})`;
       }
     }
-    
+
     // Incharge validation for non-admin users
     if (userRole !== 'admin' && !paymentData.inchargeCode) {
       errors.inchargeCode = 'Please select an incharge';
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -371,15 +371,15 @@ const FeeCollectionComponent = () => {
     }
 
     // Show confirmation dialog before API call
-    setConfirmDialog({ 
-      open: true, 
-      action: 'submit' 
+    setConfirmDialog({
+      open: true,
+      action: 'submit'
     });
   };
 
   const confirmPaymentSubmit = async () => {
     setConfirmDialog({ open: false, action: null });
-    
+
     // Show processing toast
     setSnackbar({
       open: true,
@@ -392,7 +392,7 @@ const FeeCollectionComponent = () => {
       // In a real scenario, you might want to collect for all selected fees
       const feeId = selectedFees[0];
       const feeRecord = feeGroups.find(f => f.id === feeId);
-      
+
       if (!feeRecord) {
         setSnackbar({
           open: true,
@@ -424,16 +424,16 @@ const FeeCollectionComponent = () => {
 
       await collectPaymentMutation.mutateAsync(paymentPayload);
 
-    setSnackbar({
-      open: true,
-      message: `Payment of ₹${paymentData.amount} collected successfully`,
-      severity: 'success'
-    });
-      
+      setSnackbar({
+        open: true,
+        message: `Payment of ₹${paymentData.amount} collected successfully`,
+        severity: 'success'
+      });
+
       // Reset form and close dialog
-    setOpenPaymentDialog(false);
-    setSelectedFees([]);
-    setValidationErrors({});
+      setOpenPaymentDialog(false);
+      setSelectedFees([]);
+      setValidationErrors({});
       setPaymentData({
         amount: '',
         paymentMode: 'Cash',
@@ -450,10 +450,10 @@ const FeeCollectionComponent = () => {
       setCalculatedDiscount(0);
       setDiscountDetails(null);
       setDiscountFile(null);
-      
+
       // The data will be automatically refreshed due to React Query cache invalidation
       // in the useCollectPayment hook's onSuccess callback
-      
+
     } catch (error) {
       setSnackbar({
         open: true,
@@ -488,7 +488,7 @@ const FeeCollectionComponent = () => {
         message: `Payment ${revertDialog.receiptNo} reverted successfully`,
         severity: 'success'
       });
-      
+
       setRevertDialog({ open: false, feeId: null, receiptNo: null });
     } catch (error) {
       setSnackbar({
@@ -514,7 +514,7 @@ const FeeCollectionComponent = () => {
     try {
       const feeId = selectedFees[0];
       const feeRecord = feeGroups.find(f => f.id === feeId);
-      
+
       if (!feeRecord) {
         setSnackbar({
           open: true,
@@ -561,7 +561,7 @@ const FeeCollectionComponent = () => {
   // Generate individual payment receipt
   const handleGenerateIndividualReceipt = async (paymentId, feeGroupId) => {
     setIndividualPdfLoading(prev => ({ ...prev, [paymentId]: true }));
-    
+
     try {
       const feeRecord = feeGroups.find(f => f.id === feeGroupId);
       const payment = feeRecord?.payments?.find(p => p.id === paymentId);
@@ -853,7 +853,7 @@ const FeeCollectionComponent = () => {
         <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8rem' }}>
           Date: {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
         </Typography>
-       {/* <Box sx={{ display: 'flex', gap: 0.5 }}>
+        {/* <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title="Delete">
             <IconButton size="small" sx={{ p: 0.5 }}>
               <DeleteIcon fontSize="small" />
@@ -950,8 +950,8 @@ const FeeCollectionComponent = () => {
                   <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', mr: 1 }}>
                     ₹{feeGroup.amount.toFixed(2)}
                   </Typography>
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     color="primary"
                     onClick={() => {
                       setSelectedFees([feeGroup.id]);
@@ -1012,8 +1012,8 @@ const FeeCollectionComponent = () => {
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               color="primary"
                               onClick={() => handleRevertPayment(feeGroup.id, payment.paymentId)}
                               disabled={revertPaymentMutation.isPending}
@@ -1021,8 +1021,8 @@ const FeeCollectionComponent = () => {
                             >
                               <RefreshIcon fontSize="small" />
                             </IconButton>
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               color="info"
                               onClick={() => handleGenerateIndividualReceipt(payment.id, feeGroup.id)}
                               disabled={individualPdfLoading[payment.id]}
@@ -1030,7 +1030,7 @@ const FeeCollectionComponent = () => {
                               {individualPdfLoading[payment.id] ? (
                                 <CircularProgress size={16} />
                               ) : (
-                              <PrintIcon fontSize="small" />
+                                <PrintIcon fontSize="small" />
                               )}
                             </IconButton>
                           </Box>
@@ -1134,18 +1134,18 @@ const FeeCollectionComponent = () => {
       >
         <DialogTitle sx={{ pb: 1, borderBottom: '1px solid #e5e7eb' }}>
           <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
-            {selectedFees.length > 0 && feeGroups.find(f => f.id === selectedFees[0]) 
+            {selectedFees.length > 0 && feeGroups.find(f => f.id === selectedFees[0])
               ? `${feeGroups.find(f => f.id === selectedFees[0]).name} (${feeGroups.find(f => f.id === selectedFees[0]).amount})`
               : 'Collect Fee Payment'
             }
-              </Typography>
+          </Typography>
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 4, pb: 2,mt:2 }}>
+        <DialogContent sx={{ pt: 4, pb: 2, mt: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* Date Field */}
-              <TextField
-                fullWidth
+            <TextField
+              fullWidth
               label="Date"
               type="date"
               value={paymentData.paymentDate}
@@ -1155,7 +1155,7 @@ const FeeCollectionComponent = () => {
               InputLabelProps={{ shrink: true }}
               required
             />
-            
+
             {/* Amount Field */}
             <TextField
               fullWidth
@@ -1163,7 +1163,7 @@ const FeeCollectionComponent = () => {
               value={paymentData.amount}
               onChange={(e) => handleAmountChange(e.target.value)}
               size="small"
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: validationErrors.amount ? '#ffebee' : 'transparent',
@@ -1197,7 +1197,7 @@ const FeeCollectionComponent = () => {
                     }
                   }}
                   label="Select Incharge *"
-                  sx={{ 
+                  sx={{
                     borderRadius: 1,
                     '& .MuiOutlinedInput-root': {
                       backgroundColor: validationErrors.inchargeCode ? '#ffebee' : 'transparent',
@@ -1238,22 +1238,22 @@ const FeeCollectionComponent = () => {
                 label="Next Payment Due Date"
                 value={paymentData.nextPaymentDueDate}
                 onChange={(newValue) => setPaymentData({ ...paymentData, nextPaymentDueDate: newValue })}
-                format="dd/MM/yyyy"
+                format="dd.MM.yyyy"
                 slotProps={{
                   textField: {
                     fullWidth: true,
                     size: 'small',
                     sx: { borderRadius: 1 },
-                    placeholder: "DD/MM/YYYY"
+                    placeholder: "DD.MM.YYYY"
                   },
                 }}
               />
             </LocalizationProvider>
-            
+
             {/* Discount Group */}
-              <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small">
               <InputLabel>Discount Group</InputLabel>
-                <Select
+              <Select
                 value={paymentData.discountCode}
                 onChange={(e) => handleDiscountCodeChange(e.target.value)}
                 label="Discount Group"
@@ -1264,20 +1264,20 @@ const FeeCollectionComponent = () => {
                     {discount.discountCode} - {discount.name}
                   </MenuItem>
                 ))}
-                </Select>
-              </FormControl>
-            
-                        {/* Discount Amount */}
-              <TextField
-                fullWidth
+              </Select>
+            </FormControl>
+
+            {/* Discount Amount */}
+            <TextField
+              fullWidth
               label="Discount (₹)"
               value={paymentData.discountAmount}
               onChange={(e) => {
                 const value = e.target.value.replace(/[^0-9.]/g, '');
                 setPaymentData({ ...paymentData, discountAmount: parseFloat(value) || 0 });
               }}
-                size="small"
-              sx={{ 
+              size="small"
+              sx={{
                 borderRadius: 0.5,
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: '#f5f5f5',
@@ -1295,7 +1295,7 @@ const FeeCollectionComponent = () => {
               type="number"
               required
             />
-            
+
             {/* Discount File Upload */}
             <FormControl fullWidth size="small">
               <input
@@ -1312,7 +1312,7 @@ const FeeCollectionComponent = () => {
                     component="span"
                     size="small"
                     fullWidth
-                    sx={{ 
+                    sx={{
                       borderRadius: 1,
                       textTransform: 'none',
                       justifyContent: 'flex-start',
@@ -1338,10 +1338,10 @@ const FeeCollectionComponent = () => {
                 Upload proof for discount (Image, PDF, or Document)
               </FormHelperText>
             </FormControl>
-            
+
             {/* Fine Amount */}
-              <TextField
-                fullWidth
+            <TextField
+              fullWidth
               label="Fine (₹)"
               value={paymentData.fine}
               onChange={(e) => {
@@ -1349,7 +1349,7 @@ const FeeCollectionComponent = () => {
                 setPaymentData({ ...paymentData, fine: parseFloat(value) || 0 });
               }}
               size="small"
-              sx={{ 
+              sx={{
                 borderRadius: 0.5,
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: '#f5f5f5',
@@ -1367,7 +1367,7 @@ const FeeCollectionComponent = () => {
               type="number"
               required
             />
-            
+
             {/* Payment Mode - Radio Buttons */}
             <FormControl component="fieldset">
               <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
@@ -1382,18 +1382,18 @@ const FeeCollectionComponent = () => {
                 <FormControlLabel value="UPI" control={<Radio size="small" />} label="UPI" />
               </RadioGroup>
             </FormControl>
-            
+
             {/* Note Field */}
             <TextField
               fullWidth
               label="Note"
-                multiline
+              multiline
               rows={3}
-                value={paymentData.remarks}
-                onChange={(e) => setPaymentData({ ...paymentData, remarks: e.target.value })}
-                size="small"
-                sx={{ borderRadius: 1 }}
-              />
+              value={paymentData.remarks}
+              onChange={(e) => setPaymentData({ ...paymentData, remarks: e.target.value })}
+              size="small"
+              sx={{ borderRadius: 1 }}
+            />
           </Box>
         </DialogContent>
 
@@ -1407,20 +1407,20 @@ const FeeCollectionComponent = () => {
             Cancel
           </Button>
           <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            onClick={handlePaymentSubmit}
-            variant="contained"
+            <Button
+              onClick={handlePaymentSubmit}
+              variant="contained"
               startIcon={collectPaymentMutation.isPending ? <CircularProgress size={16} /> : <MoneyIcon />}
-            size="small"
+              size="small"
               disabled={collectPaymentMutation.isPending || Object.keys(validationErrors).length > 0}
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#4caf50',
                 '&:hover': { backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#45a049' }
               }}
             >
               {collectPaymentMutation.isPending ? 'Processing...' : '₹ Collect Fees'}
-          </Button>
+            </Button>
             <Button
               onClick={async () => {
                 await handlePaymentSubmit();
@@ -1432,7 +1432,7 @@ const FeeCollectionComponent = () => {
               startIcon={<PrintIcon />}
               size="small"
               disabled={collectPaymentMutation.isPending || Object.keys(validationErrors).length > 0}
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#4caf50',
                 '&:hover': { backgroundColor: Object.keys(validationErrors).length > 0 ? '#ccc' : '#45a049' }
@@ -1528,7 +1528,7 @@ const FeeCollectionComponent = () => {
             onClick={confirmPaymentSubmit}
             variant="contained"
             size="small"
-            sx={{ 
+            sx={{
               borderRadius: 1,
               backgroundColor: '#4caf50',
               '&:hover': { backgroundColor: '#45a049' }
